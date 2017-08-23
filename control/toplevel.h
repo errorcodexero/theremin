@@ -4,20 +4,11 @@
 #include <vector>
 #include "pump.h"
 #include "drivebase.h"
-#include "climber.h"
-#include "gear_shifter.h"
-#include "gear_collector.h"
-#include "shooter.h"
-#include "lights.h"
+#include "nop.h"
 
 #define TOPLEVEL_ITEMS \
 	X(Pump,pump,Pump::Goal::AUTO)\
-	X(Climber,climber,Climber::Goal::STOP)\
-	X(Gear_shifter,shifter,Gear_shifter::Goal::LOW)\
-	X(Drivebase,drive,)\
-	X(Gear_collector,gear_collector,) \
-	X(Shooter,shooter,Shooter::Goal::OFF) \
-	X(Lights,lights,)
+	X(Drivebase,drive,)
 	
 class Toplevel{
 	public:

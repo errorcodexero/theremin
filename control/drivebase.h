@@ -10,7 +10,7 @@
 #include "../util/stall_monitor.h"
 
 struct Drivebase{
-	enum Motor{LEFT1,LEFT2,LEFT3,RIGHT1,RIGHT2,RIGHT3,MOTORS};
+	enum Motor{LEFT1,LEFT2,RIGHT1,RIGHT2,MOTORS};
 
 	typedef std::pair<Digital_in,Digital_in> Encoder_info;
 

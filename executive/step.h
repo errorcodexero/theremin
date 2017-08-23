@@ -75,7 +75,6 @@ class Drive_straight:public Step_impl_inner<Drive_straight>{//Drives straight a 
 	Motion_profile motion_profile;
 	Countdown_timer in_range;	
 	Countdown_timer stall_timer;
-	Gear_shifter::Goal gear;
 	
 	Drivebase::Distances get_distance_travelled(Drivebase::Distances);//TODO: do this better
 
@@ -109,7 +108,6 @@ class Ram:public Step_impl_inner<Ram>{//Drives straight a certain distance
 	Drivebase::Distances initial_distances;
 	bool init;
 	Countdown_timer stall_timer;
-	Gear_shifter::Goal gear;
 
 	Drivebase::Distances get_distance_travelled(Drivebase::Distances);//TODO: do this better
 
@@ -134,44 +132,6 @@ class Wait: public Step_impl_inner<Wait>{//Either stops all operation for a give
 	Step::Status done(Next_mode_info);
 	std::unique_ptr<Step_impl> clone()const;
 	bool operator==(Wait const&)const;
-};
-
-class Lift_gear: public Step_impl_inner<Lift_gear>{//Closes the gear grabber and raises the gear collector to peg height
-	Gear_collector::Goal gear_goal;//is the same in every one
-	public:
-	explicit Lift_gear();
-
-	Toplevel::Goal run(Run_info,Toplevel::Goal);
-	Toplevel::Goal run(Run_info);
-	Step::Status done(Next_mode_info);
-	std::unique_ptr<Step_impl> clone()const;
-	bool operator==(Lift_gear const&)const;
-};
-
-class Drop_gear: public Step_impl_inner<Drop_gear>{//Opens the gear grabber but keeps the manipulator at peg height
-	Gear_collector::Goal gear_goal;//is the same in every one
-
-	public:
-	explicit Drop_gear();
-
-	Toplevel::Goal run(Run_info,Toplevel::Goal);
-	Toplevel::Goal run(Run_info);
-	Step::Status done(Next_mode_info);
-	std::unique_ptr<Step_impl> clone()const;
-	bool operator==(Drop_gear const&)const;
-};
-
-class Drop_collector: public Step_impl_inner<Drop_collector>{//Lowers the gear manipulator to the floor
-	Gear_collector::Goal gear_goal;//is the same in every one
-	
-	public:
-	explicit Drop_collector();
-
-	Toplevel::Goal run(Run_info,Toplevel::Goal);
-	Toplevel::Goal run(Run_info);
-	Step::Status done(Next_mode_info);
-	std::unique_ptr<Step_impl> clone()const;
-	bool operator==(Drop_collector const&)const;
 };
 
 class Combo: public Step_impl_inner<Combo>{//Runs two steps at the same time
@@ -208,36 +168,6 @@ struct Turn: Step_impl_inner<Turn>{//orients the robot to a certain angle relati
 	Step::Status done(Next_mode_info);
 	std::unique_ptr<Step_impl> clone()const;
 	bool operator==(Turn const&)const;
-};
-
-const Inch SCORE_GEAR_APPROACH_DIST = 12.0;//inches
-
-
-struct Turn_on_light: Step_impl_inner<Turn_on_light>{
-	Lights::Goal lights_goal;
-
-	explicit Turn_on_light();
-	Toplevel::Goal run(Run_info,Toplevel::Goal);
-	Toplevel::Goal run(Run_info);
-	Step::Status done(Next_mode_info);
-	std::unique_ptr<Step_impl> clone()const;
-	bool operator==(Turn_on_light const&)const;
-};
-
-struct Score_gear: Step_impl_inner<Score_gear>{
-	enum Stage{LIFT,SCORE,RELEASE,BACK_OFF,STOW,DONE};
-	std::array<Step,Stage::DONE> steps;
-	Stage stage;
-
-	void advance();
-
-	explicit Score_gear();
-	Toplevel::Goal run(Run_info,Toplevel::Goal);
-	Toplevel::Goal run(Run_info);
-	void display(std::ostream& o)const;
-	Step::Status done(Next_mode_info);
-	std::unique_ptr<Step_impl> clone()const;
-	bool operator==(Score_gear const&)const;
 };
 
 #endif

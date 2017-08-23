@@ -7,22 +7,19 @@
 //end temp
 using namespace std;
 
+//these are all off by one
 #define L_MOTOR_LOC_1 0
 #define L_MOTOR_LOC_2 1
-#define L_MOTOR_LOC_3 2
-#define R_MOTOR_LOC_1 3
-#define R_MOTOR_LOC_2 4
-#define R_MOTOR_LOC_3 5
+#define R_MOTOR_LOC_1 2
+#define R_MOTOR_LOC_2 3
 
 unsigned pdb_location(Drivebase::Motor m){
 	#define X(NAME,INDEX) if(m==Drivebase::NAME) return INDEX;
 	//WILL NEED CORRECT VALUES
-	X(LEFT1,1)
-	X(LEFT2,2)
-	X(LEFT3,3)
-	X(RIGHT1,13)
-	X(RIGHT2,14)
-	X(RIGHT3,15)
+	X(LEFT1,0)
+	X(LEFT2,1)
+	X(RIGHT1,2)
+	X(RIGHT2,13)
 	#undef X
 	assert(0);
 	//assert(m>=0 && m<Drivebase::MOTORS);
@@ -326,7 +323,7 @@ set<Drivebase::Input> examples(Drivebase::Input*){
 	auto d=Digital_in::_0;
 	auto p=make_pair(d,d);
 	return {Drivebase::Input{
-		{0,0,0,0,0,0},p,p,{0,0},0.0
+		{0,0,0,0},p,p,{0,0},0.0
 	}};
 }
 
@@ -353,10 +350,8 @@ double get_output(Drivebase::Output out,Drivebase::Motor m){
 	#define X(NAME,POSITION) if(m==Drivebase::NAME) return out.POSITION;
 	X(LEFT1,l)
 	X(LEFT2,l)
-	X(LEFT3,l)
 	X(RIGHT1,r)
 	X(RIGHT2,r)
-	X(RIGHT3,r)
 	#undef X
 	assert(0);
 }
@@ -393,12 +388,10 @@ void Drivebase::Estimator::update(Time now,Drivebase::Input in,Drivebase::Output
 }
 
 Robot_outputs Drivebase::Output_applicator::operator()(Robot_outputs robot,Drivebase::Output b)const{
-	robot.pwm[L_MOTOR_LOC_1] = -b.l; // positive values go forward
-	robot.pwm[L_MOTOR_LOC_2] = -b.l;
-	robot.pwm[L_MOTOR_LOC_3] = -b.l;
-	robot.pwm[R_MOTOR_LOC_1] = b.r;
-	robot.pwm[R_MOTOR_LOC_2] = b.r;
-	robot.pwm[R_MOTOR_LOC_3] = b.r;
+	robot.talon_srx[L_MOTOR_LOC_1].power_level = b.l;
+	robot.talon_srx[L_MOTOR_LOC_2].power_level = b.l;
+	robot.talon_srx[R_MOTOR_LOC_1].power_level = b.r;
+	robot.talon_srx[R_MOTOR_LOC_2].power_level = b.r;
 
 	auto set_encoder=[&](unsigned int a, unsigned int b,unsigned int loc){
 		robot.digital_io[a] = Digital_out::encoder(loc,1);
@@ -419,8 +412,8 @@ Robot_outputs Drivebase::Output_applicator::operator()(Robot_outputs robot,Drive
 Drivebase::Output Drivebase::Output_applicator::operator()(Robot_outputs robot)const{
 	//assuming both motors on the same side are set to the same value//FIXME ?
 	return Drivebase::Output{	
-		-robot.pwm[L_MOTOR_LOC_1],
-		robot.pwm[R_MOTOR_LOC_1],
+		robot.talon_srx[L_MOTOR_LOC_1].power_level,
+		robot.talon_srx[R_MOTOR_LOC_1].power_level,
 	};
 }
 
@@ -550,7 +543,7 @@ struct Drivebase_sim{
 		auto d = Digital_in::_0;
 		auto p = make_pair(d,d);
 		Drivebase::Input in = {Drivebase::Input{
-			{0,0,0,0,0,0},p,p,distances,0.0
+			{0,0,0,0},p,p,distances,0.0
 		}};
 		return in;
 	}

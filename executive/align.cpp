@@ -191,8 +191,6 @@ Toplevel::Goal Align::run(Run_info info){
 Toplevel::Goal Align::run(Run_info info,Toplevel::Goal goals){
 	initial_search.update(info.in.now,info.in.robot_mode.enabled);
 	update(info.in.camera);
-	goals.lights.camera_light=1;
-	goals.shifter = Gear_shifter::Goal::LOW;
 	switch(mode){
 		case Mode::VISION:
 			{

@@ -82,11 +82,6 @@ void visit(Func f,Joystick_data const& a){
 }
 
 template<typename Func>
-void visit(Func f,Gear_shifter::Output const& a){
-	f.terminal(a);
-}
-
-template<typename Func>
 void visit(Func f,Talon_srx_input const& a){
 	#define X(NAME) f(""#NAME,a.NAME);
 	TALON_SRX_INPUT(X)
@@ -191,27 +186,6 @@ void visit(Func f,Maybe_inline<T> const& m){
 template<typename Func>
 void visit(Func f,int i){
 	f.terminal(i);
-}
-
-template<typename Func>
-void visit(Func f,Roller_arm::Status const& a){
-	f.terminal(a);
-}
-
-template<typename Func>
-void visit(Func f,Gear_lifter::Status const& a){
-	f.terminal(a);
-}
-
-
-template<typename Func>
-void visit(Func f,Gear_grabber::Status const& a){
-	f.terminal(a);
-}
-
-template<typename Func>
-void visit(Func f,Gear_collector::Status_detail const& r){
-	GEAR_COLLECTOR_ITEMS(VISIT_2ND)
 }
 
 template<typename Func>

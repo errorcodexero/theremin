@@ -59,7 +59,6 @@ Toplevel::Goal Turn::run(Run_info info,Toplevel::Goal goals){
 	double left = clip(target_to_out_power(power));//TODO: move .2 to the constructor of Turn and set an instance variable
 	double right = -clip(target_to_out_power(power - RIGHT_SPEED_CORRECTION * power));
 	goals.drive = Drivebase::Goal::absolute(left,right);
-	goals.shifter = Gear_shifter::Goal::LOW;
 	return goals;
 }
 
@@ -121,7 +120,7 @@ Step_impl::~Step_impl(){}
 }*/
 
 Drive_straight::Drive_straight(Inch goal):Drive_straight(goal,0.02,0.5){}
-Drive_straight::Drive_straight(Inch goal,double vel_modifier,double max):target_dist(goal),initial_distances(Drivebase::Distances{0,0}),init(false),motion_profile(goal,vel_modifier,max),gear(Gear_shifter::Goal::LOW){}//Motion profiling values from testing
+Drive_straight::Drive_straight(Inch goal,double vel_modifier,double max):target_dist(goal),initial_distances(Drivebase::Distances{0,0}),init(false),motion_profile(goal,vel_modifier,max){}//Motion profiling values from testing
 
 Drivebase::Distances Drive_straight::get_distance_travelled(Drivebase::Distances current){
 	return current - initial_distances;
@@ -170,7 +169,6 @@ Toplevel::Goal Drive_straight::run(Run_info info,Toplevel::Goal goals){
 	double left = clip(target_to_out_power(power));//TODO: move .11 to the constructor of Drive_straight and set an instance variable
 	double right = clip(target_to_out_power(power + power * RIGHT_SPEED_CORRECTION)); //right side would go faster than the left without error correction
 	goals.drive = Drivebase::Goal::absolute(left,right);
-	goals.shifter = gear;
 	return goals;
 }
 
@@ -179,7 +177,7 @@ unique_ptr<Step_impl> Drive_straight::clone()const{
 }
 
 bool Drive_straight::operator==(Drive_straight const& b)const{
-	return target_dist == b.target_dist && initial_distances == b.initial_distances && init == b.init && motion_profile == b.motion_profile && in_range == b.in_range /*&& stall_timer == b.stall_timer*/ && gear == b.gear;
+	return target_dist == b.target_dist && initial_distances == b.initial_distances && init == b.init && motion_profile == b.motion_profile && in_range == b.in_range /*&& stall_timer == b.stall_timer*/;
 }
 
 MP_drive::MP_drive(Inch target):target_distance(target){}
@@ -207,7 +205,7 @@ bool MP_drive::operator==(MP_drive const& a)const{
 	return target_distance==a.target_distance && drive_goal==a.drive_goal;
 }
 
-Ram::Ram(Inch goal):target_dist(goal),initial_distances(Drivebase::Distances{0,0}),init(false),gear(Gear_shifter::Goal::LOW){}
+Ram::Ram(Inch goal):target_dist(goal),initial_distances(Drivebase::Distances{0,0}),init(false){}
 
 Drivebase::Distances Ram::get_distance_travelled(Drivebase::Distances current){
 	return current - initial_distances;
@@ -239,7 +237,6 @@ Toplevel::Goal Ram::run(Run_info info,Toplevel::Goal goals){
 		double right = p + p * RIGHT_SPEED_CORRECTION; //right side would go faster than the left without error correction
 		goals.drive = Drivebase::Goal::absolute(left,right);
 	}
-	goals.shifter = gear;
 	return goals;
 }
 
@@ -248,7 +245,7 @@ unique_ptr<Step_impl> Ram::clone()const{
 }
 
 bool Ram::operator==(Ram const& b)const{
-	return target_dist == b.target_dist && initial_distances == b.initial_distances && init == b.init /*&& stall_timer == b.stall_timer*/ && gear == b.gear;
+	return target_dist == b.target_dist && initial_distances == b.initial_distances && init == b.init /*&& stall_timer == b.stall_timer*/;
 }
 
 Wait::Wait(Time wait_time){
@@ -274,81 +271,6 @@ unique_ptr<Step_impl> Wait::clone()const{
 
 bool Wait::operator==(Wait const& b)const{
 	return wait_timer == b.wait_timer;
-}
-
-Lift_gear::Lift_gear():gear_goal({Gear_grabber::Goal::CLOSE,Gear_lifter::Goal::UP,Roller::Goal::OFF,Roller_arm::Goal::STOW}){}
-
-Step::Status Lift_gear::done(Next_mode_info info){
-	return ready(status(info.status.gear_collector),gear_goal) ? Step::Status::FINISHED_SUCCESS : Step::Status::UNFINISHED;
-}
-
-Toplevel::Goal Lift_gear::run(Run_info info){
-	return run(info,{});
-}
-
-Toplevel::Goal Lift_gear::run(Run_info info, Toplevel::Goal goals){
-	(void)info;
-	goals.gear_collector = gear_goal;
-	return goals;
-}
-
-unique_ptr<Step_impl> Lift_gear::clone()const{
-	return unique_ptr<Step_impl>(new Lift_gear(*this));
-}
-
-bool Lift_gear::operator==(Lift_gear const& b)const{
-	(void)b;
-	return true;
-}
-
-Drop_gear::Drop_gear():gear_goal({Gear_grabber::Goal::OPEN,Gear_lifter::Goal::UP,Roller::Goal::OFF,Roller_arm::Goal::STOW}){}
-
-Step::Status Drop_gear::done(Next_mode_info info){	
-	return ready(status(info.status.gear_collector),gear_goal) ? Step::Status::FINISHED_SUCCESS : Step::Status::UNFINISHED;
-}
-
-Toplevel::Goal Drop_gear::run(Run_info info){
-	return run(info,{});
-}
-
-Toplevel::Goal Drop_gear::run(Run_info info,Toplevel::Goal goals){
-	(void)info;
-	goals.gear_collector = gear_goal;
-	return goals;
-}
-
-unique_ptr<Step_impl> Drop_gear::clone()const{
-	return unique_ptr<Step_impl>(new Drop_gear(*this));
-}
-
-bool Drop_gear::operator==(Drop_gear const& b)const{
-	(void)b;
-	return true;
-}
-
-Drop_collector::Drop_collector():gear_goal({Gear_grabber::Goal::CLOSE,Gear_lifter::Goal::DOWN,Roller::Goal::OFF,Roller_arm::Goal::STOW}){}
-
-Step::Status Drop_collector::done(Next_mode_info info){
-	return ready(status(info.status.gear_collector),gear_goal) ? Step::Status::FINISHED_SUCCESS : Step::Status::UNFINISHED;
-}
-
-Toplevel::Goal Drop_collector::run(Run_info info){
-	return run(info,{});
-}
-
-Toplevel::Goal Drop_collector::run(Run_info info,Toplevel::Goal goals){
-	(void)info;
-	goals.gear_collector = gear_goal;
-	return goals;
-}
-
-unique_ptr<Step_impl> Drop_collector::clone()const{
-	return unique_ptr<Step_impl>(new Drop_collector(*this));
-}
-
-bool Drop_collector::operator==(Drop_collector const& b)const{
-	(void)b;
-	return true;
 }
 
 void Combo::display(std::ostream& o)const{
@@ -393,106 +315,6 @@ unique_ptr<Step_impl> Combo::clone()const{
 
 bool Combo::operator==(Combo const& b)const{
 	return step_a == b.step_a && step_b == b.step_b;
-}
-
-Turn_on_light::Turn_on_light():lights_goal({Lights::Loading_indicator::GEARS,true,Lights::Blinky_mode::NO_FLASH}){}
-
-Step::Status Turn_on_light::done(Next_mode_info info){
-	return (ready(status(info.status.lights),lights_goal)) ? Step::Status::FINISHED_SUCCESS : Step::Status::UNFINISHED;
-}
-
-Toplevel::Goal Turn_on_light::run(Run_info info){
-	return run(info,{});
-}
-
-Toplevel::Goal Turn_on_light::run(Run_info,Toplevel::Goal goals){
-	goals.lights = lights_goal;
-	return goals;
-}
-
-unique_ptr<Step_impl> Turn_on_light::clone()const{
-	return unique_ptr<Step_impl>(new Turn_on_light(*this));
-}
-
-bool Turn_on_light::operator==(Turn_on_light const& b)const{
-	return lights_goal == b.lights_goal;
-}
-
-void Score_gear::display(std::ostream& o)const{
-	Step_impl_inner<Score_gear>::display(o);
-	o<<"(";
-	for(Step a: steps){
-		a.display(o);
-		o<<" ";
-	}
-	o<<")";
-}
-
-Score_gear::Score_gear():
-	steps({
-			Step{Lift_gear()},//lift the gear
-			Step{Combo{ //slide the gear on the peg
-				Step{Lift_gear()},
-				Step{Ram{SCORE_GEAR_APPROACH_DIST}}
-			}},
-			Step{Drop_gear()}, //release the gear
-			Step{Combo{ //back off
-				Step{Drop_gear()},
-				Step{Ram{-SCORE_GEAR_APPROACH_DIST}}
-			}},
-			Step{Drop_collector()}, // lower the collector to the floor
-	}),
-	stage(Stage::LIFT){}
-
-Toplevel::Goal Score_gear::run(Run_info info){
-	return run(info,{});
-}
-
-Toplevel::Goal Score_gear::run(Run_info info,Toplevel::Goal goals){
-	if(stage == Stage::DONE) return goals;
-	return steps[stage].run(info, goals);
-}
-
-bool Score_gear::operator==(Score_gear const& b)const{
-	return steps == b.steps && stage == b.stage;
-}
-
-unique_ptr<Step_impl> Score_gear::clone()const{
-	return unique_ptr<Step_impl>(new Score_gear(*this));
-}
-void Score_gear::advance(){
-	stage = [&]{ //move onto next step
-		switch(stage){
-			case LIFT:
-				return SCORE;
-			case SCORE:
-				return RELEASE;
-			case RELEASE:
-				return BACK_OFF;
-			case BACK_OFF:
-				return STOW;
-			case STOW:
-			case DONE:
-				return DONE;
-			default:
-				assert(0);
-		}
-	}();
-}
-
-Step::Status Score_gear::done(Next_mode_info info){
-	switch(steps[stage].done(info)){
-		case Step::Status::UNFINISHED:
-			break;
-		case Step::Status::FINISHED_FAILURE: //treat a failure as a success
-		case Step::Status::FINISHED_SUCCESS:
-			advance();
-			if(stage == Stage::DONE) return Step::Status::FINISHED_SUCCESS;
-			break;
-		default:
-			assert(0);
-	}
-	return Step::Status::UNFINISHED;
 }
 
 Step_impl const& Step::get()const{

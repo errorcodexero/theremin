@@ -40,49 +40,6 @@ ostream& operator<<(ostream& o,Nop_sim<T> const& a){
 }
 
 using Pump_sim=Nop_sim<Pump::Input>;
-using Climber_sim=Nop_sim<Climber::Input>;
-using Roller_arm_sim=Nop_sim<Roller_arm::Input>;
-using Roller_sim=Nop_sim<Roller::Input>;
-using Gear_shifter_sim=Nop_sim<Gear_shifter::Input>;
-using Shooter_sim=Nop_sim<Shooter::Input>;
-using Lights_sim=Nop_sim<Lights::Input>;
-
-struct Gear_grabber_sim{
-	using Input = Gear_grabber::Input;
-	using Output = Gear_grabber::Output;
-	
-	bool enabled;
-
-	void update(Time t,bool enable,Output out){
-		enabled = enable;
-	}
-	
-	Input get()const{
-		bool has_gear = false;
-		return {has_gear,enabled};
-	}
-
-	Gear_grabber_sim():enabled(false){}
-};
-
-
-struct Gear_lifter_sim{
-	using Input = Gear_lifter::Input;
-	using Output = Gear_lifter::Output;
-	
-	bool enabled;
-
-	void update(Time t,bool enable,Output out){
-		enabled = enable;
-	}
-	
-	Input get()const{
-		bool limit_switch = false;
-		return {enabled,limit_switch};
-	}
-
-	Gear_lifter_sim():enabled(false){}
-};
 
 struct Drivebase_sim{
 	using Input=Drivebase::Input;
@@ -115,7 +72,7 @@ struct Drivebase_sim{
 		auto d = Digital_in::_0;
 		auto p = make_pair(d,d);
 		Drivebase::Input in = {Drivebase::Input{
-			{0,0,0,0,0,0},p,p,distances,0.0
+			{0,0,0,0},p,p,distances,0.0
 		}};
 		return in;
 	}
@@ -127,29 +84,6 @@ struct Drivebase_sim{
 ostream& operator<<(ostream& o,Drivebase_sim const& a){
 	return o << "Drivebase_sim(" << a.position << ")";
 }
-
-struct Gear_collector_sim{
-	using Input=Gear_collector::Input;
-	using Output=Gear_collector::Output;
-
-	#define X(A,B) A##_sim B;
-	GEAR_COLLECTOR_ITEMS(X)
-	#undef X
-
-	void update(Time t,bool enable,Output out){
-		#define X(A,B) B.update(t,enable,out.B);
-		GEAR_COLLECTOR_ITEMS(X)
-		#undef X
-	}
-
-	Input get()const{
-		return Input{
-			#define X(A,B) B.get(),
-			GEAR_COLLECTOR_ITEMS(X)
-			#undef X
-		};
-	}
-};
 
 struct Toplevel_sim{
 	using Input=Toplevel::Input;
@@ -183,13 +117,6 @@ void simulate(SIMULATOR sim,DEVICE device){
 		//device.estimator.update(
 		
 	}
-}
-
-template<typename F>
-void visit(F f,Gear_collector_sim a){
-	#define X(A,B) f(""#B,a.B);
-	GEAR_COLLECTOR_ITEMS(X)
-	#undef X
 }
 
 template<typename F>

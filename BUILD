@@ -462,21 +462,6 @@ cc_test(
 )
 
 cc_library(
-	name="gear_shifter",
-	srcs=["control/gear_shifter.cpp"],
-	hdrs=["control/gear_shifter.h"],
-	deps=[":nop",":drivebase",":interface",":speed_tracker",":countdown_timer"]
-)
-
-cc_test(
-	name="gear_shifter_test",
-	srcs=["control/gear_shifter.cpp","control/gear_shifter.h","control/formal.h"],
-	copts=["-DGEAR_SHIFTER_TEST"],
-	deps=[":nop",":drivebase",":interface",":speed_tracker",":countdown_timer"],
-	timeout="short"
-)
-
-cc_library(
 	name="drivebase",
 	srcs=["control/drivebase.cpp"],
 	hdrs=["control/drivebase.h","util/quick.h"],
@@ -488,125 +473,6 @@ cc_test(
 	srcs=["control/drivebase.cpp","control/drivebase.h","util/quick.h","control/formal.h"],
 	copts=["-DDRIVEBASE_TEST"],
 	deps=[":interface",":motor_check",":countdown_timer",":stall_monitor"],
-	timeout="short"
-)
-
-cc_library(
-	name="climber",
-	srcs=["control/climber.cpp"],
-	hdrs=["control/climber.h"],
-	deps=[":interface",":nop",":countdown_timer"]
-)
-
-cc_test(
-	name="climber_test",
-	srcs=["control/climber.cpp","control/climber.h","control/formal.h"],
-	copts=["-DCLIMBER_TEST"],
-	deps=[":interface",":nop",":countdown_timer"],
-	timeout="short"
-)
-
-cc_library(
-        name="gear_collector",
-        srcs=["control/gear_collector.cpp"],
-        hdrs=["control/gear_collector.h"],
-        deps=[":gear_grabber",":gear_lifter",":roller",":roller_arm"]
-)
-
-cc_test(
-        name="gear_collector_test",
-        srcs=["control/gear_collector.cpp","control/gear_collector.h","control/formal.h"],
-        copts=["-DGEAR_COLLECTOR_TEST"],
-        deps=[":gear_grabber",":gear_lifter",":roller",":roller_arm"],
-        timeout="short"
-)
-
-cc_library(
-	name="roller",
-	srcs=["control/roller.cpp","control/nop.cpp"],
-	hdrs=["control/roller.h","control/nop.h"],
-	deps=[":interface"]
-)
-
-cc_test(
-	name="roller_test",
-	srcs=["control/roller.cpp","control/roller.h","control/nop.h","control/nop.cpp","control/formal.h"],
-	copts=["-DROLLER_TEST"],
-	deps=[":interface"],
-	timeout="short"
-)
-cc_library(
-	name="roller_arm",
-	srcs=["control/roller_arm.cpp","control/nop.cpp"],
-	hdrs=["control/roller_arm.h","control/nop.h"],
-	deps=[":interface",":countdown_timer"]
-)
-
-cc_test(
-	name="roller_arm_test",
-	srcs=["control/roller_arm.cpp","control/roller_arm.h","control/nop.h","control/nop.cpp","control/formal.h"],
-	copts=["-DROLLER_ARM_TEST"],
-	deps=[":interface",":countdown_timer"],
-	timeout="short"
-)
-
-cc_library(
-	name="shooter",
-	srcs=["control/shooter.cpp"],
-	hdrs=["control/shooter.h","util/quick.h","control/formal.h"],
-	deps=[":interface",":nop",":countdown_timer"]
-)
-
-cc_test(
-	name="shooter_test",
-	srcs=["control/shooter.cpp","control/shooter.h","util/quick.h","control/formal.h"],
-	copts=["-DSHOOTER_TEST"],
-	deps=[":interface",":nop",":countdown_timer"],
-	timeout="short"
-)
-
-cc_library(
-	name="gear_grabber",
-	srcs=["control/gear_grabber.cpp","util/countdown_timer.cpp"],
-	hdrs=["control/gear_grabber.h","util/countdown_timer.h"],
-	deps=[":interface"]
-)
-
-cc_test(
-	name="gear_grabber_test",
-	srcs=["control/gear_grabber.cpp","control/gear_grabber.h","util/countdown_timer.cpp","util/countdown_timer.h","control/formal.h"],
-	copts=["-DGEAR_GRABBER_TEST"],
-	deps=[":interface"],
-	timeout="short"
-)
-
-cc_library(
-        name="gear_lifter",
-        srcs=["control/gear_lifter.cpp","util/countdown_timer.cpp"],
-        hdrs=["control/gear_lifter.h","util/countdown_timer.h"],
-        deps=[":interface"]
-)
-
-cc_test(
-	name="gear_lifter_test",
-	srcs=["control/gear_lifter.cpp","control/gear_lifter.h","util/countdown_timer.cpp","util/countdown_timer.h","control/formal.h"],
-	copts=["-DGEAR_LIFTER_TEST"],
-	deps=[":interface"],
-	timeout="short"
-)
-
-cc_library(
-	name="lights",
-	srcs=["control/lights.cpp"],
-	hdrs=["control/lights.h"],
-	deps=[":interface",":nop"]
-)
-
-cc_test(
-	name="lights_test",
-	srcs=["control/lights.cpp","control/lights.h","control/formal.h"],
-	copts=["-DLIGHTS_TEST"],
-	deps=[":interface",":nop"],
 	timeout="short"
 )
 
@@ -637,14 +503,14 @@ cc_library(
 	name="toplevel",
 	srcs=["control/toplevel.cpp"],
 	hdrs=["control/toplevel.h"],
-	deps=[":pump",":drivebase",":climber",":gear_shifter",":gear_collector",":shooter",":input",":lights"]
+	deps=[":nop",":pump",":drivebase",":input"]
 )
 
 cc_test(
 	name="toplevel_test",
 	srcs=["control/toplevel.cpp","control/toplevel.h","control/formal.h"],
 	copts=["-DTOPLEVEL_TEST"],
-	deps=[":pump",":drivebase",":climber",":gear_shifter",":input",":gear_collector",":output",":shooter",":lights"],
+	deps=[":nop",":pump",":drivebase",":input",":output"],
 	timeout="short"
 )
 
