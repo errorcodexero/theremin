@@ -30,14 +30,13 @@ int encoderconv(Maybe_inline<Encoder_output> encoder){
 	return 10000;
 }
 
-const unsigned int TICKS_PER_REVOLUTION=200;//for 2017
-const double WHEEL_DIAMETER=4.25;//inches for 2017
+const unsigned int TICKS_PER_REVOLUTION=200;//TODO
+const double WHEEL_DIAMETER=6.0;
 const double WHEEL_CIRCUMFERENCE=WHEEL_DIAMETER*PI;//inches
 const double INCHES_PER_TICK=WHEEL_CIRCUMFERENCE/(double)TICKS_PER_REVOLUTION;
-const double ERROR_CORRECTION = 0.181952663*.958;//2017, encoders are geared. Rough calculation from left encoder, second value is the mod for the comp bot.
 
 double ticks_to_inches(const int ticks){
-	return ticks*INCHES_PER_TICK*ERROR_CORRECTION;
+	return ticks*INCHES_PER_TICK;
 }
 
 Drivebase::Distances ticks_to_inches(const Drivebase::Encoder_ticks ticks){
@@ -49,7 +48,7 @@ Drivebase::Distances ticks_to_inches(const Drivebase::Encoder_ticks ticks){
 }
 
 int inches_to_ticks(const double inches){
-	return (int)(inches/(INCHES_PER_TICK*ERROR_CORRECTION));
+	return (int)(inches/(INCHES_PER_TICK));
 }
 
 #define L_ENCODER_PORTS 0,1
