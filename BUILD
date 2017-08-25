@@ -610,6 +610,21 @@ cc_library(
 )
 
 cc_library(
+	name="robot_constants",
+	srcs=["util/robot_constants.cpp"],
+	hdrs=["util/robot_constants.h"],
+	deps=[]
+)
+
+cc_test(
+	name="robot_constants_test",
+	srcs=["util/robot_constants.cpp","util/robot_constants.h"],
+	copts=["-DROBOT_CONSTANTS_TEST"],
+	deps=[],
+	timeout="short"
+)
+
+cc_library(
 	name="teleop",
 	srcs=["executive/teleop.cpp"],
 	hdrs=["executive/teleop.h"],
