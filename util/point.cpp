@@ -27,10 +27,6 @@ ostream& operator<<(ostream& o,Point const& p){
 	return o<<"Point(x:"<<p.x<<" y:"<<p.y<<" theta:"<<p.theta<<")";
 }
 
-bool approx_equal(double a,double b){
-	return fabs(a-b)<.001;
-}
-
 bool approx_equal(Point a,Point b){
 	return approx_equal(a.x,b.x) && approx_equal(a.y,b.y) && approx_equal(a.theta,b.theta);
 }

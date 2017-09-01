@@ -5,6 +5,10 @@
 
 using namespace std;
 
+bool approx_equal(double a,double b){
+	return fabs(a-b)<.001;
+}
+
 vector<size_t> range(size_t lim){
 	vector<size_t> r;
 	for(size_t i=0;i<lim;i++) r|=i;
