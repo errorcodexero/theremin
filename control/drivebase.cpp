@@ -30,7 +30,7 @@ int encoderconv(Maybe_inline<Encoder_output> encoder){
 	return 10000;
 }
 
-const unsigned int TICKS_PER_REVOLUTION=200;//TODO
+const unsigned int TICKS_PER_REVOLUTION=1;//TODO
 const double WHEEL_DIAMETER=6.0;
 const double WHEEL_CIRCUMFERENCE=WHEEL_DIAMETER*PI;//inches
 const double INCHES_PER_TICK=WHEEL_CIRCUMFERENCE/(double)TICKS_PER_REVOLUTION;

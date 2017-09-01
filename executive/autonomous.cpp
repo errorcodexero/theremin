@@ -37,9 +37,18 @@ Executive get_auto_mode(Next_mode_info info){
 	//Auto mode which does nothing
 	const Executive auto_null{Teleop{}};
 
+	Executive motion_profile_test{Chain{
+		Step{MP_drive{100.0}}, //drive 100 inches
+		Executive{Teleop{}}	
+		
+	}};
+		
+	return motion_profile_test;
+
+	/*
+	
 	if(!info.panel.in_use){
-		//Do nothing during autonomous mode if no panel exists
-		return auto_null;
+		return auto_null;//Do nothing during autonomous mode if no panel exists
 	}
 
 	switch(info.panel.auto_select){
@@ -67,6 +76,7 @@ Executive get_auto_mode(Next_mode_info info){
 		default:
 			return auto_null;
 	}
+	*/
 }
 
 Executive Autonomous::next_mode(Next_mode_info info){

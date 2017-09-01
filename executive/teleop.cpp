@@ -35,9 +35,7 @@ ostream& operator<<(ostream& o,Teleop::Nudge const& a){
 
 Executive Teleop::next_mode(Next_mode_info info) {
 	if (info.autonomous_start) {
-		if (info.panel.in_use) {
-			return Executive{Autonomous()};
-		}
+		return Executive{Autonomous()};
 	}
 	//Teleop t(CONSTRUCT_STRUCT_PARAMS(TELEOP_ITEMS));
 	return Executive{*this};
