@@ -30,7 +30,7 @@ int encoderconv(Maybe_inline<Encoder_output> encoder){
 	return 10000;
 }
 
-const unsigned int TICKS_PER_REVOLUTION=1;//TODO
+const unsigned int TICKS_PER_REVOLUTION=200;
 const double WHEEL_DIAMETER=6.0;
 const double WHEEL_CIRCUMFERENCE=WHEEL_DIAMETER*PI;//inches
 const double INCHES_PER_TICK=WHEEL_CIRCUMFERENCE/(double)TICKS_PER_REVOLUTION;
@@ -389,8 +389,8 @@ void Drivebase::Estimator::update(Time now,Drivebase::Input in,Drivebase::Output
 Robot_outputs Drivebase::Output_applicator::operator()(Robot_outputs robot,Drivebase::Output b)const{
 	robot.talon_srx[L_MOTOR_LOC_1].power_level = b.l;
 	robot.talon_srx[L_MOTOR_LOC_2].power_level = b.l;
-	robot.talon_srx[R_MOTOR_LOC_1].power_level = b.r;
-	robot.talon_srx[R_MOTOR_LOC_2].power_level = b.r;
+	robot.talon_srx[R_MOTOR_LOC_1].power_level = -b.r;
+	robot.talon_srx[R_MOTOR_LOC_2].power_level = -b.r;//reverse right side for software dev bot 2017
 
 	auto set_encoder=[&](unsigned int a, unsigned int b,unsigned int loc){
 		robot.digital_io[a] = Digital_out::encoder(loc,1);
@@ -412,7 +412,7 @@ Drivebase::Output Drivebase::Output_applicator::operator()(Robot_outputs robot)c
 	//assuming both motors on the same side are set to the same value//FIXME ?
 	return Drivebase::Output{	
 		robot.talon_srx[L_MOTOR_LOC_1].power_level,
-		robot.talon_srx[R_MOTOR_LOC_1].power_level,
+		-robot.talon_srx[R_MOTOR_LOC_1].power_level, //reverse right side for software dev bot 2017
 	};
 }
 
@@ -461,7 +461,7 @@ Drivebase::Output trapezoidal_speed_control(Drivebase::Status status, Drivebase:
 	}	
 	{//for rampping down (based on distance)
 		Drivebase::Distances error = goal.distances() - status.distances;
-		const double SLOW_WITHIN_DISTANCE = 10; //inches
+		const double SLOW_WITHIN_DISTANCE = 50; //inches
 		const double SLOPE = MAX_OUT / SLOW_WITHIN_DISTANCE; //"volts"/inches //TODO: currently arbitrary value
 		
 		if(error.l < SLOW_WITHIN_DISTANCE)

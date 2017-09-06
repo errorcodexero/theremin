@@ -73,7 +73,7 @@ Toplevel::Goal Teleop::run(Run_info info) {
 			if(spin) power+=set_drive_speed(-info.driver_joystick.axis[Gamepad_axis::RIGHTX],boost,slow);
 			return -power; //inverted so drivebase values can be positive
 		}());
-		double right=clip([&]{
+		double right=-clip([&]{ //right side is reversed
 			if(!nudges[Nudges::FORWARD].timer.done()) return -NUDGE_POWER;
 			if(!nudges[Nudges::BACKWARD].timer.done()) return NUDGE_POWER;
 			if(!nudges[Nudges::CLOCKWISE].timer.done()) return ROTATE_NUDGE_POWER;	
@@ -88,7 +88,7 @@ Toplevel::Goal Teleop::run(Run_info info) {
 
 	#ifdef PRINT_OUTS
 	if(info.in.ds_info.connected && (print_number%10)==0){
-		cout<<"\nstalled:"<<info.status.drive.stall<<"\n";
+		cout<<"\nencoders:"<<info.status.drive<<"\n";
 		if(info.in.camera.enabled){
 			cout<<"size: "<<info.in.camera.blocks.size()<<" blocks: "<<info.in.camera.blocks<<"\n";
 			/*for (vector<Pixy::Block>::const_iterator it=info.in.camera.blocks.begin();it!=info.in.camera.blocks.end();it++){
