@@ -61,10 +61,12 @@ void Talon_srx_control::set(Talon_srx_output a, bool enable) {
 	}
 	switch(a.mode){
 		case Talon_srx_output::Mode::PERCENT:
+			/* TODO:  was causing problems so it has been removed -- should we fix it and use it?
 			if(!approx_equal(a.power_level,clip(a.power_level))){//make sure we're not setting the power to over 100% or under -100%
 				cout<<endl<<"Power level set too high: "<<a.power_level<<endl;
 				assert(0);
 			}
+			*/
 			if(mode!=Talon_srx_control::Mode::PERCENT){
 				talon->SetControlMode(frc::CANSpeedController::kPercentVbus);
 				talon->EnableControl();
