@@ -1,7 +1,9 @@
 #include "WPILib.h"
+#include "AHRS.h"
 #include "../control/main.h"
 #include "dio_control.h"
 #include "talon_srx_control.h"
+#include "navx_control.h"
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <unistd.h>
@@ -173,6 +175,7 @@ class To_roborio
 	int error_code;
 	USER_CODE main;
 	Talon_srx_controls talon_srx_controls;
+	Navx_control navx_control;
 	//DriverStationLCD *lcd;
 	//NetworkTable *table;
 	//Gyro *gyro;

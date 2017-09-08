@@ -82,6 +82,17 @@ bool operator==(Talon_srx_input,Talon_srx_input);
 bool operator!=(Talon_srx_input,Talon_srx_input);
 bool operator<(Talon_srx_input,Talon_srx_input);
 
+struct Navx_input{
+	double angle;
+	
+	Navx_input():angle(0.0){}
+};
+
+std::ostream& operator<<(std::ostream&,Navx_input);
+bool operator==(Navx_input,Navx_input);
+bool operator!=(Navx_input,Navx_input);
+bool operator<(Navx_input,Navx_input);
+
 std::ostream& operator<<(std::ostream&,Digital_out);
 bool operator<(Digital_out,Digital_out);
 bool operator==(Digital_out,Digital_out);
@@ -214,6 +225,8 @@ struct Robot_inputs{
 
 	static const unsigned TALON_SRX_INPUTS=TALON_SRXS;
 	Checked_array<Talon_srx_input, TALON_SRX_INPUTS> talon_srx;
+
+	Navx_input navx;
 	
 	Driver_station_input driver_station;
 	Rad orientation;
