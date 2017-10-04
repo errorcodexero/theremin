@@ -187,7 +187,7 @@ class To_roborio
 	bool cam_data_recieved;
 	std::ofstream null_stream;
 public:
-	To_roborio():error_code(0),driver_station(frc::DriverStation::GetInstance()),uart("/dev/ttyS1"),camera(uart),cam_data_recieved(false),null_stream("/dev/null")//,gyro(NULL)
+	To_roborio():error_code(0),navx_control(frc::SerialPort::Port::kUSB),driver_station(frc::DriverStation::GetInstance()),uart("/dev/ttyS1"),camera(uart),cam_data_recieved(false),null_stream("/dev/null")//,gyro(NULL)
 	{
 		power = new frc::PowerDistributionPanel();
 		// Wake the NUC by sending a Wake-on-LAN magic UDP packet:
@@ -273,6 +273,10 @@ public:
 		return ds_info;
 	}
 
+	Navx_input read_navx(){
+		return navx_control.get();
+	}
+
 	Camera read_camera(Robot_inputs /*r*/){
 		Camera c;
 		camera.enable();
@@ -295,6 +299,7 @@ public:
 		//error_code|=read_driver_station(r.driver_station);
 		r.current=read_currents();
 		r.camera=read_camera(r);
+		r.navx=read_navx();
 		return make_pair(r,error_code);
 	}
 	array<double,Robot_inputs::CURRENT> read_currents(){
