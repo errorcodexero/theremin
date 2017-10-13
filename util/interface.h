@@ -7,6 +7,7 @@
 #include "maybe_inline.h"
 #include "checked_array.h"
 #include "../input/pixycam/PixyUART.h"
+#include "quick.h"
 
 typedef double Time;//Seconds
 typedef bool Solenoid_output;
@@ -83,9 +84,59 @@ bool operator!=(Talon_srx_input,Talon_srx_input);
 bool operator<(Talon_srx_input,Talon_srx_input);
 
 struct Navx_input{
-	double angle;
+	#define NAVX_INPUT_ITEMS(X) \
+		X(double,pitch) \
+		X(double,roll) \
+		X(double,yaw) \
+		X(double,compass_heading) \
+		X(bool,calibrated) \
+		X(bool,connected) \
+		X(double,byte_count) \
+		X(double,update_count) \
+		X(long,last_sensor_timestamp) \
+		X(double,world_linear_accel_x) \
+		X(double,world_linear_accel_y) \
+		X(double,world_linear_accel_z) \
+		X(bool,moving) \
+		X(bool,rotating) \
+		X(double,barometric_pressure) \
+		X(double,altitude) \
+		X(bool,valid_altitude) \
+		X(double,fused_heading) \
+		X(bool,magnetic_disturbance) \
+		X(bool,magnetometer_calibrated) \
+		X(double,quaternion_w) \
+		X(double,quaternion_x) \
+		X(double,quaternion_y) \
+		X(double,quaternion_z) \
+		X(double,velocity_x) \
+		X(double,velocity_y) \
+		X(double,velocity_z) \
+		X(double,displacement_x) \
+		X(double,displacement_y) \
+		X(double,displacement_z) \
+		X(double,angle) \
+		X(double,rate) \
+		X(double,angle_adjustment) \
+		X(double,raw_gyro_x) \
+		X(double,raw_gyro_y) \
+		X(double,raw_gyro_z) \
+		X(double,raw_accel_x) \
+		X(double,raw_accel_y) \
+		X(double,raw_accel_z) \
+		X(double,raw_mag_x) \
+		X(double,raw_mag_y) \
+		X(double,raw_mag_z) \
+		X(double,pressure) \
+		X(double,temperature) \
+		X(std::string,firmware_version) \
+		X(int,actual_update_rate) \
+		X(int,requested_update_rate)
+		//X(AHRS::BoardYawAxis,board_yaw_axis)//FIXME
+	STRUCT_MEMBERS(NAVX_INPUT_ITEMS)
 	
-	Navx_input():angle(0.0){}
+	Navx_input();
+	IMPL_STRUCT_DECLARE(Navx_input,NAVX_INPUT_ITEMS)
 };
 
 std::ostream& operator<<(std::ostream&,Navx_input);
