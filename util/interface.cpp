@@ -126,21 +126,21 @@ std::ostream& operator<<(std::ostream& o, Talon_srx_output a){
 	return o<<")";
 }
 
-IMPL_STRUCT(Navx_input::Navx_input,NAVX_INPUT_ITEMS)
+IMPL_STRUCT(Navx_input::Navx_input,NAVX_ITEMS)
 Navx_input::Navx_input():Navx_input(0.0,0.0,0.0,0.0,false,false,0.0,0.0,0,0.0,0.0,0.0,false,false,0.0,0.0,false,0.0,false,false,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,"",0,0,false){}
 
 std::ostream& operator<<(std::ostream& o,Navx_input a){
 	o<<"(";
-	#define X(t,NAME) o<<""#NAME<<":"<<(a.NAME)<<" ";
-	NAVX_INPUT_ITEMS(X)
+	#define X(t,NAME,...) o<<""#NAME<<":"<<(a.NAME)<<" ";
+	NAVX_ITEMS(X)
 	#undef X
 	o<<")";
 	return o;
 }
 
 bool operator==(Navx_input a,Navx_input b){
-	#define X(t,NAME) if(a.NAME != b.NAME) return false;
-	NAVX_INPUT_ITEMS(X)
+	#define X(t,NAME,...) if(a.NAME != b.NAME) return false;
+	NAVX_ITEMS(X)
 	#undef X
 	return true;
 }
@@ -150,8 +150,8 @@ bool operator!=(Navx_input a,Navx_input b){
 }
 
 bool operator<(Navx_input a,Navx_input b){
-	#define X(t,NAME) if(a.NAME<b.NAME) return 1; if(b.NAME<a.NAME) return 0;
-	NAVX_INPUT_ITEMS(X)
+	#define X(t,NAME,...) if(a.NAME<b.NAME) return 1; if(b.NAME<a.NAME) return 0;
+	NAVX_ITEMS(X)
 	#undef X
 	return 1;
 }

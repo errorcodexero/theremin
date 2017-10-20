@@ -20,12 +20,15 @@ void Navx_control::init(frc::SerialPort::Port port){
 }
 
 Navx_input Navx_control::get(){
-	in.angle = ahrs->GetAngle();
+	#define X(A,B,C) in.B = ahrs->C();
+	NAVX_ITEMS(X)
+	#undef X
+
 	return in;
 }
 
 ostream& operator<<(ostream& o,Navx_control){
-	o<<"Navrx_control()";
+	o<<"Navx_control()";
 	return o;
 }
 
