@@ -235,6 +235,8 @@ set<Drivebase::Status> examples(Drivebase::Status*){
 
 set<Drivebase::Goal> examples(Drivebase::Goal*){
 	return {
+		Drivebase::Goal::rotate(0),
+		Drivebase::Goal::drive_straight(0),
 		Drivebase::Goal::distances({0,0}),
 		Drivebase::Goal::absolute(0,0),
 		Drivebase::Goal::absolute(1,1)
@@ -255,7 +257,7 @@ Drivebase::Goal::Mode Drivebase::Goal::mode()const{
 }
 
 Drivebase::Distances Drivebase::Goal::distances()const{
-	assert(mode_ == Drivebase::Goal::Mode::DISTANCE);
+	assert(mode_ == Drivebase::Goal::Mode::DISTANCES);
 	return distances_;
 }
 
@@ -269,9 +271,19 @@ double Drivebase::Goal::left()const{
 	return left_;
 }
 
+double Drivebase::Goal::target_distance()const{
+	assert(mode_ == Drivebase::Goal::Mode::DRIVE_STRAIGHT);
+	return target_distance_;
+}
+
+Rad Drivebase::Goal::angle()const{
+	assert(mode_ == Drivebase::Goal::Mode::ROTATE);
+	return angle_;
+}
+
 Drivebase::Goal Drivebase::Goal::distances(Drivebase::Distances distances){
 	Drivebase::Goal a;
-	a.mode_ = Drivebase::Goal::Mode::DISTANCE;
+	a.mode_ = Drivebase::Goal::Mode::DISTANCES;
 	a.distances_ = distances;
 	return a;
 }
@@ -284,10 +296,30 @@ Drivebase::Goal Drivebase::Goal::absolute(double left,double right){
 	return a;
 }
 
+Drivebase::Goal Drivebase::Goal::drive_straight(double target){
+	Drivebase::Goal a;
+	a.mode_ = Drivebase::Goal::Mode::DRIVE_STRAIGHT;
+	a.target_distance_ = target;
+	return a;
+}
+
+Drivebase::Goal Drivebase::Goal::rotate(Rad angle){
+	Drivebase::Goal a;
+	a.mode_ = Drivebase::Goal::Mode::ROTATE;
+	a.angle_ = angle;
+	return a;
+}
+
 ostream& operator<<(ostream& o,Drivebase::Goal const& a){
 	o<<"Drivebase::Goal("<<a.mode()<<" ";
 	switch(a.mode()){
-		case Drivebase::Goal::Mode::DISTANCE:
+		case Drivebase::Goal::Mode::ROTATE:
+			o<<a.angle();
+			break;
+		case Drivebase::Goal::Mode::DRIVE_STRAIGHT:
+			o<<a.target_distance();
+			break;
+		case Drivebase::Goal::Mode::DISTANCES:
 			o<<a.distances();
 			break;
 		case Drivebase::Goal::Mode::ABSOLUTE:
@@ -479,10 +511,14 @@ Drivebase::Output trapezoidal_speed_control(Drivebase::Status status, Drivebase:
 
 Drivebase::Output control(Drivebase::Status status,Drivebase::Goal goal){
 	switch(goal.mode()){
-		case Drivebase::Goal::Mode::DISTANCE:
+		case Drivebase::Goal::Mode::DISTANCES:
 			return trapezoidal_speed_control(status,goal);
 		case Drivebase::Goal::Mode::ABSOLUTE:
 			return Drivebase::Output{goal.left(),goal.right()};
+		case Drivebase::Goal::Mode::DRIVE_STRAIGHT:
+			nyi //TODO
+		case Drivebase::Goal::Mode::ROTATE:
+			nyi //TODO
 		default:
 			nyi
 	}
@@ -494,11 +530,20 @@ bool ready(Drivebase::Status status,Drivebase::Goal goal){
 	switch(goal.mode()){
 		case Drivebase::Goal::Mode::ABSOLUTE:
 			return true;
-		case Drivebase::Goal::Mode::DISTANCE:
+		case Drivebase::Goal::Mode::DISTANCES:
 			{
 				const double TOLERANCE = 1;//inches
 				return fabs(goal.distances().l - status.distances.l) < TOLERANCE;//TODO: this is just a placeholder for now
 			}
+		case Drivebase::Goal::Mode::DRIVE_STRAIGHT:
+			{
+				const double TOLERANCE = 1;//inches
+				double left_error = fabs(goal.target_distance() - status.distances.l),
+					right_error = fabs(goal.target_distance() - status.distances.r);
+				return ((left_error + right_error) / 2) < TOLERANCE;
+			}
+		case Drivebase::Goal::Mode::ROTATE:
+			nyi //TODO
 		default:
 			nyi
 	}
