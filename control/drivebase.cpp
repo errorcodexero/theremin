@@ -71,6 +71,7 @@ Robot_inputs Drivebase::Input_reader::operator()(Robot_inputs all,Input in)const
 	encoder(R_ENCODER_PORTS,in.right);
 	all.digital_io.encoder[L_ENCODER_LOC] = -inches_to_ticks(in.distances.l);
 	all.digital_io.encoder[R_ENCODER_LOC] = inches_to_ticks(in.distances.r);
+	all.navx.angle = in.angle;
 	return all;
 }
 
@@ -92,7 +93,8 @@ Drivebase::Input Drivebase::Input_reader::operator()(Robot_inputs const& in)cons
 		{
 			-ticks_to_inches(encoderconv(in.digital_io.encoder[L_ENCODER_LOC])),
 			ticks_to_inches(encoderconv(in.digital_io.encoder[R_ENCODER_LOC]))
-		}
+		},
+		in.navx.angle
 	};
 }
 
@@ -229,6 +231,7 @@ set<Drivebase::Status> examples(Drivebase::Status*){
 		{0,0},
 		*examples((Drivebase::Output*)nullptr).begin(),
 		0.0,
+		0.0,
 		0.0
 	}};
 }
@@ -250,7 +253,7 @@ std::ostream& operator<<(std::ostream& o, Drivebase::Goal::Mode a){
 	nyi
 }
 
-Drivebase::Goal::Goal():mode_(Drivebase::Goal::Mode::ABSOLUTE),distances_({0,0}),left_(0),right_(0){}
+Drivebase::Goal::Goal():mode_(Drivebase::Goal::Mode::ABSOLUTE),distances_({0,0}),target_distance_(0),angle_(0),left_(0),right_(0){}
 
 Drivebase::Goal::Mode Drivebase::Goal::mode()const{
 	return mode_;
@@ -332,12 +335,53 @@ ostream& operator<<(ostream& o,Drivebase::Goal const& a){
 	return o;
 }
 
+
+bool operator==(Drivebase::Goal const& a,Drivebase::Goal const& b){
+	#define X(NAME) if(a.NAME != b.NAME) return false;
+	X(mode())
+	switch(a.mode()){
+		case Drivebase::Goal::Mode::ABSOLUTE:
+			X(left())
+			X(right())
+			break;
+		case Drivebase::Goal::Mode::DISTANCES:
+			X(distances())
+			break;
+		case Drivebase::Goal::Mode::DRIVE_STRAIGHT:
+			X(target_distance())
+			break;
+		case Drivebase::Goal::Mode::ROTATE:
+			X(angle())
+			break;
+		default:
+			nyi
+	}
+	#undef X
+	return true;	
+}
+
+
 #define CMP(name) if(a.name<b.name) return 1; if(b.name<a.name) return 0;
 
 bool operator<(Drivebase::Goal const& a,Drivebase::Goal const& b){
 	CMP(mode())
-	CMP(left())
-	CMP(right())
+	switch(a.mode()){
+		case Drivebase::Goal::Mode::ABSOLUTE:
+			CMP(left())
+			CMP(right())
+			break;
+		case Drivebase::Goal::Mode::DISTANCES:
+			CMP(distances())
+			break;
+		case Drivebase::Goal::Mode::DRIVE_STRAIGHT:
+			CMP(target_distance())
+			break;
+		case Drivebase::Goal::Mode::ROTATE:
+			CMP(angle())
+			break;
+		default:
+			nyi
+	}
 	return 0;
 }
 
@@ -354,11 +398,11 @@ set<Drivebase::Input> examples(Drivebase::Input*){
 	auto d=Digital_in::_0;
 	auto p=make_pair(d,d);
 	return {Drivebase::Input{
-		{0,0,0,0},p,p,{0,0},0.0
+		{0,0,0,0},p,p,{0,0},0.0,0.0
 	}};
 }
 
-Drivebase::Estimator::Estimator():motor_check(),last({{{}},false,{0,0},{0,0},{0,0},0.0,0.0}){}
+Drivebase::Estimator::Estimator():motor_check(),last({{{}},false,{0,0},{0,0},{0,0},0.0,0.0,0.0}){}
 
 Drivebase::Status_detail Drivebase::Estimator::get()const{
 	/*array<Motor_check::Status,MOTORS> a;
@@ -391,7 +435,8 @@ void Drivebase::Estimator::update(Time now,Drivebase::Input in,Drivebase::Output
 	last.dt = now - last.now;//TODO: should now come from input?
 	last.now = now;
 	last.last_output = out;
-	
+	last.angle = in.angle;	
+
 	speed_timer.update(now,true);
 	static const double POLL_TIME = .05;//seconds
 	if(speed_timer.done()){
@@ -484,9 +529,9 @@ Drivebase::Output trapezoidal_speed_control(Drivebase::Status status, Drivebase:
 		const double SPEED_UP_TIME = 2000; //milliseconds
 		const double SLOPE = MAX_OUT / SPEED_UP_TIME; //"volts"/ms //TODO: currently arbitrary value
 		const double MAX_STEP = 0.2;//"volts" //TODO: currently arbitrary value
-		const double MILLISECONDS_PER_SECONDS = 1000 / 1;
+		const double MILLISECONDS_PER_SECOND = 1000 / 1;
 		
-		double step = clamp(status.dt * MILLISECONDS_PER_SECONDS * SLOPE,-MAX_STEP,MAX_STEP);// in "volts" 
+		double step = clamp(status.dt * MILLISECONDS_PER_SECOND * SLOPE,-MAX_STEP,MAX_STEP);// in "volts" 
 		double l_step = copysign(step,goal.distances().l);
 		double r_step = copysign(step,goal.distances().r);
 		
@@ -509,6 +554,17 @@ Drivebase::Output trapezoidal_speed_control(Drivebase::Status status, Drivebase:
 	return out;
 }
 
+Drivebase::Output rotation_control(Drivebase::Status status, Drivebase::Goal goal){
+	Drivebase::Output out = {0,0};
+	static const double MAX_OUT = 0.5;
+	static const double P = 0.0025;//TODO: currently arbitrary value
+	double error = goal.angle() - status.angle;
+	double power = clamp(error*P,-MAX_OUT,MAX_OUT);
+	out = Drivebase::Output(-power,power);
+	cout<<"\n\ngoal:"<<goal.angle()<<" status:"<<status.angle<<"\n\n";
+	return out;
+}
+
 Drivebase::Output control(Drivebase::Status status,Drivebase::Goal goal){
 	switch(goal.mode()){
 		case Drivebase::Goal::Mode::DISTANCES:
@@ -518,7 +574,7 @@ Drivebase::Output control(Drivebase::Status status,Drivebase::Goal goal){
 		case Drivebase::Goal::Mode::DRIVE_STRAIGHT:
 			nyi //TODO
 		case Drivebase::Goal::Mode::ROTATE:
-			nyi //TODO
+			return rotation_control(status,goal);
 		default:
 			nyi
 	}
@@ -543,7 +599,11 @@ bool ready(Drivebase::Status status,Drivebase::Goal goal){
 				return ((left_error + right_error) / 2) < TOLERANCE;
 			}
 		case Drivebase::Goal::Mode::ROTATE:
-			nyi //TODO
+			{
+				const Rad TOLERANCE = 0.05236;
+				double error = goal.angle() - status.angle;
+				return fabs(error) < TOLERANCE;
+			}
 		default:
 			nyi
 	}

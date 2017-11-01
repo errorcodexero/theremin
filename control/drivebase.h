@@ -39,7 +39,8 @@ struct Drivebase{
 		X(SINGLE_ARG(std::array<double,MOTORS>),current) \
 		X(Encoder_info,left) \
 		X(Encoder_info,right) \
-		X(Distances,distances)
+		X(Distances,distances) \
+		X(Rad,angle)
 	DECLARE_STRUCT(Input,DRIVEBASE_INPUT)
 
 	struct Input_reader{
@@ -65,7 +66,8 @@ struct Drivebase{
 		X(Distances,distances) \
 		X(Output,last_output) \
 		X(Time,dt) \
-		X(Time,now)
+		X(Time,now) \
+		X(Rad,angle)
 	DECLARE_STRUCT(Status,DRIVEBASE_STATUS) //time is all in seconds
 
 	typedef Status Status_detail;
@@ -171,6 +173,7 @@ std::set<Drivebase::Status> examples(Drivebase::Status*);
 std::ostream& operator<<(std::ostream&,Drivebase::Goal const&);
 std::set<Drivebase::Goal> examples(Drivebase::Goal*);
 bool operator<(Drivebase::Goal const&,Drivebase::Goal const&);
+bool operator==(Drivebase::Goal const&,Drivebase::Goal const&);
 
 Drivebase::Status status(Drivebase::Status_detail);
 Drivebase::Output control(Drivebase::Status_detail,Drivebase::Goal);
