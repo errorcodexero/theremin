@@ -4,6 +4,7 @@
 #include "../util/util.h"
 //temp
 #include "../util/point.h"
+#include <fstream>
 //end temp
 using namespace std;
 
@@ -470,7 +471,7 @@ Drivebase::Output trapezoidal_speed_control(Drivebase::Status status, Drivebase:
 		if(error.r < SLOW_WITHIN_DISTANCE)
 			out.r = clamp((error.r * SLOPE), -MAX_OUT, MAX_OUT);
 	}
-	
+	//cout << status.now << " / " << status.distances.l << ":" << status.distances.r << " / " << out.l << ":" << out.r << "\n";
 	return out;
 }
 
