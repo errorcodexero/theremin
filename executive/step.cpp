@@ -29,25 +29,25 @@ Toplevel::Goal Step::run(Run_info info){
 
 const double RIGHT_SPEED_CORRECTION = /*-0.045; */ 0.0;// 0 is for comp bot. //left and right sides of the practice robot drive at different speeds given the same power, adjust this to make the robot drive straight
 
-Drivebase::Distances Turn::angle_to_distances(Rad target_angle){
-	Inch side_goal = target_angle * 0.5 * ROBOT_WIDTH;
+Drivebase::Distances Rotate::angle_to_distances(Rad target_angle){
+	Inch side_goal = target_angle * 0.5 * Robot_constants::ROBOT_WIDTH;
 	return Drivebase::Distances{side_goal,-side_goal};
 }
 
-Drivebase::Distances Turn::get_distance_travelled(Drivebase::Distances current){
+Drivebase::Distances Rotate::get_distance_travelled(Drivebase::Distances current){
 	return current - initial_distances;
 }
 
-Turn::Turn(Rad a):Turn(a,0.02,0.5){}//from testing
-Turn::Turn(Rad a,double vel_modifier,double max):target_angle(a),initial_distances({0,0}),init(false),side_goals(angle_to_distances(a)){
+Rotate::Rotate(Rad a):Rotate(a,0.02,0.5){}//from testing
+Rotate::Rotate(Rad a,double vel_modifier,double max):target_angle(a),initial_distances({0,0}),init(false),side_goals(angle_to_distances(a)){
 	motion_profile = {side_goals.l,vel_modifier,max};//from testing
 }
 
-Toplevel::Goal Turn::run(Run_info info){
+Toplevel::Goal Rotate::run(Run_info info){
 	return run(info,{});
 }
 
-Toplevel::Goal Turn::run(Run_info info,Toplevel::Goal goals){
+Toplevel::Goal Rotate::run(Run_info info,Toplevel::Goal goals){
 	if(!init){
 		initial_distances = info.status.drive.distances;
 		init = true;
@@ -56,13 +56,13 @@ Toplevel::Goal Turn::run(Run_info info,Toplevel::Goal goals){
 	
 	//ignoring right encoder because it's proven hard to get meaningful data from it
 	double power = motion_profile.target_speed(distance_travelled.l); 
-	double left = clip(target_to_out_power(power));//TODO: move .2 to the constructor of Turn and set an instance variable
+	double left = clip(target_to_out_power(power));//TODO: move .2 to the constructor of Rotate and set an instance variable
 	double right = -clip(target_to_out_power(power - RIGHT_SPEED_CORRECTION * power));
 	goals.drive = Drivebase::Goal::absolute(left,right);
 	return goals;
 }
 
-Step::Status Turn::done(Next_mode_info info){
+Step::Status Rotate::done(Next_mode_info info){
 	static const Inch TOLERANCE = 1.0;//inches
 	Drivebase::Distances distance_travelled = get_distance_travelled(info.status.drive.distances);
 	Drivebase::Distances distance_left = side_goals - distance_travelled;
@@ -75,12 +75,47 @@ Step::Status Turn::done(Next_mode_info info){
 	return in_range.done() ? Step::Status::FINISHED_SUCCESS : Step::Status::UNFINISHED;
 }
 
-std::unique_ptr<Step_impl> Turn::clone()const{
-	return unique_ptr<Step_impl>(new Turn(*this));
+std::unique_ptr<Step_impl> Rotate::clone()const{
+	return unique_ptr<Step_impl>(new Rotate(*this));
 }
 
-bool Turn::operator==(Turn const& b)const{
+bool Rotate::operator==(Rotate const& b)const{
 	return target_angle == b.target_angle && initial_distances == b.initial_distances && side_goals == b.side_goals && motion_profile == b.motion_profile && in_range == b.in_range;
+}
+////
+
+Navx_rotate::Navx_rotate(double a):target_angle(a),initial_angle(0),init(false){}
+
+Toplevel::Goal Navx_rotate::run(Run_info info){
+	return run(info,{});
+}
+
+Toplevel::Goal Navx_rotate::run(Run_info info,Toplevel::Goal goals){
+	if(!init){
+		initial_angle = info.status.drive.angle;//TODO
+		init = true;
+	}
+	
+	goals.drive = Drivebase::Goal::rotate(target_angle);
+	return goals;
+}
+
+Step::Status Navx_rotate::done(Next_mode_info info){
+	if(ready(info.status.drive,Drivebase::Goal::rotate(target_angle))){
+		 in_range.update(info.in.now,info.in.robot_mode.enabled);
+	} else {
+		static const Time FINISH_TIME = .50;//seconds
+		in_range.set(FINISH_TIME);
+	}
+	return in_range.done() ? Step::Status::FINISHED_SUCCESS : Step::Status::UNFINISHED;
+}
+
+std::unique_ptr<Step_impl> Navx_rotate::clone()const{
+	return unique_ptr<Step_impl>(new Navx_rotate(*this));
+}
+
+bool Navx_rotate::operator==(Navx_rotate const& b)const{
+	return target_angle == b.target_angle && initial_angle == b.initial_angle && in_range == b.in_range;
 }
 
 //Step::Step(Step_impl const& a):impl(a.clone().get()){}
