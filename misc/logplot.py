@@ -2,8 +2,8 @@
 import argparse
 import matplotlib.pyplot as plt
 
-parser = argparse.ArgumentParser(description="Plot motion profile from drivebase test log")
-parser.add_argument("log_path", help="path to the drivebase log file")
+parser = argparse.ArgumentParser(description="Plot motion profile from robot log")
+parser.add_argument("log_path", help="path to the robot log file")
 
 log_file = open(parser.parse_args().log_path, "r")
 log = log_file.read()
@@ -20,7 +20,8 @@ for line in lines:
 		time = float(halves[0])
 		distances = [float(n) for n in halves[1].split(":")]
 		outputs = [float(n) for n in halves[2].split(":")]
-        	data.append({"t": time, "dist_l": distances[0], "dist_r": distances[1], "out_l": outputs[0], "out_r": outputs[1]})
+		error = float(halves[3])
+        	data.append({"t": time, "dist_l": distances[0], "dist_r": distances[1], "out_l": outputs[0], "out_r": outputs[1], "error": error})
 
 plt.figure(1)
 
@@ -47,4 +48,21 @@ plt.ylabel("right distance (in)")
 plt.subplots_adjust(wspace=.5, hspace=.5)
 plt.suptitle("Log Values")
 
+plt.figure(2)
+
+plt.subplot(111)
+plt.plot([d["t"] for d in data], [d["dist_l"] - d["dist_r"] for d in data])
+plt.xlabel("time (s)")
+plt.ylabel("distance difference (in)")
+
+plt.suptitle("Log Values")
+
+plt.figure(3)
+
+plt.subplot(111)
+plt.plot([d["t"] for d in data], [d["error"] for d in data])
+plt.xlabel("time (s)")
+plt.ylabel("error")
+
+plt.suptitle("Log Values")
 plt.show()

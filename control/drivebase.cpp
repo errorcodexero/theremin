@@ -445,7 +445,10 @@ bool operator!=(Drivebase const& a,Drivebase const& b){
 //TODO: Rename units
 Drivebase::Output trapezoidal_speed_control(Drivebase::Status status, Drivebase::Goal goal){
 	Drivebase::Output out = {0,0};
-	const double MAX_OUT = 1.0;//in "volts"
+	const double MAX_OUT = 1.0;//in "volts
+	double avg_goal = (goal.distances().l + goal.distances().r) / 2;
+	double avg_dist = (status.distances.l + status.distances.r) / 2;
+	double avg_last = (status.last_output.l + status.last_output.r) / 2;
 	{//for ramping up (based on time)
 		const double SPEED_UP_TIME = 2000; //milliseconds
 		const double SLOPE = MAX_OUT / SPEED_UP_TIME; //"volts"/ms //TODO: currently arbitrary value
@@ -453,29 +456,44 @@ Drivebase::Output trapezoidal_speed_control(Drivebase::Status status, Drivebase:
 		const double MILLISECONDS_PER_SECONDS = 1000 / 1;
 		
 		double step = clamp(status.dt * MILLISECONDS_PER_SECONDS * SLOPE,-MAX_STEP,MAX_STEP);// in "volts" 
-		double l_step = copysign(step,goal.distances().l);
-		double r_step = copysign(step,goal.distances().r);
+		//double l_step = copysign(step,goal.distances().l);
+		//double r_step = copysign(step,goal.distances().r);
 		
 		//cout<<"\ndt:"<<status.dt * MILLISECONDS_PER_SECONDS<<" ms step:"<<step<<" "<<status<<"\n";
 		
-		out = {clamp(status.last_output.l + l_step,-MAX_OUT,MAX_OUT),clamp(status.last_output.r + r_step,-MAX_OUT,MAX_OUT)};
+		double avg_out = clamp(avg_last + step, -MAX_OUT, MAX_OUT);
+		out = {avg_out, avg_out};
+		//out = {clamp(status.last_output.l + l_step,-MAX_OUT,MAX_OUT),clamp(status.last_output.r + r_step,-MAX_OUT,MAX_OUT)};
 	}	
-	{//for rampping down (based on distance)
-		Drivebase::Distances error = goal.distances() - status.distances;
-		const double SLOW_WITHIN_DISTANCE = 50; //inches
+	{//for ramping down (based on distance)
+		//Drivebase::Distances error = goal.distances() - status.distances;
+		double error = avg_goal - avg_dist;
+		const double SLOW_WITHIN_DISTANCE = 80; //inches
 		const double SLOPE = MAX_OUT / SLOW_WITHIN_DISTANCE; //"volts"/inches //TODO: currently arbitrary value
 		
+		if(error < SLOW_WITHIN_DISTANCE) {
+			double slow_out = clamp(error * SLOPE, -avg_last, avg_last);
+			out = {slow_out, slow_out};
+		}
+	
+		/*
 		if(error.l < SLOW_WITHIN_DISTANCE)
-			out.l = clamp((error.l * SLOPE), -MAX_OUT, MAX_OUT);
+			out.l = clamp((error.l * SLOPE), -MAX_OUT, status.last_output.l);
 	
 		if(error.r < SLOW_WITHIN_DISTANCE)
-			out.r = clamp((error.r * SLOPE), -MAX_OUT, MAX_OUT);
+			out.r = clamp((error.r * SLOPE), -MAX_OUT, status.last_output.r);
+		*/
 	}
-	//cout << status.now << " / " << status.distances.l << ":" << status.distances.r << " / " << out.l << ":" << out.r << "\n";
+	//const double P = .005;
+	//double s_error = status.speeds.l - status.speeds.r;
+	//out.l = clamp(out.l + P*s_error, -MAX_OUT, MAX_OUT);
+	//out.r = clamp(out.r - P*s_error, -MAX_OUT, MAX_OUT);
+	//cout << status.now << " / " << status.distances.l << ":" << status.distances.r << " / " << out.l << ":" << out.r << " / " << s_error << "\n";
 	return out;
 }
 
 Drivebase::Output control(Drivebase::Status status,Drivebase::Goal goal){
+	//cout << status.distances.l << " " << status.distances.r << "\n";
 	switch(goal.mode()){
 		case Drivebase::Goal::Mode::DISTANCE:
 			return trapezoidal_speed_control(status,goal);

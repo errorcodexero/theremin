@@ -42,6 +42,11 @@ Executive get_auto_mode(Next_mode_info info){
 		Executive{Teleop{}}	
 		
 	}};
+
+	Executive drive_test{Chain{
+		Step{Drive(1)},
+		Executive{Teleop()}
+	}};
 		
 	return motion_profile_test;
 
