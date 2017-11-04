@@ -67,6 +67,8 @@ have_now=''
 
 group=[]
 
+clear_banner = 'CLEAR_SCREEN'
+
 try:
   while True:
 	try: msg = sock_queue.get_nowait()
@@ -78,14 +80,16 @@ try:
 		sp[0]=have_now+sp[0]
 		have_now=sp[-1]
 		sp=sp[:-1]
-
+	
 		for elem in sp:
-			if 'CLEAR_SCREEN' in elem:
-				os.system('clear')
-				for ele in group:
+			for ele in group:
+				if clear_banner in ele:
+					os.system('clear')
+				else:
 					print ele
-				group=[]
+			group=[]
 			group.append(elem)
+			
 		#for i,elem in enumerate(sp):
 		#	if 'in:' in elem:
 		#		os.system('clear')
