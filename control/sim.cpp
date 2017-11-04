@@ -57,7 +57,7 @@ struct Drivebase_sim{
 		Drivebase::Speeds speeds = {out.l * POWER_TO_SPEED, out.r * POWER_TO_SPEED};
 		Drivebase::Distances ddistances = {speeds.l * dt, speeds.r * dt};
 		double avg_dist_traveled = mean(ddistances.l,ddistances.r);
-		double dtheta = ((out.l-out.r)*POWER_TO_SPEED*dt)/ROBOT_WIDTH;
+		double dtheta = ((out.l-out.r)*POWER_TO_SPEED*dt)/Robot_constants::ROBOT_WIDTH;
 		/*
 			Angle is calculated as the difference between the two sides' powers divided by 2 --   (out.l - out.r) / 2
 			That is then converted to a distance   --   ((out.l - out.r) / 2) * POWER_TO_SPEED * dt

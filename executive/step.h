@@ -4,6 +4,7 @@
 #include "executive.h"
 #include "../util/motion_profile.h"
 #include "../util/settable_constant.h"
+#include "../util/robot_constants.h"
 
 struct Step_impl;
 
@@ -147,8 +148,6 @@ class Combo: public Step_impl_inner<Combo>{//Runs two steps at the same time
 	std::unique_ptr<Step_impl> clone()const;
 	bool operator==(Combo const&)const;
 };
-
-static const Inch ROBOT_WIDTH = 28; //inches, ignores bumpers //TODO: finds some way of dealing with constants like this and wheel diameter
 
 struct Rotate: Step_impl_inner<Rotate>{//orients the robot to a certain angle relative to its starting orientation
 	Rad target_angle;//radians,clockwise=positive

@@ -465,13 +465,13 @@ cc_test(
 cc_library(
 	name="drivebase",
 	srcs=["control/drivebase.cpp"],
-	hdrs=["control/drivebase.h","util/quick.h"],
+	hdrs=["control/drivebase.h","util/quick.h","util/robot_constants.h"],
 	deps=[":interface",":motor_check",":motion_profile",":countdown_timer",":stall_monitor"]
 )
 
 cc_test(
 	name="drivebase_test",
-	srcs=["control/drivebase.cpp","control/drivebase.h","util/quick.h","control/formal.h"],
+	srcs=["control/drivebase.cpp","control/drivebase.h","util/quick.h","util/robot_constants.h","control/formal.h"],
 	copts=["-DDRIVEBASE_TEST"],
 	deps=[":interface",":motion_profile",":motor_check",":countdown_timer",":stall_monitor"],
 	timeout="short"
@@ -611,21 +611,6 @@ cc_library(
 )
 
 cc_library(
-	name="robot_constants",
-	srcs=["util/robot_constants.cpp"],
-	hdrs=["util/robot_constants.h"],
-	deps=[]
-)
-
-cc_test(
-	name="robot_constants_test",
-	srcs=["util/robot_constants.cpp","util/robot_constants.h"],
-	copts=["-DROBOT_CONSTANTS_TEST"],
-	deps=[],
-	timeout="short"
-)
-
-cc_library(
 	name="teleop",
 	srcs=["executive/teleop.cpp"],
 	hdrs=["executive/teleop.h"],
@@ -675,7 +660,7 @@ cc_library(
 cc_library(
 	name="step",
 	srcs=["executive/step.cpp"],
-	hdrs=["executive/step.h"],
+	hdrs=["executive/step.h","util/robot_constants.h"],
 	deps=[":executive",":motion_profile",":settable_constant"]
 )
 
@@ -710,7 +695,7 @@ cc_test(
 
 cc_test(
 	name="step_test",
-	srcs=["executive/step.cpp","executive/step.h"],
+	srcs=["executive/step.cpp","executive/step.h","util/robot_constants.h"],
 	copts=["-DSTEP_TEST"],
 	deps=[":executive_impl",":motion_profile",":settable_constant"],
 	timeout="short"

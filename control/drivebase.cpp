@@ -2,6 +2,7 @@
 #include <iostream>
 #include <math.h>
 #include "../util/util.h"
+#include "../util/robot_constants.h"
 #include "../util/motion_profile.h"
 //temp
 #include "../util/point.h"
@@ -32,8 +33,7 @@ int encoderconv(Maybe_inline<Encoder_output> encoder){
 }
 
 const unsigned int TICKS_PER_REVOLUTION=200;
-const double WHEEL_DIAMETER=6.0;
-const double WHEEL_CIRCUMFERENCE=WHEEL_DIAMETER*PI;//inches
+const double WHEEL_CIRCUMFERENCE=Robot_constants::DRIVE_WHEEL_DIAMETER*PI;//inches
 const double INCHES_PER_TICK=WHEEL_CIRCUMFERENCE/(double)TICKS_PER_REVOLUTION;
 
 double ticks_to_inches(const int ticks){
