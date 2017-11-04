@@ -150,7 +150,7 @@ class Combo: public Step_impl_inner<Combo>{//Runs two steps at the same time
 
 static const Inch ROBOT_WIDTH = 28; //inches, ignores bumpers //TODO: finds some way of dealing with constants like this and wheel diameter
 
-struct Turn: Step_impl_inner<Turn>{//orients the robot to a certain angle relative to its starting orientation
+struct Rotate: Step_impl_inner<Rotate>{//orients the robot to a certain angle relative to its starting orientation
 	Rad target_angle;//radians,clockwise=positive
 	Drivebase::Distances initial_distances;
 	bool init;
@@ -161,13 +161,28 @@ struct Turn: Step_impl_inner<Turn>{//orients the robot to a certain angle relati
 	Drivebase::Distances angle_to_distances(Rad);
 	Drivebase::Distances get_distance_travelled(Drivebase::Distances);
 
-	explicit Turn(Rad);
-	explicit Turn(Rad,double,double);
+	explicit Rotate(Rad);
+	explicit Rotate(Rad,double,double);
 	Toplevel::Goal run(Run_info,Toplevel::Goal);
 	Toplevel::Goal run(Run_info);
 	Step::Status done(Next_mode_info);
 	std::unique_ptr<Step_impl> clone()const;
-	bool operator==(Turn const&)const;
+	bool operator==(Rotate const&)const;
+};
+
+struct Navx_rotate: Step_impl_inner<Navx_rotate>{//orients the robot to a certain angle relative to its starting orientation //TODO
+	double target_angle;//degrees,clockwise=positive
+	double initial_angle;
+	bool init;
+	Countdown_timer in_range;
+
+	explicit Navx_rotate(double);
+	
+	Toplevel::Goal run(Run_info,Toplevel::Goal);
+	Toplevel::Goal run(Run_info);
+	Step::Status done(Next_mode_info);
+	std::unique_ptr<Step_impl> clone()const;
+	bool operator==(Navx_rotate const&)const;
 };
 
 #endif

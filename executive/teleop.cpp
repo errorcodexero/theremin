@@ -86,7 +86,7 @@ Toplevel::Goal Teleop::run(Run_info info) {
 		goals.drive = Drivebase::Goal::absolute(left,right);
 	}
 
-	if(info.driver_joystick.button[Gamepad_button::A]) goals.drive = Drivebase::Goal::rotate(1.6);
+	if(info.driver_joystick.button[Gamepad_button::A]) goals.drive = Drivebase::Goal::rotate(270);
 
 	#ifdef PRINT_OUTS
 	if(info.in.ds_info.connected && (print_number%10)==0){

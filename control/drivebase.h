@@ -40,7 +40,7 @@ struct Drivebase{
 		X(Encoder_info,left) \
 		X(Encoder_info,right) \
 		X(Distances,distances) \
-		X(Rad,angle)
+		X(double,angle)
 	DECLARE_STRUCT(Input,DRIVEBASE_INPUT)
 
 	struct Input_reader{
@@ -67,7 +67,7 @@ struct Drivebase{
 		X(Output,last_output) \
 		X(Time,dt) \
 		X(Time,now) \
-		X(Rad,angle)
+		X(double,angle)
 	DECLARE_STRUCT(Status,DRIVEBASE_STATUS) //time is all in seconds
 
 	typedef Status Status_detail;
@@ -105,7 +105,7 @@ struct Drivebase{
 
 		Distances distances_;//used for controlling all drive motors on the robot 
 		double target_distance_;//used for drving straights
-		Rad angle_;
+		double angle_;//degrees
 		double left_,right_;
 
 		public:

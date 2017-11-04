@@ -135,6 +135,7 @@ bool operator!=(Talon_srx_input,Talon_srx_input);
 		//X(AHRS::BoardYawAxis,board_yaw_axis)//FIXME
 
 struct Navx_input{
+	//angle is cumulative and clockwise from top is positive
 	STRUCT_MEMBERS(NAVX_ITEMS)
 	
 	Navx_input();

@@ -2,6 +2,7 @@
 #include <iostream>
 #include <math.h>
 #include "../util/util.h"
+#include "../util/motion_profile.h"
 //temp
 #include "../util/point.h"
 //end temp
@@ -279,7 +280,7 @@ double Drivebase::Goal::target_distance()const{
 	return target_distance_;
 }
 
-Rad Drivebase::Goal::angle()const{
+double Drivebase::Goal::angle()const{
 	assert(mode_ == Drivebase::Goal::Mode::ROTATE);
 	return angle_;
 }
@@ -306,7 +307,7 @@ Drivebase::Goal Drivebase::Goal::drive_straight(double target){
 	return a;
 }
 
-Drivebase::Goal Drivebase::Goal::rotate(Rad angle){
+Drivebase::Goal Drivebase::Goal::rotate(double angle){
 	Drivebase::Goal a;
 	a.mode_ = Drivebase::Goal::Mode::ROTATE;
 	a.angle_ = angle;
@@ -554,14 +555,25 @@ Drivebase::Output trapezoidal_speed_control(Drivebase::Status status, Drivebase:
 	return out;
 }
 
+double total_angle_to_displacement(const double ANGLE){//converts total angle to a displacement
+	static const int UNITS_PER_REV = 360;//degrees/rev
+	double angle_displacement = fmod(ANGLE,UNITS_PER_REV);//relative dispalcement from starting angle, not total angle distance
+	double signed_angle_displacement = (angle_displacement > (UNITS_PER_REV * 0.5)) ? ((UNITS_PER_REV * 0.5) - angle_displacement) : angle_displacement;//converts angle to the closest rotation, from 0-180 or 0-180
+	return signed_angle_displacement;
+}
+
 Drivebase::Output rotation_control(Drivebase::Status status, Drivebase::Goal goal){
 	Drivebase::Output out = {0,0};
 	static const double MAX_OUT = 0.5;
 	static const double P = 0.0025;//TODO: currently arbitrary value
-	double error = goal.angle() - status.angle;
-	double power = clamp(error*P,-MAX_OUT,MAX_OUT);
-	out = Drivebase::Output(-power,power);
-	cout<<"\n\ngoal:"<<goal.angle()<<" status:"<<status.angle<<"\n\n";
+	
+	double status_angle_displacement = total_angle_to_displacement(status.angle);
+	double goal_angle_displacement = total_angle_to_displacement(goal.angle());
+	
+	double error = goal_angle_displacement - status_angle_displacement;
+	double power = target_to_out_power(clamp(error*P,-MAX_OUT,MAX_OUT));
+	out = Drivebase::Output(power,-power);
+	cout<<"\n\ngoal:"<<goal.angle()<<","<<goal_angle_displacement<<" status:"<<status.angle<<","<<status_angle_displacement<<" out:"<<out<<"\n\n";
 	return out;
 }
 
@@ -572,7 +584,8 @@ Drivebase::Output control(Drivebase::Status status,Drivebase::Goal goal){
 		case Drivebase::Goal::Mode::ABSOLUTE:
 			return Drivebase::Output{goal.left(),goal.right()};
 		case Drivebase::Goal::Mode::DRIVE_STRAIGHT:
-			nyi //TODO
+			return Drivebase::Output{0,0};
+			//nyi //TODO
 		case Drivebase::Goal::Mode::ROTATE:
 			return rotation_control(status,goal);
 		default:
@@ -600,8 +613,8 @@ bool ready(Drivebase::Status status,Drivebase::Goal goal){
 			}
 		case Drivebase::Goal::Mode::ROTATE:
 			{
-				const Rad TOLERANCE = 0.05236;
-				double error = goal.angle() - status.angle;
+				const double TOLERANCE = 1;//degrees
+				double error = total_angle_to_displacement(goal.angle()) - total_angle_to_displacement(status.angle);
 				return fabs(error) < TOLERANCE;
 			}
 		default:
