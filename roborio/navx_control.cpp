@@ -21,10 +21,18 @@ void Navx_control::init(frc::SerialPort::Port port){
 
 Navx_input Navx_control::get(){
 	#define X(A,B,C) in.B = ahrs->C();
-	NAVX_ITEMS(X)
+	NAVX_INPUT_ITEMS(X)
 	#undef X
 
 	return in;
+}
+
+void Navx_control::set(Navx_output a){
+	out = a;
+	
+	#define X(TYPE,NAME,FUNC) if(a.NAME) ahrs->FUNC();
+	NAVX_OUTPUT_ITEMS(X)
+	#undef X
 }
 
 ostream& operator<<(ostream& o,Navx_control){

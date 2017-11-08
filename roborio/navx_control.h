@@ -11,13 +11,15 @@ class Navx_control{
 	AHRS* ahrs;
 	Navx_input in;
 
+	Navx_output out;
+
 	public:
 	Navx_control();
 	Navx_control(frc::SerialPort::Port);
 	~Navx_control();
 
 	Navx_input get();
-		
+	void set(Navx_output);
 	void init(frc::SerialPort::Port);
 	friend std::ostream& operator<<(std::ostream&,Navx_control);
 };
