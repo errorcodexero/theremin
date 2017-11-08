@@ -69,8 +69,7 @@ Maybe<Pump::Status> parse_status(string const& s){
 }
 
 Pump::Output control(Pump::Status,Pump::Goal g){
-	if(g==Pump::Goal::OFF) return Pump::Output::OFF;
-	return Pump::Output::AUTO;
+	return g;
 }
 
 Robot_outputs Pump::Output_applicator::operator()(Robot_outputs r,Pump::Output out)const{

@@ -84,7 +84,7 @@ bool operator<(Talon_srx_input,Talon_srx_input);
 bool operator==(Talon_srx_input,Talon_srx_input);
 bool operator!=(Talon_srx_input,Talon_srx_input);
 
-#define NAVX_ITEMS(X) \
+#define NAVX_INPUT_ITEMS(X) \
 		X(double,pitch,GetPitch) \
 		X(double,roll,GetRoll) \
 		X(double,yaw,GetYaw) \
@@ -136,16 +136,31 @@ bool operator!=(Talon_srx_input,Talon_srx_input);
 
 struct Navx_input{
 	//angle is cumulative and clockwise from top is positive
-	STRUCT_MEMBERS(NAVX_ITEMS)
+	STRUCT_MEMBERS(NAVX_INPUT_ITEMS)
 	
 	Navx_input();
-	IMPL_STRUCT_DECLARE(Navx_input,NAVX_ITEMS)
+	IMPL_STRUCT_DECLARE(Navx_input,NAVX_INPUT_ITEMS)
 };
 
 std::ostream& operator<<(std::ostream&,Navx_input);
 bool operator==(Navx_input,Navx_input);
 bool operator!=(Navx_input,Navx_input);
 bool operator<(Navx_input,Navx_input);
+
+#define NAVX_OUTPUT_ITEMS(X) \
+	X(bool,zero_yaw,ZeroYaw) 
+
+struct Navx_output{
+	STRUCT_MEMBERS(NAVX_OUTPUT_ITEMS)
+
+	Navx_output();
+	IMPL_STRUCT_DECLARE(Navx_output,NAVX_OUTPUT_ITEMS);
+};
+
+std::ostream& operator<<(std::ostream&,Navx_output);
+bool operator==(Navx_output,Navx_output);
+bool operator!=(Navx_output,Navx_output);
+bool operator<(Navx_output,Navx_output);
 
 std::ostream& operator<<(std::ostream&,Digital_out);
 bool operator<(Digital_out,Digital_out);
@@ -169,6 +184,8 @@ struct Robot_outputs{
 	
 	static const unsigned TALON_SRX_OUTPUTS=TALON_SRXS;//FIXME: talon initializaitons
 	Checked_array<Talon_srx_output, TALON_SRX_OUTPUTS> talon_srx;
+
+	Navx_output navx;
 	
 	//could add in some setup for the analog inputs
 	
