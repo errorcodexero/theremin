@@ -117,6 +117,20 @@ class MP_drive:public Step_impl_inner<MP_drive>{
 	bool operator==(MP_drive const&)const;
 };
 
+class Navx_drive_straight:public Step_impl_inner<Navx_drive_straight>{
+	Inch target_distance;
+	Settable_constant<Drivebase::Goal> drive_goal;
+
+	public:
+	explicit Navx_drive_straight(Inch);
+
+	Toplevel::Goal run(Run_info,Toplevel::Goal);
+	Toplevel::Goal run(Run_info);
+	Step::Status done(Next_mode_info);
+	std::unique_ptr<Step_impl> clone()const;
+	bool operator==(Navx_drive_straight const&)const;
+};
+
 class Ram:public Step_impl_inner<Ram>{//Drives straight a certain distance
 	Inch target_dist;
 	Drivebase::Distances initial_distances;

@@ -123,7 +123,7 @@ struct Drivebase{
 		
 		static Goal distances(Distances);
 		static Goal absolute(double,double);
-		static Goal drive_straight(double);
+		static Goal drive_straight(Distances,double);
 		static Goal rotate(Rad);
 	};
 };

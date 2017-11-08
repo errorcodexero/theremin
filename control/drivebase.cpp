@@ -241,7 +241,7 @@ set<Drivebase::Status> examples(Drivebase::Status*){
 set<Drivebase::Goal> examples(Drivebase::Goal*){
 	return {
 		Drivebase::Goal::rotate(0),
-		Drivebase::Goal::drive_straight(0),
+		Drivebase::Goal::drive_straight(0,0),
 		Drivebase::Goal::distances({0,0}),
 		Drivebase::Goal::absolute(0,0),
 		Drivebase::Goal::absolute(1,1)
@@ -301,10 +301,11 @@ Drivebase::Goal Drivebase::Goal::absolute(double left,double right){
 	return a;
 }
 
-Drivebase::Goal Drivebase::Goal::drive_straight(double target){
+Drivebase::Goal Drivebase::Goal::drive_straight(Drivebase::Distances target, double initial_angle){
 	Drivebase::Goal a;
 	a.mode_ = Drivebase::Goal::Mode::DRIVE_STRAIGHT;
-	a.target_distance_ = target;
+	a.distances_ = target;
+	a.angle_ = initial_angle;
 	return a;
 }
 
@@ -593,6 +594,12 @@ Drivebase::Output rotation_control(Drivebase::Status status, Drivebase::Goal goa
 	return out;
 }
 
+Drivebase::Output drive_straight(Drivebase::Status status, Drivebase::Goal goal){
+	Drivebase::Output out = trapezoidal_speed_control(status,goal);
+	
+	return out;
+}
+
 Drivebase::Output control(Drivebase::Status status,Drivebase::Goal goal){
 	//cout << status.distances.l << " " << status.distances.r << "\n";
 	switch(goal.mode()){
@@ -601,8 +608,7 @@ Drivebase::Output control(Drivebase::Status status,Drivebase::Goal goal){
 		case Drivebase::Goal::Mode::ABSOLUTE:
 			return Drivebase::Output{goal.left(),goal.right()};
 		case Drivebase::Goal::Mode::DRIVE_STRAIGHT:
-			return Drivebase::Output{0,0};
-			//nyi //TODO
+			return drive_straight(status,goal);
 		case Drivebase::Goal::Mode::ROTATE:
 			return rotation_control(status,goal);
 		default:
