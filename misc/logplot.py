@@ -20,49 +20,36 @@ for line in lines:
 		time = float(halves[0])
 		distances = [float(n) for n in halves[1].split(":")]
 		outputs = [float(n) for n in halves[2].split(":")]
-		error = float(halves[3])
-        	data.append({"t": time, "dist_l": distances[0], "dist_r": distances[1], "out_l": outputs[0], "out_r": outputs[1], "error": error})
+		current_angle = float(halves[3])
+		goal_angle = float(halves[4])
+        	data.append({"t": time, "dist_l": distances[0], "dist_r": distances[1], "out_l": outputs[0], "out_r": outputs[1], "current_angle": current_angle, "goal_angle": goal_angle})
 
 plt.figure(1)
 
 plt.subplot(221)
 plt.plot([d["t"] for d in data], [d["out_l"] for d in data])
-plt.xlabel("time (s)")
-plt.ylabel("left output")
-
-plt.subplot(222)
 plt.plot([d["t"] for d in data], [d["out_r"] for d in data])
 plt.xlabel("time (s)")
-plt.ylabel("right output")
+plt.ylabel("output")
 
-plt.subplot(223)
+plt.subplot(222)
 plt.plot([d["t"] for d in data], [d["dist_l"] for d in data])
-plt.xlabel("time (s)")
-plt.ylabel("left distance (in)")
-
-plt.subplot(224)
 plt.plot([d["t"] for d in data], [d["dist_r"] for d in data])
 plt.xlabel("time (s)")
-plt.ylabel("right distance (in)")
+plt.ylabel("distance (in)")
 
-plt.subplots_adjust(wspace=.5, hspace=.5)
-plt.suptitle("Log Values")
+plt.subplot(223)
+plt.plot([d["t"] for d in data], [d["goal_angle"] for d in data])
+plt.plot([d["t"] for d in data], [d["current_angle"] for d in data])
+plt.xlabel("time (s)")
+plt.ylabel("angle (degrees)")
 
-plt.figure(2)
-
-plt.subplot(111)
+plt.subplot(224)
 plt.plot([d["t"] for d in data], [d["dist_l"] - d["dist_r"] for d in data])
 plt.xlabel("time (s)")
 plt.ylabel("distance difference (in)")
 
+plt.subplots_adjust(wspace=.5, hspace=.5)
 plt.suptitle("Log Values")
 
-plt.figure(3)
-
-plt.subplot(111)
-plt.plot([d["t"] for d in data], [d["error"] for d in data])
-plt.xlabel("time (s)")
-plt.ylabel("error")
-
-plt.suptitle("Log Values")
 plt.show()

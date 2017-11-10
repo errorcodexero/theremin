@@ -255,14 +255,14 @@ std::ostream& operator<<(std::ostream& o, Drivebase::Goal::Mode a){
 	nyi
 }
 
-Drivebase::Goal::Goal():mode_(Drivebase::Goal::Mode::ABSOLUTE),distances_({0,0}),target_distance_(0),angle_(0),left_(0),right_(0){}
+Drivebase::Goal::Goal():mode_(Drivebase::Goal::Mode::ABSOLUTE),distances_({0,0}),angle_(0),left_(0),right_(0){}
 
 Drivebase::Goal::Mode Drivebase::Goal::mode()const{
 	return mode_;
 }
 
 Drivebase::Distances Drivebase::Goal::distances()const{
-	assert(mode_ == Drivebase::Goal::Mode::DISTANCES);
+	assert(mode_ == Drivebase::Goal::Mode::DISTANCES || mode_ == Drivebase::Goal::Mode::DRIVE_STRAIGHT);
 	return distances_;
 }
 
@@ -276,13 +276,8 @@ double Drivebase::Goal::left()const{
 	return left_;
 }
 
-double Drivebase::Goal::target_distance()const{
-	assert(mode_ == Drivebase::Goal::Mode::DRIVE_STRAIGHT);
-	return target_distance_;
-}
-
 double Drivebase::Goal::angle()const{
-	assert(mode_ == Drivebase::Goal::Mode::ROTATE);
+	assert(mode_ == Drivebase::Goal::Mode::ROTATE || mode_ == Drivebase::Goal::Mode::DRIVE_STRAIGHT);
 	return angle_;
 }
 
@@ -323,7 +318,7 @@ ostream& operator<<(ostream& o,Drivebase::Goal const& a){
 			o<<a.angle();
 			break;
 		case Drivebase::Goal::Mode::DRIVE_STRAIGHT:
-			o<<a.target_distance();
+			o<<a.distances()<<" "<<a.angle();
 			break;
 		case Drivebase::Goal::Mode::DISTANCES:
 			o<<a.distances();
@@ -351,7 +346,8 @@ bool operator==(Drivebase::Goal const& a,Drivebase::Goal const& b){
 			X(distances())
 			break;
 		case Drivebase::Goal::Mode::DRIVE_STRAIGHT:
-			X(target_distance())
+			X(distances())
+			X(angle())
 			break;
 		case Drivebase::Goal::Mode::ROTATE:
 			X(angle())
@@ -377,7 +373,8 @@ bool operator<(Drivebase::Goal const& a,Drivebase::Goal const& b){
 			CMP(distances())
 			break;
 		case Drivebase::Goal::Mode::DRIVE_STRAIGHT:
-			CMP(target_distance())
+			CMP(distances())
+			CMP(angle())
 			break;
 		case Drivebase::Goal::Mode::ROTATE:
 			CMP(angle())
@@ -548,7 +545,7 @@ Drivebase::Output trapezoidal_speed_control(Drivebase::Status status, Drivebase:
 	{//for ramping down (based on distance)
 		//Drivebase::Distances error = goal.distances() - status.distances;
 		double error = avg_goal - avg_dist;
-		const double SLOW_WITHIN_DISTANCE = 80; //inches
+		const double SLOW_WITHIN_DISTANCE = 60; //inches
 		const double SLOPE = MAX_OUT / SLOW_WITHIN_DISTANCE; //"volts"/inches //TODO: currently arbitrary value
 		
 		if(error < SLOW_WITHIN_DISTANCE) {
@@ -568,7 +565,6 @@ Drivebase::Output trapezoidal_speed_control(Drivebase::Status status, Drivebase:
 	//double s_error = status.speeds.l - status.speeds.r;
 	//out.l = clamp(out.l + P*s_error, -MAX_OUT, MAX_OUT);
 	//out.r = clamp(out.r - P*s_error, -MAX_OUT, MAX_OUT);
-	//cout << status.now << " / " << status.distances.l << ":" << status.distances.r << " / " << out.l << ":" << out.r << " / " << s_error << "\n";
 	return out;
 }
 
@@ -590,13 +586,21 @@ Drivebase::Output rotation_control(Drivebase::Status status, Drivebase::Goal goa
 	double error = goal_angle_displacement - status_angle_displacement;
 	double power = target_to_out_power(clamp(error*P,-MAX_OUT,MAX_OUT));
 	out = Drivebase::Output(power,-power);
-	cout<<"\n\ngoal:"<<goal.angle()<<","<<goal_angle_displacement<<" status:"<<status.angle<<","<<status_angle_displacement<<" out:"<<out<<"\n\n";
+	//cout<<"\n\ngoal:"<<goal.angle()<<","<<goal_angle_displacement<<" status:"<<status.angle<<","<<status_angle_displacement<<" out:"<<out<<"\n\n";
 	return out;
 }
 
 Drivebase::Output drive_straight(Drivebase::Status status, Drivebase::Goal goal){
 	Drivebase::Output out = trapezoidal_speed_control(status,goal);
-	
+
+	static const double MAX_OUT = 1.0;
+	static const double P = 0.01;	
+	double error = total_angle_to_displacement(goal.angle()) - total_angle_to_displacement(status.angle);
+	out.l = clamp(out.l + error*P, -MAX_OUT, MAX_OUT);
+	out.r = clamp(out.r - error*P, -MAX_OUT, MAX_OUT);
+
+	cout << status.now << " / " << status.distances.l << ":" << status.distances.r << " / " << out.l << ":" << out.r << " / " << status.angle << " / " << goal.angle() << "\n";
+
 	return out;
 }
 
@@ -630,8 +634,8 @@ bool ready(Drivebase::Status status,Drivebase::Goal goal){
 		case Drivebase::Goal::Mode::DRIVE_STRAIGHT:
 			{
 				const double TOLERANCE = 1;//inches
-				double left_error = fabs(goal.target_distance() - status.distances.l),
-					right_error = fabs(goal.target_distance() - status.distances.r);
+				double left_error = fabs(goal.distances().l - status.distances.l),
+					right_error = fabs(goal.distances().r - status.distances.r);
 				return ((left_error + right_error) / 2) < TOLERANCE;
 			}
 		case Drivebase::Goal::Mode::ROTATE:

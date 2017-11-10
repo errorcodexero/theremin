@@ -104,7 +104,6 @@ struct Drivebase{
 		Mode mode_;
 
 		Distances distances_;//used for controlling all drive motors on the robot 
-		double target_distance_;//used for drving straights
 		double angle_;//degrees
 		double left_,right_;
 
@@ -116,6 +115,7 @@ struct Drivebase{
 		Distances distances()const;
 
 		double target_distance()const;	
+		double initial_angle()const;
 		Rad angle()const;
 	
 		double right()const;
