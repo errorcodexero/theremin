@@ -8,10 +8,10 @@
 using namespace std;
 
 //these are all off by one
-#define L_MOTOR_LOC_1 0
-#define L_MOTOR_LOC_2 1
-#define R_MOTOR_LOC_1 2
-#define R_MOTOR_LOC_2 3
+#define R_MOTOR_LOC_1 0
+#define R_MOTOR_LOC_2 1
+#define L_MOTOR_LOC_1 2
+#define L_MOTOR_LOC_2 3
 
 unsigned pdb_location(Drivebase::Motor m){
 	#define X(NAME,INDEX) if(m==Drivebase::NAME) return INDEX;
