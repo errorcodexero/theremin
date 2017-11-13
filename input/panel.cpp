@@ -7,12 +7,13 @@
 
 using namespace std;
 
-const int AUTO_SELECTOR_AXIS=0;
+static const unsigned int AUTO_SELECTOR_AXIS=0,GRABBER_AXIS=1, PINCHERS_AXIS=2;
+static const unsigned int GRABBER_TOGGLE_LOC=0;
 
 #define BUTTONS \
-
+	X(grabber_toggle)
 #define THREE_POS_SWITCHES \
-
+	X(grabber) X(pinchers) 
 #define TEN_POS_SWITCHES \
 	X(auto_select)
 #define DIALS \
@@ -28,8 +29,24 @@ Panel::Panel():
 	#define X(BUTTON) BUTTON(false),
 	BUTTONS
 	#undef X
-	auto_select(0)
+	grabber(Grabber::AUTO),
+	pinchers(Pinchers::AUTO),
+	auto_select(0)	
 {}
+
+ostream& operator<<(ostream& o,Panel::Grabber a){
+	#define X(NAME) if(a==Panel::Grabber::NAME) return o<<""#NAME;
+	X(UP) X(DOWN) X(AUTO)
+	#undef X
+	assert(0);
+}
+
+ostream& operator<<(ostream& o,Panel::Pinchers a){
+	#define X(NAME) if(a==Panel::Pinchers::NAME) return o<<""#NAME;
+	X(OPEN) X(CLOSE) X(AUTO)
+	#undef X
+	assert(0);
+}
 
 ostream& operator<<(ostream& o,Panel p){
 	o<<"Panel(";
@@ -76,56 +93,40 @@ bool get_in_use(Joystick_data d){
 
 Panel interpret_oi(Joystick_data d){
 	Panel p;
-	//static const float ARTIFICIAL_MAX = 1.5;
+	static const float ARTIFICIAL_MAX = 1.5;
 	{
 		p.in_use=get_in_use(d);
 		if(!p.in_use) return p;
 	}
 	{//set the auto mode number from the dial value
 		float auto_dial_value = d.axis[AUTO_SELECTOR_AXIS];
-		p.auto_select = interpret_20_turn_pot(auto_dial_value);
+		p.auto_select = interpret_10_turn_pot(auto_dial_value);
 	}
 	{//two position switches
 	}
 	{//three position switches
+
+		float grabber = d.axis[GRABBER_AXIS];
+		p.grabber = [&]{
+			static const float AUTO=-1,UP=0,DOWN=1;
+			if(set_button(grabber,AUTO,UP,DOWN)) return Panel::Grabber::UP;
+			if(set_button(grabber,UP,DOWN,ARTIFICIAL_MAX)) return Panel::Grabber::DOWN;
+			return Panel::Grabber::AUTO;
+		}();
+
+		float pinchers = d.axis[PINCHERS_AXIS];
+		p.pinchers = [&]{
+			static const float AUTO=-1,OPEN=0,CLOSE=1;
+			if(set_button(pinchers,AUTO,OPEN,CLOSE)) return Panel::Pinchers::OPEN;
+			if(set_button(pinchers,OPEN,CLOSE,ARTIFICIAL_MAX)) return Panel::Pinchers::CLOSE;
+			return Panel::Pinchers::AUTO;
+		}();
+
 	}	
 	{//buttons
+		p.grabber_toggle=d.button[GRABBER_TOGGLE_LOC];
 	}
 	{//Dials
-	}
-	return p;
-}
-
-Panel interpret_test_oi(Joystick_data d){	
-	//static const unsigned int POTENTIOMETER_AXIS=1, TEN_POS_SWITCH_AXIS = 0; //TODO: need real values
-	//static const unsigned int BUTTON_0_LOC=0, BUTTON_1_LOC=1, BUTTON_2_LOC=2, BUTTON_3_LOC=3, TWO_POS_SWITCH_0_LOC = 4, TWO_POS_SWITCH_1_LOC =5; //TODO: need real values
-
-	Panel p;
-	{
-		p.in_use=[&](){
-			for(int i=0;i<JOY_AXES;i++) {
-				if(d.axis[i]!=0)return true;
-			}
-			for(int i=0;i<JOY_BUTTONS;i++) {
-				if(d.button[i]!=0)return true;
-			}
-			return false;
-		}();
-		if(!p.in_use) return p;
-	}
-	//p. = interpret_10_turn_pot(d.axis[TEN_POS_SWITCH_AXIS]); //set the switch value from the pot value
-	{//two position switches
-		//p. = d.button[TWO_POS_SWITCH_0_LOC];
-		//p. = d.button[TWO_POS_SWITCH_1_LOC];
-	}
-	{//buttons
-		//p. = d.button[BUTTON_0_LOC];
-		//p. = d.button[BUTTON_1_LOC];
-		//p. = d.button[BUTTON_2_LOC];
-		//p. = d.button[BUTTON_3_LOC];
-	}
-	{//dials
-		//p. = d.axis[POTENTIOMETER_AXIS];
 	}
 	return p;
 }
@@ -135,6 +136,37 @@ Panel interpret_gamepad(Joystick_data d){
 	p.in_use = get_in_use(d);
 	if(!p.in_use) return p;
 	
+	p.grabber_toggle = d.button[Gamepad_button::A];
+
+	p.grabber = Panel::Grabber::AUTO;
+	p.pinchers = Panel::Pinchers::AUTO;
+	switch(pov_section(d.pov)){
+		case POV_section::CENTER:
+			break;
+		case POV_section::UP:
+			p.grabber = Panel::Grabber::UP;
+			break;
+		case POV_section::UP_LEFT:
+			break;
+		case POV_section::LEFT:
+			p.pinchers = Panel::Pinchers::OPEN;
+			break;
+		case POV_section::DOWN_LEFT:
+			break;
+		case POV_section::DOWN:
+			p.grabber = Panel::Grabber::DOWN;
+			break;
+		case POV_section::DOWN_RIGHT:
+			break;
+		case POV_section::RIGHT:
+			p.pinchers = Panel::Pinchers::CLOSE;
+			break;
+		case POV_section::UP_RIGHT:
+			break;
+		default:
+		assert(0);
+	}
+
 	//TODO: Add in all of the new controls
 	p.auto_select=0;
 	return p;
