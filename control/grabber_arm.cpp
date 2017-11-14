@@ -41,7 +41,7 @@ std::set<Grabber_arm::Input> examples(Grabber_arm::Input*){
 }
 
 std::set<Grabber_arm::Status_detail> examples(Grabber_arm::Status_detail*){
-	return {Grabber_arm::Status_detail::UP,Grabber_arm::Status_detail::GOING_UP,Grabber_arm::Status_detail::GOING_DOWN,Grabber_arm::Status_detail::DOWN};
+	return {Grabber_arm::Status_detail::DOWN,Grabber_arm::Status_detail::GOING_DOWN,Grabber_arm::Status_detail::GOING_UP,Grabber_arm::Status_detail::UP};
 }
 
 std::ostream& operator<<(std::ostream& o,Grabber_arm::Goal g){

@@ -477,6 +477,21 @@ cc_test(
 )
 
 cc_library(
+	name="dozer",
+	srcs=["control/dozer.cpp"],
+	hdrs=["control/dozer.h"],
+	deps=[":countdown_timer"]
+)
+
+cc_test(
+	name="dozer_test",
+	srcs=["control/dozer.cpp","control/dozer.h","control/formal.h"],
+	copts=["-DDOZER_TEST"],
+	deps=[":countdown_timer",":interface"],
+	timeout="short"
+)
+
+cc_library(
 	name="force",
 	srcs=["control/force.cpp"],
 	hdrs=["control/force.h"],
@@ -503,14 +518,14 @@ cc_library(
 	name="toplevel",
 	srcs=["control/toplevel.cpp"],
 	hdrs=["control/toplevel.h"],
-	deps=[":nop",":pump",":drivebase",":grabber_arm",":input"]
+	deps=[":nop",":pump",":drivebase",":grabber_arm",":dozer",":input"]
 )
 
 cc_test(
 	name="toplevel_test",
 	srcs=["control/toplevel.cpp","control/toplevel.h","control/formal.h"],
 	copts=["-DTOPLEVEL_TEST"],
-	deps=[":nop",":pump",":drivebase",":grabber_arm",":input",":output"],
+	deps=[":nop",":pump",":drivebase",":grabber_arm",":dozer",":input",":output"],
 	timeout="short"
 )
 
