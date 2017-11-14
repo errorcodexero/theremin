@@ -5,10 +5,12 @@
 #include "pump.h"
 #include "drivebase.h"
 #include "nop.h"
+#include "dozer.h"
 
 #define TOPLEVEL_ITEMS \
 	X(Pump,pump,Pump::Goal::AUTO)\
-	X(Drivebase,drive,)
+	X(Drivebase,drive,) \
+	X(Dozer,dozer,Dozer::Goal::STOP) 
 	
 class Toplevel{
 	public:
