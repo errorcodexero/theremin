@@ -503,14 +503,14 @@ cc_library(
 	name="toplevel",
 	srcs=["control/toplevel.cpp"],
 	hdrs=["control/toplevel.h"],
-	deps=[":nop",":pump",":drivebase",":input"]
+	deps=[":nop",":pump",":drivebase",":grabber_arm",":input"]
 )
 
 cc_test(
 	name="toplevel_test",
 	srcs=["control/toplevel.cpp","control/toplevel.h","control/formal.h"],
 	copts=["-DTOPLEVEL_TEST"],
-	deps=[":nop",":pump",":drivebase",":input",":output"],
+	deps=[":nop",":pump",":drivebase",":grabber_arm",":input",":output"],
 	timeout="short"
 )
 
@@ -567,6 +567,21 @@ cc_test(
 	srcs=["control/nop.cpp","control/nop.h","control/formal.h"],
 	copts=["-DNOP_TEST"],
 	deps=[":interface"],
+	timeout="short"
+)
+
+cc_library(
+	name="grabber_arm",
+	srcs=["control/grabber_arm.cpp"],
+	hdrs=["control/grabber_arm.h"],
+	deps=[":interface",":countdown_timer"]
+)
+
+cc_test(
+	name="grabber_arm_test",
+	srcs=["control/grabber_arm.cpp","control/grabber_arm.h","control/formal.h"],
+	copts=["-DGRABBER_ARM_TEST"],
+	deps=[":interface",":countdown_timer"],
 	timeout="short"
 )
 

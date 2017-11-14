@@ -148,7 +148,8 @@ ostream& operator<<(ostream& o,Toplevel::Goal g){
 
 Toplevel::Status::Status():
 	pump(Pump::Status::NOT_FULL),
-	drive(*examples((Drivebase::Status*)nullptr).begin())
+	drive(*examples((Drivebase::Status*)nullptr).begin()),
+	grabber_arm(Grabber_arm::Status::DOWN)
 {}
 bool operator==(Toplevel::Status a,Toplevel::Status b){
 	#define X(A,name,C) if(a.name!=b.name) return 0;
@@ -322,7 +323,8 @@ bool operator<(Toplevel::Goal const& a,Toplevel::Goal const& b){
 set<Toplevel::Status_detail> examples(Toplevel::Status_detail*){
 	return {Toplevel::Status_detail{
 		Pump::Status_detail{Pump::Status::FULL},
-		*examples((Drivebase::Status_detail*)0).begin()
+		*examples((Drivebase::Status_detail*)0).begin(),
+		*examples((Grabber_arm::Status_detail*)0).begin()
 	}};
 }
 
@@ -338,6 +340,7 @@ set<Toplevel::Input> examples(Toplevel::Input*){
 	Toplevel::Input a{
 		Pump::Input{},
 		*examples((Drivebase::Input*)0).begin(),
+		*examples((Grabber_arm::Input*)0).begin()
 	};
 	return {a};
 }

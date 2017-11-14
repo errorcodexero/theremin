@@ -40,6 +40,7 @@ ostream& operator<<(ostream& o,Nop_sim<T> const& a){
 }
 
 using Pump_sim=Nop_sim<Pump::Input>;
+using Grabber_arm_sim=Nop_sim<Grabber_arm::Input>;
 
 struct Drivebase_sim{
 	using Input=Drivebase::Input;

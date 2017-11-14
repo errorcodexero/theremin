@@ -224,6 +224,11 @@ void visit(Func f,Pump::Status const& a){
 	f.terminal(a);
 }
 
+template<typename Func>
+void visit(Func f,Grabber_arm::Status const& a){
+	f.terminal(a);
+}
+
 template<typename Func,typename T1,typename T2>
 void visit(Func f,std::pair<T1,T2> p){
 	visit(f,p.first);
