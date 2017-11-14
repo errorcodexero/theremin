@@ -151,6 +151,7 @@ Toplevel::Status::Status():
 	pump(Pump::Status::NOT_FULL),
 	drive(*examples((Drivebase::Status*)nullptr).begin()),
 	grabber_arm(*examples((Grabber_arm::Status*)nullptr).begin()),
+	pinchers(*examples((Pinchers::Status*)nullptr).begin()),
 	dozer(*examples((Dozer::Status*)nullptr).begin())
 {}
 bool operator==(Toplevel::Status a,Toplevel::Status b){
@@ -327,6 +328,7 @@ set<Toplevel::Status_detail> examples(Toplevel::Status_detail*){
 		Pump::Status_detail{Pump::Status::FULL},
 		*examples((Drivebase::Status_detail*)0).begin(),
 		*examples((Grabber_arm::Status_detail*)0).begin(),
+		*examples((Pinchers::Status_detail*)0).begin(),
 		*examples((Dozer::Status_detail*)0).begin()
 	}};
 }
@@ -344,6 +346,7 @@ set<Toplevel::Input> examples(Toplevel::Input*){
 		Pump::Input{},
 		*examples((Drivebase::Input*)0).begin(),
 		*examples((Grabber_arm::Input*)0).begin(),
+		*examples((Pinchers::Input*)0).begin(),
 		*examples((Dozer::Input*)0).begin()
 	};
 	return {a};

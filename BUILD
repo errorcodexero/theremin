@@ -518,14 +518,14 @@ cc_library(
 	name="toplevel",
 	srcs=["control/toplevel.cpp"],
 	hdrs=["control/toplevel.h"],
-	deps=[":nop",":pump",":drivebase",":grabber_arm",":dozer",":input"]
+	deps=[":nop",":pump",":drivebase",":grabber_arm","pinchers",":dozer",":input"]
 )
 
 cc_test(
 	name="toplevel_test",
 	srcs=["control/toplevel.cpp","control/toplevel.h","control/formal.h"],
 	copts=["-DTOPLEVEL_TEST"],
-	deps=[":nop",":pump",":drivebase",":grabber_arm",":dozer",":input",":output"],
+	deps=[":nop",":pump",":drivebase",":grabber_arm",":pinchers",":dozer",":input",":output"],
 	timeout="short"
 )
 
@@ -596,6 +596,21 @@ cc_test(
 	name="grabber_arm_test",
 	srcs=["control/grabber_arm.cpp","control/grabber_arm.h","control/formal.h"],
 	copts=["-DGRABBER_ARM_TEST"],
+	deps=[":interface",":countdown_timer"],
+	timeout="short"
+)
+
+cc_library(
+	name="pinchers",
+	srcs=["control/pinchers.cpp"],
+	hdrs=["control/pinchers.h"],
+	deps=[":interface",":countdown_timer"]
+)
+
+cc_test(
+	name="pinchers_test",
+	srcs=["control/pinchers.cpp","control/pinchers.h","control/formal.h"],
+	copts=["-DPINCHERS_TEST"],
 	deps=[":interface",":countdown_timer"],
 	timeout="short"
 )
