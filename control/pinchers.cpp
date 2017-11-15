@@ -3,9 +3,10 @@
 using namespace std;
 
 #define PISTON_LOC 3
+#define BUCKET_SENSOR 4
 
-Pinchers::Input::Input():enabled(false){}
-Pinchers::Input::Input(bool a):enabled(a){}
+Pinchers::Input::Input():enabled(false),bucket_sensor(false){}
+Pinchers::Input::Input(bool a,bool b):enabled(a),bucket_sensor(b){}
 
 Pinchers::Estimator::Estimator():last(Status_detail::OPEN){
 }
@@ -35,8 +36,10 @@ std::set<Pinchers::Goal> examples(Pinchers::Goal*){
 
 std::set<Pinchers::Input> examples(Pinchers::Input*){
 	return {
-		{true},
-		{false}
+		{true,true},
+		{true,false},
+		{false,true},
+		{false,false}
 	};
 }
 
@@ -52,7 +55,10 @@ std::ostream& operator<<(std::ostream& o,Pinchers::Goal g){
 }
 
 std::ostream& operator<<(std::ostream& o,Pinchers::Input a){
-	return o<<"Input(enabled:"<<a.enabled<<")";
+	o<<"Input(";
+	o<<"enabled:"<<a.enabled;
+	o<<" bucket_sensor:"<<a.bucket_sensor;
+	return o<<")";
 }
 
 std::ostream& operator<<(std::ostream& o,Pinchers::Status_detail a){
@@ -70,10 +76,14 @@ std::ostream& operator<<(std::ostream& o,Pinchers const&){
 }
 
 bool operator<(Pinchers::Input a,Pinchers::Input b){ 
-	return !a.enabled && b.enabled;
+	if(b.enabled && !a.enabled) return true;
+	if(a.enabled && !b.enabled) return false;
+	if(b.bucket_sensor && !a.bucket_sensor) return true;
+	if(a.bucket_sensor && !b.bucket_sensor) return false;
+	return false;
 }
 bool operator==(Pinchers::Input a,Pinchers::Input b){
-	return a.enabled == b.enabled;
+	return a.enabled == b.enabled && a.bucket_sensor == b.bucket_sensor;
 }
 bool operator!=(Pinchers::Input a, Pinchers::Input b){ return !(a==b); }
 
@@ -87,11 +97,12 @@ bool operator==(Pinchers,Pinchers){ return 1; }
 bool operator!=(Pinchers a, Pinchers b){ return !(a==b); }
 
 Pinchers::Input Pinchers::Input_reader::operator()(Robot_inputs const& r) const{
-	return {r.robot_mode.enabled};
+	return {r.robot_mode.enabled,r.digital_io.in[BUCKET_SENSOR]==Digital_in::_1};
 }
 
 Robot_inputs Pinchers::Input_reader::operator()(Robot_inputs r, Pinchers::Input in) const{
 	r.robot_mode.enabled = in.enabled;
+	r.digital_io.in[BUCKET_SENSOR] = in.bucket_sensor ? Digital_in::_1 : Digital_in::_0;
 	return r;
 }
 
@@ -197,7 +208,7 @@ int main(){
 
 			cout<<"t:"<<t<<"\tgoal:"<<goal<<"\tstatus:"<<status<<"\n";
 
-			a.estimator.update(t,Pinchers::Input{ENABLED},out);
+			a.estimator.update(t,Pinchers::Input{ENABLED,false},out);
 			if(ready(status,goal)){
 				cout<<"Goal "<<goal<<" reached. Finishing\n";
 				break;
@@ -212,7 +223,7 @@ int main(){
 
 			cout<<"t:"<<t<<"\tgoal:"<<goal<<"\tstatus:"<<status<<"\n";
 
-			a.estimator.update(t,Pinchers::Input{ENABLED},out);
+			a.estimator.update(t,Pinchers::Input{ENABLED,false},out);
 			if(ready(status,goal)){
 				cout<<"Goal "<<goal<<" reached. Finishing\n";
 				break;

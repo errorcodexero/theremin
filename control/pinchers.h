@@ -21,9 +21,9 @@ struct Pinchers{
 	};
 
 	struct Input{
-		bool enabled;
+		bool enabled, bucket_sensor;
 		Input();
-		Input(bool);
+		Input(bool,bool);
 	};
 
 	enum class Status_detail{OPEN,OPENING,CLOSING,CLOSED};
