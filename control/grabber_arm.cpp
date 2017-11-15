@@ -3,9 +3,10 @@
 using namespace std;
 
 #define PISTON_LOC 2
+#define GRABBER_ARM_LIMIT 5
 
-Grabber_arm::Input::Input():enabled(false){}
-Grabber_arm::Input::Input(bool a):enabled(a){}
+Grabber_arm::Input::Input():enabled(false),limit_switch(false){}
+Grabber_arm::Input::Input(bool a,bool b):enabled(a),limit_switch(b){}
 
 Grabber_arm::Estimator::Estimator():last(Status_detail::DOWN){
 }
@@ -35,8 +36,10 @@ std::set<Grabber_arm::Goal> examples(Grabber_arm::Goal*){
 
 std::set<Grabber_arm::Input> examples(Grabber_arm::Input*){
 	return {
-		{true},
-		{false}
+		{true,true},
+		{true,false},
+		{false,true},
+		{false,false}
 	};
 }
 
@@ -52,7 +55,10 @@ std::ostream& operator<<(std::ostream& o,Grabber_arm::Goal g){
 }
 
 std::ostream& operator<<(std::ostream& o,Grabber_arm::Input a){
-	return o<<"Input(enabled:"<<a.enabled<<")";
+	o<<"Input(";
+	o<<"enabled:"<<a.enabled;
+	o<<" limit_switch:"<<a.limit_switch;
+	return o<<")";
 }
 
 std::ostream& operator<<(std::ostream& o,Grabber_arm::Status_detail a){
@@ -70,10 +76,14 @@ std::ostream& operator<<(std::ostream& o,Grabber_arm const&){
 }
 
 bool operator<(Grabber_arm::Input a,Grabber_arm::Input b){ 
-	return !a.enabled && b.enabled;
+	if(b.enabled && !a.enabled) return true;
+	if(a.enabled && !b.enabled) return false;
+	if(b.limit_switch && !a.limit_switch) return true;
+	if(a.limit_switch && !b.limit_switch) return false;
+	return false;
 }
 bool operator==(Grabber_arm::Input a,Grabber_arm::Input b){
-	return a.enabled == b.enabled;
+	return a.enabled == b.enabled && a.limit_switch == b.limit_switch;
 }
 bool operator!=(Grabber_arm::Input a, Grabber_arm::Input b){ return !(a==b); }
 
@@ -87,11 +97,12 @@ bool operator==(Grabber_arm,Grabber_arm){ return 1; }
 bool operator!=(Grabber_arm a, Grabber_arm b){ return !(a==b); }
 
 Grabber_arm::Input Grabber_arm::Input_reader::operator()(Robot_inputs const& r) const{
-	return {r.robot_mode.enabled};
+	return {r.robot_mode.enabled,r.digital_io.in[GRABBER_ARM_LIMIT]==Digital_in::_1};
 }
 
 Robot_inputs Grabber_arm::Input_reader::operator()(Robot_inputs r, Grabber_arm::Input in) const{
 	r.robot_mode.enabled = in.enabled;
+	r.digital_io.in[GRABBER_ARM_LIMIT] = in.limit_switch ? Digital_in::_1 : Digital_in::_0;
 	return r;
 }
 
@@ -107,16 +118,8 @@ Grabber_arm::Output Grabber_arm::Output_applicator::operator()(Robot_outputs con
 void Grabber_arm::Estimator::update(Time time,Grabber_arm::Input input,Grabber_arm::Output output){
 	switch(output){
 		case Grabber_arm::Output::DOWN:
-			if(last == Status::GOING_DOWN){
-				state_timer.update(time,input.enabled);
-			} else if(last != Status::DOWN){ 
-				const Time DOWN_TIME = 1.0;//seconds. assumed
-				last = Status::GOING_DOWN;
-				state_timer.set(DOWN_TIME);
-			}
-			if(state_timer.done() || last == Status::DOWN) {
-				last = Status::DOWN;
-			}
+			if(last != Status::DOWN) last = Status::GOING_DOWN;
+			if(input.limit_switch || last == Status::DOWN) last = Status::DOWN;
 			break;
 		case Grabber_arm::Output::UP:
 			if(last == Status::GOING_UP){
@@ -188,7 +191,7 @@ int main(){
 	}
 	{
 		Grabber_arm a;
-		Grabber_arm::Goal goal = Grabber_arm::Goal::DOWN;
+		Grabber_arm::Goal goal = Grabber_arm::Goal::UP;
 
 		const bool ENABLED = true;	
 		for(Time t: range(100)){
@@ -197,14 +200,14 @@ int main(){
 
 			cout<<"t:"<<t<<"\tgoal:"<<goal<<"\tstatus:"<<status<<"\n";
 
-			a.estimator.update(t,Grabber_arm::Input{ENABLED},out);
+			a.estimator.update(t,Grabber_arm::Input{ENABLED,t<.2},out);
 			if(ready(status,goal)){
 				cout<<"Goal "<<goal<<" reached. Finishing\n";
 				break;
 			}
 		}
 
-		goal = Grabber_arm::Goal::UP;
+		goal = Grabber_arm::Goal::DOWN;
 		
 		for(Time t: range(100)){
 			Grabber_arm::Status_detail status = a.estimator.get();
@@ -212,7 +215,7 @@ int main(){
 
 			cout<<"t:"<<t<<"\tgoal:"<<goal<<"\tstatus:"<<status<<"\n";
 
-			a.estimator.update(t,Grabber_arm::Input{ENABLED},out);
+			a.estimator.update(t,Grabber_arm::Input{ENABLED,t>2},out);
 			if(ready(status,goal)){
 				cout<<"Goal "<<goal<<" reached. Finishing\n";
 				break;
