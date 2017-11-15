@@ -86,6 +86,22 @@ Toplevel::Goal Teleop::run(Run_info info) {
 		goals.drive = Drivebase::Goal::absolute(left,right);
 	}
 
+	goals.dozer=Dozer::Goal::IN;
+
+	grabber_toggle.update(info.panel.grabber_toggle);
+	if(grabber_toggle.get()){
+		goals.grabber_arm=Grabber_arm::Goal::UP;
+		goals.pinchers=Pinchers::Goal::CLOSE;
+	}else{
+		goals.grabber_arm=Grabber_arm::Goal::DOWN;
+		goals.pinchers=Pinchers::Goal::OPEN;
+	}
+
+	if(info.panel.pinchers==Panel::Pinchers::OPEN) goals.pinchers=Pinchers::Goal::OPEN;
+	if(info.panel.pinchers==Panel::Pinchers::CLOSE) goals.pinchers=Pinchers::Goal::CLOSE;
+	if(info.panel.grabber==Panel::Grabber::UP) goals.grabber_arm=Grabber_arm::Goal::UP;
+	if(info.panel.grabber==Panel::Grabber::DOWN) goals.grabber_arm=Grabber_arm::Goal::DOWN;
+
 	#ifdef PRINT_OUTS
 	if(info.in.ds_info.connected && (print_number%10)==0){
 		cout<<"\nencoders:"<<info.status.drive<<"\n";
