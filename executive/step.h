@@ -69,6 +69,19 @@ struct Step_impl_inner:Step_impl{
 
 using Inch=double;
 
+class Drive:public Step_impl_inner<Drive>{//Drives straight a certain distance
+	Countdown_timer timer;
+	
+	public:
+	explicit Drive(double);
+
+	Toplevel::Goal run(Run_info,Toplevel::Goal);
+	Toplevel::Goal run(Run_info);
+	Step::Status done(Next_mode_info);
+	std::unique_ptr<Step_impl> clone()const;
+	bool operator==(Drive const&)const;
+};
+
 class Drive_straight:public Step_impl_inner<Drive_straight>{//Drives straight a certain distance
 	Inch target_dist;
 	Drivebase::Distances initial_distances;

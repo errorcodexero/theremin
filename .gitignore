@@ -3,3 +3,7 @@ bazel-*
 t.mk
 FRCUserProgram
 *.swp
+<<<<<<< HEAD
+=======
+backups
+>>>>>>> master

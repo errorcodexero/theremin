@@ -391,7 +391,7 @@ public:
 			}
 			else cout<<"No new data."<<in.now<<"\n";*/
 			//cout<<"cam_data_recieved: "<<cam_data_recieved<<"\n";
-			//cout<<"CLEAR_SCREEN\n";
+			cout<<"CLEAR_SCREEN\n";
 		}
 		print_num++;
 		#endif

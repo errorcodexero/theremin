@@ -189,7 +189,7 @@ def cross_makefile(out,printouts):
 	print>>out,'OBJDIR=obj'
 	print>>out,"H_FILES=$(find -name \*.h)"
 	print>>out,"CXX=arm-frc-linux-gnueabi-g++"
-	print>>out,"CXXFLAGS=-pthread -Wall -Wextra -Werror -O2 -g -std=c++14 -DPRINT_OUTS -DNAMESPACED_WPILIB -I"+os.environ['HOME']+"/wpilib/cpp/current/include -I"+os.environ['HOME']+"/CTRE_FRCLib/cpp/include -isystem "+os.environ['HOME']+"/navx-mxp-libs/roborio/cpp/include "+printouts+" -fmessage-length=0" #TODO: remove the definition for using the namespaced version of WPILib after FIRST makes the change in 2018 (probably)
+	print>>out,"CXXFLAGS=-pthread -Wall -Wextra -Werror -O2 -g -std=c++14 -DNAMESPACED_WPILIB -I"+os.environ['HOME']+"/wpilib/cpp/current/include -I"+os.environ['HOME']+"/CTRE_FRCLib/cpp/include -isystem "+os.environ['HOME']+"/navx-mxp-libs/roborio/cpp/include "+printouts+" -fmessage-length=0" #TODO: remove the definition for using the namespaced version of WPILib after FIRST makes the change in 2018 (probably)
 	print>>out,"LD_FLAGS="+os.environ['HOME']+"/CTRE_FRCLib/cpp/lib/libCTRLib.a "+os.environ['HOME']+"/navx-mxp-libs/roborio/cpp/lib/libnavx_frc_cpp.a -L"+os.environ['HOME']+"/wpilib/cpp/current/lib -Wl,-rpath,/opt/GenICam_v2_3/bin/Linux_armv7-a -lwpi"
 	print>>out,".PHONY: clean\n"
 
@@ -242,6 +242,7 @@ if __name__=='__main__':
 
 	def build(printouts):
 		define_printouts = "-DPRINT_OUTS" if printouts else ""
+		print define_printouts
 		cross_makefile(open('t.mk','w'),define_printouts)
 		r=os.system('make -j4 -f t.mk')
 		assert r&0xff==0

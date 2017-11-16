@@ -154,6 +154,33 @@ Step_impl::~Step_impl(){}
 	return this->operator==(b);
 }*/
 
+Drive::Drive(double t){
+	timer.set(t);
+}
+
+Step::Status Drive::done(Next_mode_info /*info*/){
+	return timer.done() ? Step::Status::FINISHED_SUCCESS : Step::Status::UNFINISHED;
+}
+
+Toplevel::Goal Drive::run(Run_info info){
+	return run(info,{});
+}
+
+Toplevel::Goal Drive::run(Run_info info,Toplevel::Goal goals){
+	timer.update(info.in.now, info.in.robot_mode.enabled);
+	const double POWER = 0.4;
+	goals.drive = Drivebase::Goal::absolute(POWER,POWER);
+	return goals;
+}
+
+unique_ptr<Step_impl> Drive::clone()const{
+	return unique_ptr<Step_impl>(new Drive(*this));
+}
+
+bool Drive::operator==(Drive const& b)const{
+	return timer == b.timer;
+}
+
 Drive_straight::Drive_straight(Inch goal):Drive_straight(goal,0.02,0.5){}
 Drive_straight::Drive_straight(Inch goal,double vel_modifier,double max):target_dist(goal),initial_distances(Drivebase::Distances{0,0}),init(false),motion_profile(goal,vel_modifier,max){}//Motion profiling values from testing
 
