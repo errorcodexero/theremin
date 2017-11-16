@@ -187,6 +187,66 @@ bool operator<(Navx_output a,Navx_output b){
 	return false;
 }
 
+IMPL_STRUCT(Pump_input::Pump_input,PUMP_INPUT_ITEMS)
+Pump_input::Pump_input():Pump_input(false,false){}
+
+ostream& operator<<(ostream& o,Pump_input a){
+	o<<"(";
+	#define X(TYPE,NAME) o<<""#NAME<<":"<<(a.NAME)<<" ";
+	PUMP_INPUT_ITEMS(X)
+	#undef X
+	o<<")";
+	return o;
+}
+
+bool operator==(Pump_input a,Pump_input b){
+	#define X(TYPE,NAME) if(a.NAME != b.NAME) return false;
+	PUMP_INPUT_ITEMS(X)
+	#undef X
+	return true;
+}
+
+bool operator!=(Pump_input a,Pump_input b){
+	return !(a==b);
+}
+
+bool operator<(Pump_input a,Pump_input b){
+	#define X(TYPE,NAME) if(a.NAME<b.NAME) return 1; if(b.NAME<a.NAME) return 0;
+	PUMP_INPUT_ITEMS(X)
+	#undef X
+	return 0;
+}
+
+IMPL_STRUCT(Pump_output::Pump_output,PUMP_OUTPUT_ITEMS)
+Pump_output::Pump_output():Pump_output(Mode::CLOSED_LOOP,false){}
+
+ostream& operator<<(ostream& o,Pump_output a){
+	o<<"(";
+	#define X(TYPE,NAME) o<<""#NAME<<":"<<(a.NAME)<<" ";
+	PUMP_OUTPUT_ITEMS(X)
+	#undef X
+	o<<")";
+	return o;
+}
+
+bool operator==(Pump_output a,Pump_output b){
+	#define X(TYPE,NAME) if(a.NAME != b.NAME) return false;
+	PUMP_OUTPUT_ITEMS(X)
+	#undef X
+	return true;
+}
+
+bool operator!=(Pump_output a,Pump_output b){
+	return !(a==b);
+}
+
+bool operator<(Pump_output a,Pump_output b){
+	#define X(TYPE,NAME) if(a.NAME<b.NAME) return 1; if(b.NAME<a.NAME) return 0;
+	PUMP_OUTPUT_ITEMS(X)
+	#undef X
+	return 0;
+}
+
 void terse(ostream& o, Digital_out d){
 	//o<<d;
 	switch(d.type()){
@@ -309,7 +369,7 @@ bool operator<(Digital_out a, Digital_out b){
 	return 0;
 }
 
-Robot_outputs::Robot_outputs():pump_auto(1){
+Robot_outputs::Robot_outputs():pump(){
 	for(unsigned i=0;i<PWMS;i++){
 		pwm[i]=0;
 	}
@@ -347,7 +407,7 @@ bool operator==(Robot_outputs a,Robot_outputs b){
 			return 0;
 		}
 	}
-	return a.navx==b.navx && a.driver_station==b.driver_station && a.pump_auto==b.pump_auto;
+	return a.pump==b.pump && a.navx==b.navx && a.driver_station==b.driver_station;
 }
 
 bool operator!=(Robot_outputs a,Robot_outputs b){
@@ -385,7 +445,7 @@ bool operator<(Robot_outputs a,Robot_outputs b){
 	if(a.navx < b.navx) return 1;
 	if(b.navx < a.navx) return 0;
 
-	return a.pump_auto<b.pump_auto;
+	return a.pump<b.pump;
 }
 
 ostream& operator<<(ostream& o,Robot_outputs a){
@@ -413,8 +473,8 @@ ostream& operator<<(ostream& o,Robot_outputs a){
 		o<<a.talon_srx[i];
 	}
 	o<<" navx:"<<a.navx;
+	o<<" pump:"<<a.pump;
 	o<<" driver_station_output:"<<a.driver_station;
-	o<<" pump_auto:"<<a.pump_auto;
 	return o<<")";
 }
 
@@ -672,7 +732,7 @@ bool operator==(Camera const& a,Camera const& b){
 bool operator!=(Camera const& a,Camera const& b){ return !(a==b); }
 
 Robot_inputs::Robot_inputs():
-	now(0),orientation(0),pump(0)
+	now(0),orientation(0),pump()
 {
 	for(unsigned i=0;i<ANALOG_INPUTS;i++){
 		//could make this be NAN instead
@@ -712,6 +772,7 @@ bool operator==(Robot_inputs a,Robot_inputs b){
 		}
 	}
 	if(a.navx!=b.navx) return 0;
+	if(a.pump!=b.pump) return 0;
 	for(unsigned i=0; i<Robot_inputs::CURRENT;i++){
 		if(a.current[i]!=b.current[i]){
 			return 0;
@@ -736,6 +797,7 @@ bool operator<(Robot_inputs a,Robot_inputs b){
 	X(analog)
 	X(talon_srx)
 	X(navx)
+	X(pump)
 	X(driver_station)
 	X(orientation)
 	X(current)
@@ -766,7 +828,8 @@ ostream& operator<<(ostream& o,Robot_inputs a){
 	for(unsigned i=0;i<Robot_inputs::TALON_SRX_INPUTS;i++){
 		o<<a.talon_srx[i];
 	}
-	o<<" navx"<<a.navx;
+	o<<" navx:"<<a.navx;
+	o<<" pump:"<<a.pump;
 	o<<" currents:"<<a.current;	
 	o<<" driver_station_inputs:"<<a.driver_station;
 	o<<" camera:"<<a.camera;

@@ -7,12 +7,12 @@
 using namespace std;
 
 Robot_inputs Pump::Input_reader::operator()(Robot_inputs all,Pump::Input in)const{
-	all.pump=(in==Input::FULL);
+	all.pump.pressure_switch_triggered=(in==Input::FULL);
 	return all;
 }
 
 Pump::Input Pump::Input_reader::operator()(Robot_inputs all)const{
-	return all.pump?Input::FULL:Input::NOT_FULL;
+	return all.pump.pressure_switch_triggered?Input::FULL:Input::NOT_FULL;
 }
 
 set<Pump::Status> examples(Pump::Status*){
@@ -73,12 +73,12 @@ Pump::Output control(Pump::Status,Pump::Goal g){
 }
 
 Robot_outputs Pump::Output_applicator::operator()(Robot_outputs r,Pump::Output out)const{
-	r.pump_auto=(out==Pump::Output::AUTO);
+	r.pump.mode = (out==Pump::Output::AUTO) ? Pump_output::Mode::CLOSED_LOOP : Pump_output::Mode::OPEN_LOOP;
 	return r;
 }
 
 Pump::Output Pump::Output_applicator::operator()(Robot_outputs out)const{
-	return out.pump_auto?Pump::Output::AUTO:Pump::Output::OFF;
+	return (out.pump.mode == Pump_output::Mode::CLOSED_LOOP) ? Pump::Output::AUTO : Pump::Output::OFF;
 }
 
 bool operator==(Pump::Estimator const& a,Pump::Estimator const& b){ return a.status==b.status; }

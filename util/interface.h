@@ -58,7 +58,6 @@ struct Talon_srx_input{
 	Talon_srx_input():encoder_position(0),fwd_limit_switch(0),rev_limit_switch(0),a(0),b(0),velocity(0),current(0){}
 };
 
-
 struct Talon_srx_output{
 	PID_values pid;
 	double power_level;
@@ -162,6 +161,37 @@ bool operator==(Navx_output,Navx_output);
 bool operator!=(Navx_output,Navx_output);
 bool operator<(Navx_output,Navx_output);
 
+struct Pump_input{
+	#define PUMP_INPUT_ITEMS(X) \
+		X(bool,pressure_switch_triggered)
+
+	STRUCT_MEMBERS(PUMP_INPUT_ITEMS)
+
+	Pump_input();
+	IMPL_STRUCT_DECLARE(Pump_input,PUMP_INPUT_ITEMS)
+};
+
+std::ostream& operator<<(std::ostream&,Pump_input);
+bool operator==(Pump_input,Pump_input);
+bool operator!=(Pump_input,Pump_input);
+bool operator<(Pump_input,Pump_input);
+
+struct Pump_output{
+	enum Mode{CLOSED_LOOP,OPEN_LOOP};//controls whether the compressor automatically turns on at low pressure or not
+	#define PUMP_OUTPUT_ITEMS(X) \
+		X(Mode,mode)
+
+	STRUCT_MEMBERS(PUMP_OUTPUT_ITEMS)
+	
+	Pump_output();
+	IMPL_STRUCT_DECLARE(Pump_output,PUMP_OUTPUT_ITEMS)
+};
+
+std::ostream& operator<<(std::ostream&,Pump_output);
+bool operator==(Pump_output,Pump_output);
+bool operator!=(Pump_output,Pump_output);
+bool operator<(Pump_output,Pump_output);
+
 std::ostream& operator<<(std::ostream&,Digital_out);
 bool operator<(Digital_out,Digital_out);
 bool operator==(Digital_out,Digital_out);
@@ -191,7 +221,8 @@ struct Robot_outputs{
 	
 	static const unsigned DRIVER_STATION_DIGITAL_OUTPUTS = Driver_station_output::DIGITAL_OUTPUTS;
 	Driver_station_output driver_station;
-	bool pump_auto;
+	
+	Pump_output pump;
 
 	Robot_outputs();
 };
@@ -304,7 +335,7 @@ struct Robot_inputs{
 		
 	static const unsigned CURRENT=16;
 	Checked_array<double,CURRENT> current;
-	bool pump;
+	Pump_input pump;
 
 	Camera camera;
 

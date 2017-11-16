@@ -406,6 +406,18 @@ pair<Talon_srx_input,Talon_srx_input> create_pair(Talon_srx_input*){
 	return make_pair(Talon_srx_input{},a);
 }
 
+pair<Pump_output,Pump_output> create_pair(Pump_output*){
+	Pump_output a;
+	a.mode = Pump_output::OPEN_LOOP;
+	return make_pair(Pump_output{},a);
+}
+
+pair<Pump_input,Pump_input> create_pair(Pump_input*){
+	Pump_input a;
+	a.pressure_switch_triggered = 1;
+	return make_pair(Pump_input{},a);
+}
+
 pair<Pump::Input,Pump::Input> create_pair(Pump::Input*){
 	return make_pair(Pump::Input::FULL,Pump::Input::NOT_FULL);
 }
@@ -431,17 +443,18 @@ pair<Robot_inputs,Robot_inputs> create_pair(Robot_inputs*){
 		r.first.talon_srx[i]=p.first;
 		r.second.talon_srx[i]=p.second;
 	}
-	//driver station
 	//current
 	for(unsigned i=0;i<Robot_inputs::CURRENT;i++){
 		auto p=create_pair((double*)0);
 		r.first.current[i]=p.first;
 		r.second.current[i]=p.second;
 	}
-	auto p=create_pair((bool*)0);
-	r.first.pump=p.first;
-	r.second.pump=p.second;
 	//pump
+	{
+		auto p=create_pair((Pump_input*)nullptr);
+		r.first.pump=p.first;
+		r.second.pump=p.second;
+	}
 	return r;
 }
 
@@ -484,8 +497,11 @@ pair<Robot_outputs,Robot_outputs> create_pair(Robot_outputs*){
 		r.first.driver_station = p.first;
 		r.second.driver_station = p.second;
 	}
-	r.first.pump_auto=0;
-	r.second.pump_auto=1;
+	{//pump
+		auto p = create_pair((Pump_output*)nullptr);
+		r.first.pump=p.first;
+		r.second.pump=p.second;
+	}
 	return r;
 }
 
@@ -527,7 +543,7 @@ set<Output> different(Robot_outputs const& a,Robot_outputs const& b){
 	X(TALON_SRX_OUTPUTS,talon_srx,talon_srx)
 	X(DRIVER_STATION_DIGITAL_OUTPUTS,driver_station.digital,driver_station)
 	#undef X
-	if(a.pump_auto!=b.pump_auto) r|=Output::pump();
+	if(a.pump!=b.pump) r|=Output::pump();//TODO
 	return r;
 }
 
