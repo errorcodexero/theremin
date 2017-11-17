@@ -181,7 +181,7 @@ void visit(auto f,Robot_outputs a){
 	X(digital_io) 
 	X(talon_srx) 
 	X(driver_station)
-	X(pump_auto)
+	X(pump)
 	#undef X
 }
 

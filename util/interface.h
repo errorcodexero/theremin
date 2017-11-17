@@ -43,29 +43,51 @@ struct PID_values{
 	float p,i,d,f;
 	PID_values();
 };
+
 std::ostream& operator<<(std::ostream&,PID_values const&);
 bool operator==(PID_values const&,PID_values const&);
+bool operator!=(PID_values const&,PID_values const&);
 bool operator<(PID_values const&,PID_values const&);
 
 struct Talon_srx_input{
-	int encoder_position;
-	bool fwd_limit_switch;
-	bool rev_limit_switch;
-	bool a;
-	bool b;
-	int velocity;
-	double current;
-	Talon_srx_input():encoder_position(0),fwd_limit_switch(0),rev_limit_switch(0),a(0),b(0),velocity(0),current(0){}
+	#define TALON_SRX_INPUT_ITEMS(X) \
+		X(int,encoder_position) \
+		X(bool,fwd_limit_switch) \
+		X(bool,rev_limit_switch) \
+		X(bool,a) \
+		X(bool,b) \
+		X(int,velocity) \
+		X(double,current) 
+
+	STRUCT_MEMBERS(TALON_SRX_INPUT_ITEMS)
+
+	IMPL_STRUCT_DECLARE(Talon_srx_input,TALON_SRX_INPUT_ITEMS)	
+
+	Talon_srx_input();
 };
 
 struct Talon_srx_output{
-	PID_values pid;
-	double power_level;
-	double speed;
-	enum class Mode{PERCENT,SPEED};//percent means percent voltage on the in terminals on the talon
-	Mode mode;
+	#define TALON_SRX_OUTPUT_MODES \
+		X(PERCENT) \
+		X(SPEED)
+	
+	enum class Mode{
+		#define X(NAME) NAME,
+		TALON_SRX_OUTPUT_MODES
+		#undef X
+	};//percent means percent voltage on the in terminals on the talon
 
-	Talon_srx_output():power_level(0),speed(0),mode(Talon_srx_output::Mode::PERCENT){}
+	#define TALON_SRX_OUTPUT_ITEMS(X) \
+		X(PID_values,pid) \
+		X(double,power_level) \
+		X(double,speed) \
+		X(Mode,mode) 
+
+	STRUCT_MEMBERS(TALON_SRX_OUTPUT_ITEMS)
+	
+	IMPL_STRUCT_DECLARE(Talon_srx_output,TALON_SRX_OUTPUT_ITEMS)
+
+	Talon_srx_output();
 
 	static Talon_srx_output percent(double);
 	static Talon_srx_output closed_loop(double);
@@ -177,7 +199,15 @@ bool operator!=(Pump_input,Pump_input);
 bool operator<(Pump_input,Pump_input);
 
 struct Pump_output{
-	enum Mode{CLOSED_LOOP,OPEN_LOOP};//controls whether the compressor automatically turns on at low pressure or not
+	#define PUMP_OUTPUT_MODES \
+		X(CLOSED_LOOP) \
+		X(OPEN_LOOP)
+	enum Mode{
+		#define X(NAME) NAME,
+		PUMP_OUTPUT_MODES
+		#undef X
+	};//controls whether the compressor automatically turns on at low pressure or not
+	
 	#define PUMP_OUTPUT_ITEMS(X) \
 		X(Mode,mode)
 
@@ -187,6 +217,7 @@ struct Pump_output{
 	IMPL_STRUCT_DECLARE(Pump_output,PUMP_OUTPUT_ITEMS)
 };
 
+std::ostream& operator<<(std::ostream&,Pump_output::Mode);
 std::ostream& operator<<(std::ostream&,Pump_output);
 bool operator==(Pump_output,Pump_output);
 bool operator!=(Pump_output,Pump_output);
@@ -267,12 +298,21 @@ bool operator!=(Robot_mode,Robot_mode);
 std::ostream& operator<<(std::ostream&,Robot_mode);
 
 enum class Alliance{RED,BLUE,INVALID};
+std::ostream& operator<<(std::ostream&,Alliance const&);
+
 struct DS_info{
-	bool connected;
-	Alliance alliance;
-	int location;
+	#define DS_INFO_ITEMS(X) \
+		X(bool,connected) \
+		X(Alliance,alliance) \
+		X(int,location) 
+	
+	STRUCT_MEMBERS(DS_INFO_ITEMS)
+
+	IMPL_STRUCT_DECLARE(DS_info,DS_INFO_ITEMS)
+	
 	DS_info();
 };
+
 bool operator<(DS_info const&,DS_info const&);
 bool operator==(DS_info const&,DS_info const&);
 bool operator!=(DS_info const&,DS_info const&);

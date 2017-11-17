@@ -21,6 +21,10 @@ bool operator==(PID_values const& a,PID_values const& b){
 	return 1;
 }
 
+bool operator!=(PID_values const& a,PID_values const& b){
+	return !(a==b);
+}
+
 bool operator<(PID_values const& a,PID_values const& b){
 	#define X(NAME) if(a.NAME<b.NAME) return 1; if(b.NAME<a.NAME) return 0;
 	PID_ITEMS
@@ -94,9 +98,14 @@ std::ostream& operator<<(std::ostream& o, PID_values const& a){
 }
 
 std::ostream& operator<<(std::ostream& o, Talon_srx_input in){
-	o<<"(encoder_position:"<<in.encoder_position<<" velocity:"<<in.velocity<<" fwd_limit_switch:"<<in.fwd_limit_switch<<" rev_limit_switch:"<<in.rev_limit_switch<<" a:"<<in.a<<" b:"<<in.b;
+	#define X(TYPE,NAME) o<<""#NAME<<":"<<(in.NAME)<<" ";
+	TALON_SRX_INPUT_ITEMS(X)
+	#undef X
 	return o<<")";
 }
+
+IMPL_STRUCT(Talon_srx_output::Talon_srx_output,TALON_SRX_OUTPUT_ITEMS)
+Talon_srx_output::Talon_srx_output():Talon_srx_output(PID_values(),0,0,Talon_srx_output::Mode::PERCENT,false){}
 
 Talon_srx_output Talon_srx_output::percent(double a){
 	Talon_srx_output r;
@@ -113,9 +122,10 @@ Talon_srx_output Talon_srx_output::closed_loop(double a){
 }
 
 std::ostream& operator<<(std::ostream& o, Talon_srx_output::Mode a){
-	if(a==Talon_srx_output::Mode::PERCENT) o<<"PERCENT";
-	else if(a==Talon_srx_output::Mode::SPEED) o<<"SPEED";
-	return o;
+	#define X(NAME) if(a == Talon_srx_output::Mode::NAME) return o<<""#NAME;
+	TALON_SRX_OUTPUT_MODES
+	#undef X
+	nyi
 }
 
 std::ostream& operator<<(std::ostream& o, Talon_srx_output a){
@@ -220,6 +230,13 @@ bool operator<(Pump_input a,Pump_input b){
 IMPL_STRUCT(Pump_output::Pump_output,PUMP_OUTPUT_ITEMS)
 Pump_output::Pump_output():Pump_output(Mode::CLOSED_LOOP,false){}
 
+ostream& operator<<(ostream& o,Pump_output::Mode a){
+	#define X(NAME) if(a == Pump_output::Mode::NAME) return o<<""#NAME;
+	PUMP_OUTPUT_MODES
+	#undef X
+	nyi
+}
+
 ostream& operator<<(ostream& o,Pump_output a){
 	o<<"(";
 	#define X(TYPE,NAME) o<<""#NAME<<":"<<(a.NAME)<<" ";
@@ -313,8 +330,14 @@ Maybe<Relay_output> parse_relay_output(string s){
 	return parse_enum<Relay_output>(relay_outputs(),s);
 }
 
+IMPL_STRUCT(Talon_srx_input::Talon_srx_input,TALON_SRX_INPUT_ITEMS)
+Talon_srx_input::Talon_srx_input():Talon_srx_input(0,0,0,0,0,0,0,0){}
+
 bool operator==(Talon_srx_input a,Talon_srx_input b){
-	return a.encoder_position==b.encoder_position && a.fwd_limit_switch==b.fwd_limit_switch && a.rev_limit_switch==b.rev_limit_switch && a.current==b.current;
+	#define X(TYPE,NAME) if(a.NAME != b.NAME) return false;
+	TALON_SRX_INPUT_ITEMS(X)
+	#undef X
+	return true;
 }
 
 bool operator!=(Talon_srx_input a,Talon_srx_input b){
@@ -322,17 +345,17 @@ bool operator!=(Talon_srx_input a,Talon_srx_input b){
 }
 
 bool operator<(Talon_srx_input a, Talon_srx_input b){
-	#define X(NAME) if(a.NAME<b.NAME) return 1; if(b.NAME<a.NAME) return 0;
-	X(encoder_position) X(fwd_limit_switch) X(rev_limit_switch) X(current)
+	#define X(TYPE,NAME) if(a.NAME<b.NAME) return 1; if(b.NAME<a.NAME) return 0;
+	TALON_SRX_INPUT_ITEMS(X)
 	#undef X
 	return 0;
 }
 
 bool operator==(Talon_srx_output a,Talon_srx_output b){
-	if(a.mode!=b.mode) return false;
-	if(a.mode==Talon_srx_output::Mode::PERCENT) return a.power_level==b.power_level;
-	if(a.mode==Talon_srx_output::Mode::SPEED) return a.speed==b.speed;
-	return false;
+	#define X(TYPE,NAME) if(a.NAME != b.NAME) return false;
+	TALON_SRX_OUTPUT_ITEMS(X)
+	#undef X
+	return true;
 }
 
 bool operator!=(Talon_srx_output a,Talon_srx_output b){
@@ -340,9 +363,11 @@ bool operator!=(Talon_srx_output a,Talon_srx_output b){
 }
 
 bool operator<(Talon_srx_output a, Talon_srx_output b){
-	if(a.mode!=b.mode) return a.mode<b.mode;
-	if(a.mode==Talon_srx_output::Mode::PERCENT) return a.power_level<b.power_level;
-	if(a.mode==Talon_srx_output::Mode::SPEED) return a.speed<b.speed;
+	#define X(TYPE,NAME) \
+		if(a.NAME < b.NAME) return true; \
+		if(b.NAME < a.NAME) return false;
+	TALON_SRX_OUTPUT_ITEMS(X)
+	#undef X
 	return false;
 }
 
@@ -590,7 +615,7 @@ ostream& operator<<(ostream& o,Robot_mode m){
 	return o<<")";
 }
 
-ostream& operator<<(ostream& o,Alliance a){
+ostream& operator<<(ostream& o,Alliance const& a){
 	o<<"Alliance(";
 	#define X(value) case value: o<<#value; break;
 	switch(a){
@@ -679,31 +704,34 @@ ostream& operator<<(ostream& o,Digital_inputs const& a){
 	return o<<")";
 }
 
-DS_info::DS_info():connected(0),alliance(Alliance::INVALID),location(0){}
+IMPL_STRUCT(DS_info::DS_info,DS_INFO_ITEMS)
+DS_info::DS_info():DS_info(false,Alliance::INVALID,0,false){}
 
 ostream& operator<<(ostream& o,DS_info const& d){
 	o<<"DS_info(";
-	o<<"connected:"<<d.connected;
-	o<<" alliance:"<<d.alliance;
-	o<<" location:"<<d.location;
+	#define X(TYPE,NAME) o<<""#NAME<<":"<<(d.NAME)<<" ";
+	DS_INFO_ITEMS(X)
+	#undef X
 	return o<<")";
 }
 
 bool operator<(DS_info const& a,DS_info const& b){
-	if(!a.connected && b.connected) return 1;
-	if(a.connected && !b.connected) return 0;
-	if(a.alliance<b.alliance) return 1;
-	if(b.alliance<a.alliance) return 0;
-	if(a.location<b.location) return 1;
-	if(b.location<a.location) return 0;
+	#define X(TYPE,NAME) if(a.NAME<b.NAME) return 1; if(b.NAME<a.NAME) return 0;
+	DS_INFO_ITEMS(X)
+	#undef X
 	return 0;
 }
 
 bool operator==(DS_info const& a,DS_info const& b){
-	return a.connected==b.connected && a.alliance==b.alliance && a.location==b.location;
+	#define X(TYPE,NAME) if(a.NAME != b.NAME) return false;
+	DS_INFO_ITEMS(X)
+	#undef X
+	return true;
 }
 
-bool operator!=(DS_info const& a,DS_info const& b){ return !(a==b); }
+bool operator!=(DS_info const& a,DS_info const& b){
+	return !(a==b);
+}
 
 Camera::Camera():enabled(0){}
 
