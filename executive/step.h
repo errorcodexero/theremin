@@ -121,7 +121,6 @@ class Ram:public Step_impl_inner<Ram>{//Drives straight a certain distance
 	bool operator==(Ram const&)const;
 };
 
-
 class Wait: public Step_impl_inner<Wait>{//Either stops all operation for a given period of time or continues to run the same goals for that time
 	Countdown_timer wait_timer;//seconds
 	public:
@@ -132,6 +131,20 @@ class Wait: public Step_impl_inner<Wait>{//Either stops all operation for a give
 	Step::Status done(Next_mode_info);
 	std::unique_ptr<Step_impl> clone()const;
 	bool operator==(Wait const&)const;
+};
+
+class Grab_bucket: public Step_impl_inner<Grab_bucket>{
+	Grabber_arm::Goal grabber_arm_goal;
+	Pinchers::Goal pinchers_goal;
+
+	public:
+	explicit Grab_bucket();
+
+	Toplevel::Goal run(Run_info,Toplevel::Goal);
+	Toplevel::Goal run(Run_info);
+	Step::Status done(Next_mode_info);
+	std::unique_ptr<Step_impl> clone()const;
+	bool operator==(Grab_bucket const&)const;
 };
 
 class Combo: public Step_impl_inner<Combo>{//Runs two steps at the same time

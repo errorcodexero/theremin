@@ -273,6 +273,32 @@ bool Wait::operator==(Wait const& b)const{
 	return wait_timer == b.wait_timer;
 }
 
+Grab_bucket::Grab_bucket():grabber_arm_goal(Grabber_arm::Goal::UP),pinchers_goal(Pinchers::Goal::CLOSE){}
+
+Step::Status Grab_bucket::done(Next_mode_info info){
+	return (ready(status(info.status.grabber_arm),grabber_arm_goal) && ready(status(info.status.pinchers),pinchers_goal)) ? Step::Status::FINISHED_SUCCESS : Step::Status::UNFINISHED;
+}
+
+Toplevel::Goal Grab_bucket::run(Run_info info){
+	return run(info,{});
+}
+
+Toplevel::Goal Grab_bucket::run(Run_info info,Toplevel::Goal goals){
+	(void)info;
+	goals.grabber_arm = grabber_arm_goal;
+	goals.pinchers = pinchers_goal;
+	return goals;
+}
+
+unique_ptr<Step_impl> Grab_bucket::clone()const{
+	return unique_ptr<Step_impl>(new Grab_bucket(*this));
+}
+
+bool Grab_bucket::operator==(Grab_bucket const& b)const{
+	(void)b;
+	return true;
+}
+
 void Combo::display(std::ostream& o)const{
 	Step_impl_inner<Combo>::display(o);
 	o<<"(";
