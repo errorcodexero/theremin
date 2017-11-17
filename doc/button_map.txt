@@ -3,11 +3,11 @@ Driver:
  B          - 
  X          - 
  Y          - 
- Start      - Climb (Toggle winch)
- Back       - Toggle camera lights on/off
- RB         - Low gear
+ Start      - 
+ Back       - 
+ RB         - 
  LB         - Slow
- RT         - High gear
+ RT         - 
  LT         - Turbo
  L_Joy:
   X Axis    - 
@@ -29,41 +29,35 @@ POV:
   Up_right   - 
 
 Gunner:
- A          - Stow
-              AO: Gear collector down
- B          - Score gear
-              AO: Gear grasper open
- X          - Collect gear
-              AO: Gear grasper closed
- Y          - Prep score gear
-              AO: Gear collector up
- Start      - Learn
+ A          - Grabber toggle
+ B          - 
+ X          - 
+ Y          - 
+ Start      - 
  Back       -
  RB         - 
- LB         - Alternative Operation (AO) - changes what other buttons do if held
- RT         - AO: Disable roller
- LT         - Shooter speed modifier
+ LB         - 
+ RT         - 
+ LT         - 
  L_Joy:
   Up        - 
-  Down      - Turbo Climb
+  Down      - 
   Left      - 
-  Right     - Standard Climb
+  Right     - 
   Pushed in - 
  R_Joy:
-  Up        - AO: Rollers up
-  Down      - AO: Rollers down
+  Up        - 
+  Down      - 
   Left      - 
   Right     - 
   Pushed in - 
  POV:        
   Center     - 
-  Up         -
+  Up         - Grabber up
   Up_left    - 
-  Left       - Camera light
-               AO: Ball intake out
+  Left       - Open pinchers
   Down_left  - 
-  Down       - Climb
+  Down       - Grabber down
   Down_right - 
-  Right      - Shoot
-               AO: Ball intake in
+  Right      - Close pinchers
   Up_right   - 
