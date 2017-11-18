@@ -67,7 +67,8 @@ struct Drivebase{
 		X(Output,last_output) \
 		X(Time,dt) \
 		X(Time,now) \
-		X(double,angle)
+		X(double,angle) \
+		X(double,prev_angle)
 	DECLARE_STRUCT(Status,DRIVEBASE_STATUS) //time is all in seconds
 
 	typedef Status Status_detail;
@@ -105,6 +106,7 @@ struct Drivebase{
 
 		Distances distances_;//used for controlling all drive motors on the robot 
 		double angle_;//degrees
+		double angle_i_;//integral of angle error
 		double left_,right_;
 
 		public:
@@ -114,16 +116,15 @@ struct Drivebase{
 		
 		Distances distances()const;
 
-		double target_distance()const;	
-		double initial_angle()const;
 		Rad angle()const;
+		double angle_i()const;
 	
 		double right()const;
 		double left()const;
 		
 		static Goal distances(Distances);
 		static Goal absolute(double,double);
-		static Goal drive_straight(Distances,double);
+		static Goal drive_straight(Distances,double,double);
 		static Goal rotate(Rad);
 	};
 };
@@ -151,6 +152,8 @@ Drivebase::Distances ticks_to_inches(const Drivebase::Encoder_ticks);
 Drivebase::Encoder_ticks inches_to_ticks(const Drivebase::Distances);
 
 int encoderconv(Maybe_inline<Encoder_output>);
+
+double total_angle_to_displacement(double);
 
 CMP1(Drivebase::Encoder_ticks)
 CMP1(Drivebase::Speeds)
