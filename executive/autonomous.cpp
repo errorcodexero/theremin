@@ -40,15 +40,19 @@ Executive get_auto_mode(Next_mode_info info){
 	Executive motion_profile_test{Chain{
 		Step{MP_drive{100.0}}, //drive 100 inches
 		Executive{Teleop{}}	
-		
 	}};
 
 	Executive drive_test{Chain{
 		Step{Drive(1)},
 		Executive{Teleop()}
 	}};
+
+	Executive drive_straight_test{Chain{
+		Step{Navx_drive_straight{100.0}},
+		Executive{Teleop()}
+	}};
 		
-	return motion_profile_test;
+	return drive_straight_test;
 
 	/*
 	

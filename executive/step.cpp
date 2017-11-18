@@ -267,6 +267,31 @@ bool MP_drive::operator==(MP_drive const& a)const{
 	return target_distance==a.target_distance && drive_goal==a.drive_goal;
 }
 
+Navx_drive_straight::Navx_drive_straight(Inch target):target_distance(target){}
+
+Step::Status Navx_drive_straight::done(Next_mode_info info){
+	drive_goal = Drivebase::Goal::drive_straight(Drivebase::Distances(target_distance) + info.status.drive.distances, info.status.drive.angle);
+	return ready(info.status.drive, *drive_goal) ? Step::Status::FINISHED_SUCCESS : Step::Status::UNFINISHED;
+}
+
+Toplevel::Goal Navx_drive_straight::run(Run_info info){
+	return run(info, {});
+}
+
+Toplevel::Goal Navx_drive_straight::run(Run_info info, Toplevel::Goal goals){
+	drive_goal = Drivebase::Goal::drive_straight(Drivebase::Distances(target_distance) + info.status.drive.distances, info.status.drive.angle);
+	goals.drive = *drive_goal;
+	return goals;
+}
+
+unique_ptr<Step_impl> Navx_drive_straight::clone()const{
+	return unique_ptr<Step_impl>(new Navx_drive_straight(*this));
+}
+
+bool Navx_drive_straight::operator==(Navx_drive_straight const& a)const{
+	return target_distance==a.target_distance && drive_goal==a.drive_goal;
+}
+
 Ram::Ram(Inch goal):target_dist(goal),initial_distances(Drivebase::Distances{0,0}),init(false){}
 
 Drivebase::Distances Ram::get_distance_travelled(Drivebase::Distances current){
