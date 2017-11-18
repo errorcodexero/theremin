@@ -107,12 +107,12 @@ Robot_inputs Grabber_arm::Input_reader::operator()(Robot_inputs r, Grabber_arm::
 }
 
 Robot_outputs Grabber_arm::Output_applicator::operator()(Robot_outputs r, Grabber_arm::Output o)const{
-	r.solenoid[PISTON_LOC] = o == Grabber_arm::Output::DOWN;
+	r.solenoid[PISTON_LOC] = o == Grabber_arm::Output::UP;
 	return r;
 }
 
 Grabber_arm::Output Grabber_arm::Output_applicator::operator()(Robot_outputs const& r)const{
-	return r.solenoid[PISTON_LOC] ? Output::DOWN : Output::UP;
+	return r.solenoid[PISTON_LOC] ? Output::UP : Output::DOWN;
 }
 
 void Grabber_arm::Estimator::update(Time time,Grabber_arm::Input input,Grabber_arm::Output output){

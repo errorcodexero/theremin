@@ -162,13 +162,13 @@ Robot_inputs Pinchers::Input_reader::operator()(Robot_inputs r, Pinchers::Input 
 }
 
 Robot_outputs Pinchers::Output_applicator::operator()(Robot_outputs r, Pinchers::Output o)const{
-	r.solenoid[PISTON_LOC] = o.piston == Pinchers::Output::Piston::CLOSE;
+	r.solenoid[PISTON_LOC] = o.piston == Pinchers::Output::Piston::OPEN;
 	r.driver_station.digital[BUCKET_LIGHT] = o.bucket_light;
 	return r;
 }
 
 Pinchers::Output Pinchers::Output_applicator::operator()(Robot_outputs const& r)const{
-	return {r.solenoid[PISTON_LOC] ? Output::Piston::CLOSE : Output::Piston::OPEN,r.driver_station.digital[BUCKET_LIGHT]};
+	return {r.solenoid[PISTON_LOC] ? Output::Piston::OPEN : Output::Piston::CLOSE,r.driver_station.digital[BUCKET_LIGHT]};
 }
 
 void Pinchers::Estimator::update(Time time,Pinchers::Input input,Pinchers::Output output){
@@ -177,9 +177,9 @@ void Pinchers::Estimator::update(Time time,Pinchers::Input input,Pinchers::Outpu
 			if(last.state == Status::State::CLOSING){
 				state_timer.update(time,input.enabled);
 			} else if(last.state != Status::State::CLOSED){ 
-				const Time DOWN_TIME = 1.0;//seconds. assumed
+				const Time CLOSE_TIME = 1.0;//seconds. assumed
 				last.state = Status::State::CLOSING;
-				state_timer.set(DOWN_TIME);
+				state_timer.set(CLOSE_TIME);
 			}
 			if(state_timer.done() || last.state == Status::State::CLOSED) {
 				last.state = Status::State::CLOSED;
@@ -189,9 +189,9 @@ void Pinchers::Estimator::update(Time time,Pinchers::Input input,Pinchers::Outpu
 			if(last.state == Status::State::OPENING){
 				state_timer.update(time,input.enabled);
 			} else if(last.state != Status::State::OPEN){ 
-				const Time UP_TIME = 2.2;//seconds. assumed
+				const Time OPEN_TIME = 2.2;//seconds. assumed
 				last.state = Status::State::OPENING;
-				state_timer.set(UP_TIME);
+				state_timer.set(OPEN_TIME);
 			}
 			if(state_timer.done() || last.state == Status::State::OPEN) { 
 				last.state = Status::State::OPEN;
