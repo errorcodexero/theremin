@@ -100,29 +100,37 @@ std::ostream& operator<<(std::ostream& o, Talon_srx_input in){
 
 Talon_srx_output Talon_srx_output::percent(double a){
 	Talon_srx_output r;
-	r.mode=Mode::PERCENT;
+	r.control_mode=Control_mode::PERCENT;
 	r.power_level=a;
 	return r;
 }
 
 Talon_srx_output Talon_srx_output::closed_loop(double a){
 	Talon_srx_output r;
-	r.mode=Mode::SPEED;
+	r.control_mode=Control_mode::SPEED;
 	r.speed=a;
 	return r;
 }
 
-std::ostream& operator<<(std::ostream& o, Talon_srx_output::Mode a){
-	if(a==Talon_srx_output::Mode::PERCENT) o<<"PERCENT";
-	else if(a==Talon_srx_output::Mode::SPEED) o<<"SPEED";
+std::ostream& operator<<(std::ostream& o, Talon_srx_output::Control_mode a){
+	if(a==Talon_srx_output::Control_mode::PERCENT) o<<"PERCENT";
+	else if(a==Talon_srx_output::Control_mode::SPEED) o<<"SPEED";
+	return o;
+}
+
+std::ostream& operator<<(std::ostream& o, Talon_srx_output::Speed_mode a){
+	if(a==Talon_srx_output::Speed_mode::BRAKE) o<<"BRAKE";
+	else if(a==Talon_srx_output::Speed_mode::COAST) o<<"COAST";
+	else if(a==Talon_srx_output::Speed_mode::NO_OVERRIDE) o<<"NO_OVERRIDE";
 	return o;
 }
 
 std::ostream& operator<<(std::ostream& o, Talon_srx_output a){
-	o<<"(mode: "<<a.mode;
+	o<<"(control_mode: "<<a.control_mode;
+	o<<" speed_mode: "<<a.speed_mode;
 	o<<" pid:"<<a.pid;
-	if(a.mode==Talon_srx_output::Mode::PERCENT) o<<" power_level:"<<a.power_level;
-	else if(a.mode==Talon_srx_output::Mode::SPEED) o<<" speed:"<<a.speed;
+	if(a.control_mode==Talon_srx_output::Control_mode::PERCENT) o<<" power_level:"<<a.power_level;
+	else if(a.control_mode==Talon_srx_output::Control_mode::SPEED) o<<" speed:"<<a.speed;
 	return o<<")";
 }
 
@@ -208,9 +216,10 @@ bool operator<(Talon_srx_input a, Talon_srx_input b){
 }
 
 bool operator==(Talon_srx_output a,Talon_srx_output b){
-	if(a.mode!=b.mode) return false;
-	if(a.mode==Talon_srx_output::Mode::PERCENT) return a.power_level==b.power_level;
-	if(a.mode==Talon_srx_output::Mode::SPEED) return a.speed==b.speed;
+	if(a.control_mode!=b.control_mode) return false;
+	if(a.control_mode==Talon_srx_output::Control_mode::PERCENT) return a.power_level==b.power_level;
+	if(a.control_mode==Talon_srx_output::Control_mode::SPEED) return a.speed==b.speed;
+	if(a.speed_mode != b.speed_mode) return false;
 	return false;
 }
 
@@ -219,9 +228,11 @@ bool operator!=(Talon_srx_output a,Talon_srx_output b){
 }
 
 bool operator<(Talon_srx_output a, Talon_srx_output b){
-	if(a.mode!=b.mode) return a.mode<b.mode;
-	if(a.mode==Talon_srx_output::Mode::PERCENT) return a.power_level<b.power_level;
-	if(a.mode==Talon_srx_output::Mode::SPEED) return a.speed<b.speed;
+	if(a.control_mode!=b.control_mode) return a.control_mode<b.control_mode;
+	if(a.control_mode==Talon_srx_output::Control_mode::PERCENT) return a.power_level<b.power_level;
+	if(a.control_mode==Talon_srx_output::Control_mode::SPEED) return a.speed<b.speed;
+	if(a.speed_mode < b.speed_mode) return true;
+	if(b.speed_mode < a.speed_mode) return false;
 	return false;
 }
 

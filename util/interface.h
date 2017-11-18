@@ -62,16 +62,20 @@ struct Talon_srx_output{
 	PID_values pid;
 	double power_level;
 	double speed;
-	enum class Mode{PERCENT,SPEED};//percent means percent voltage on the in terminals on the talon
-	Mode mode;
+	enum class Control_mode{PERCENT,SPEED};//percent means percent voltage on the in terminals on the talon
+	Control_mode control_mode;
+		
+	enum class Speed_mode{BRAKE,COAST,NO_OVERRIDE};
+	Speed_mode speed_mode;
 
-	Talon_srx_output():power_level(0),speed(0),mode(Talon_srx_output::Mode::PERCENT){}
+	Talon_srx_output():power_level(0),speed(0),control_mode(Talon_srx_output::Control_mode::PERCENT),speed_mode(Talon_srx_output::Speed_mode::NO_OVERRIDE){}
 
 	static Talon_srx_output percent(double);
 	static Talon_srx_output closed_loop(double);
 };
 
-std::ostream& operator<<(std::ostream&,Talon_srx_output::Mode);
+std::ostream& operator<<(std::ostream&,Talon_srx_output::Control_mode);
+std::ostream& operator<<(std::ostream&,Talon_srx_output::Speed_mode);
 std::ostream& operator<<(std::ostream&,Talon_srx_output);
 bool operator==(Talon_srx_output,Talon_srx_output);
 bool operator!=(Talon_srx_output,Talon_srx_output);
