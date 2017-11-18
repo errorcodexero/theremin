@@ -35,8 +35,8 @@ Gunner:
  Y          - 
  Start      - 
  Back       -
- RB         - 
- LB         - 
+ RB         - Open pinchers
+ LB         - Close pinchers
  RT         - 
  LT         - 
  L_Joy:
@@ -55,9 +55,9 @@ Gunner:
   Center     - 
   Up         - Grabber up
   Up_left    - 
-  Left       - Open pinchers
+  Left       - 
   Down_left  - 
   Down       - Grabber down
   Down_right - 
-  Right      - Close pinchers
+  Right      - 
   Up_right   - 

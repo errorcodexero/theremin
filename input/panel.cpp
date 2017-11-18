@@ -137,9 +137,12 @@ Panel interpret_gamepad(Joystick_data d){
 	if(!p.in_use) return p;
 	
 	p.grabber_toggle = d.button[Gamepad_button::A];
+	
+	p.pinchers = Panel::Pinchers::AUTO;
+	if(d.button[Gamepad_button::LB]) p.pinchers = Panel::Pinchers::CLOSE;
+	if(d.button[Gamepad_button::RB]) p.pinchers = Panel::Pinchers::OPEN;
 
 	p.grabber = Panel::Grabber::AUTO;
-	p.pinchers = Panel::Pinchers::AUTO;
 	switch(pov_section(d.pov)){
 		case POV_section::CENTER:
 			break;
@@ -149,7 +152,6 @@ Panel interpret_gamepad(Joystick_data d){
 		case POV_section::UP_LEFT:
 			break;
 		case POV_section::LEFT:
-			p.pinchers = Panel::Pinchers::OPEN;
 			break;
 		case POV_section::DOWN_LEFT:
 			break;
@@ -159,7 +161,6 @@ Panel interpret_gamepad(Joystick_data d){
 		case POV_section::DOWN_RIGHT:
 			break;
 		case POV_section::RIGHT:
-			p.pinchers = Panel::Pinchers::CLOSE;
 			break;
 		case POV_section::UP_RIGHT:
 			break;
@@ -167,7 +168,6 @@ Panel interpret_gamepad(Joystick_data d){
 		assert(0);
 	}
 
-	//TODO: Add in all of the new controls
 	p.auto_select=0;
 	return p;
 }
