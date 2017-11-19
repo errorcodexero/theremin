@@ -6,10 +6,12 @@
 
 struct Chain:Executive_impl<Chain>{
 	//enum class Failure_procedure{TREAT_AS_SUCCESS,ENTER_TELEOP,ABORT};
-	Step step;
+	unsigned current_step;
+	std::vector<Step> steps;
 	Executive next;
 
-	Chain(Step,Executive);
+	Chain(std::vector<Step>, Executive);
+	Chain(Step, Executive);
 
 	Toplevel::Goal run(Run_info);
 	Executive next_mode(Next_mode_info);
