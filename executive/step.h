@@ -119,6 +119,7 @@ class MP_drive:public Step_impl_inner<MP_drive>{
 
 class Navx_drive_straight:public Step_impl_inner<Navx_drive_straight>{
 	Inch target_distance;
+	double angle_i;
 	Settable_constant<Drivebase::Goal> drive_goal;
 
 	public:

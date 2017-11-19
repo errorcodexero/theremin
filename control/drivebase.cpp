@@ -234,6 +234,7 @@ set<Drivebase::Status> examples(Drivebase::Status*){
 		*examples((Drivebase::Output*)nullptr).begin(),
 		0.0,
 		0.0,
+		0.0,
 		0.0
 	}};
 }
@@ -241,7 +242,7 @@ set<Drivebase::Status> examples(Drivebase::Status*){
 set<Drivebase::Goal> examples(Drivebase::Goal*){
 	return {
 		Drivebase::Goal::rotate(0),
-		Drivebase::Goal::drive_straight(0,0),
+		Drivebase::Goal::drive_straight(0,0,0),
 		Drivebase::Goal::distances({0,0}),
 		Drivebase::Goal::absolute(0,0),
 		Drivebase::Goal::absolute(1,1)
@@ -281,6 +282,11 @@ double Drivebase::Goal::angle()const{
 	return angle_;
 }
 
+double Drivebase::Goal::angle_i()const{
+	assert(mode_ == Drivebase::Goal::Mode::DRIVE_STRAIGHT);
+	return angle_i_;
+}
+
 Drivebase::Goal Drivebase::Goal::distances(Drivebase::Distances distances){
 	Drivebase::Goal a;
 	a.mode_ = Drivebase::Goal::Mode::DISTANCES;
@@ -296,11 +302,12 @@ Drivebase::Goal Drivebase::Goal::absolute(double left,double right){
 	return a;
 }
 
-Drivebase::Goal Drivebase::Goal::drive_straight(Drivebase::Distances target, double initial_angle){
+Drivebase::Goal Drivebase::Goal::drive_straight(Drivebase::Distances target, double initial_angle, double initial_angle_i){
 	Drivebase::Goal a;
 	a.mode_ = Drivebase::Goal::Mode::DRIVE_STRAIGHT;
 	a.distances_ = target;
 	a.angle_ = initial_angle;
+	a.angle_i_ = initial_angle_i;
 	return a;
 }
 
@@ -402,7 +409,7 @@ set<Drivebase::Input> examples(Drivebase::Input*){
 	}};
 }
 
-Drivebase::Estimator::Estimator():motor_check(),last({{{}},false,{0,0},{0,0},{0,0},0.0,0.0,0.0}){}
+Drivebase::Estimator::Estimator():motor_check(),last({{{}},false,{0,0},{0,0},{0,0},0.0,0.0,0.0,0.0}){}
 
 Drivebase::Status_detail Drivebase::Estimator::get()const{
 	/*array<Motor_check::Status,MOTORS> a;
@@ -435,7 +442,8 @@ void Drivebase::Estimator::update(Time now,Drivebase::Input in,Drivebase::Output
 	last.dt = now - last.now;//TODO: should now come from input?
 	last.now = now;
 	last.last_output = out;
-	last.angle = in.angle;	
+	last.prev_angle = last.angle;
+	last.angle = in.angle;
 
 	speed_timer.update(now,true);
 	static const double POLL_TIME = .05;//seconds
@@ -524,7 +532,7 @@ bool operator!=(Drivebase const& a,Drivebase const& b){
 //TODO: Rename units
 Drivebase::Output trapezoidal_speed_control(Drivebase::Status status, Drivebase::Goal goal){
 	Drivebase::Output out = {0,0};
-	const double MAX_OUT = 1.0;//in "volts
+	const double MAX_OUT = .6;//in "volts
 	double avg_goal = (goal.distances().l + goal.distances().r) / 2;
 	double avg_dist = (status.distances.l + status.distances.r) / 2;
 	double avg_last = (status.last_output.l + status.last_output.r) / 2;
@@ -545,7 +553,7 @@ Drivebase::Output trapezoidal_speed_control(Drivebase::Status status, Drivebase:
 	{//for ramping down (based on distance)
 		//Drivebase::Distances error = goal.distances() - status.distances;
 		double error = avg_goal - avg_dist;
-		const double SLOW_WITHIN_DISTANCE = 60; //inches
+		const double SLOW_WITHIN_DISTANCE = 120; //inches
 		const double SLOPE = MAX_OUT / SLOW_WITHIN_DISTANCE; //"volts"/inches //TODO: currently arbitrary value
 		
 		if(error < SLOW_WITHIN_DISTANCE) {
@@ -593,13 +601,19 @@ Drivebase::Output rotation_control(Drivebase::Status status, Drivebase::Goal goa
 Drivebase::Output drive_straight(Drivebase::Status status, Drivebase::Goal goal){
 	Drivebase::Output out = trapezoidal_speed_control(status,goal);
 
-	static const double MAX_OUT = 1.0;
-	static const double P = 0.01;	
+	static const double MAX_OUT = .6;
+	static const double P = .05, I = .1, D = .005;
 	double error = total_angle_to_displacement(goal.angle()) - total_angle_to_displacement(status.angle);
-	out.l = clamp(out.l + error*P, -MAX_OUT, MAX_OUT);
-	out.r = clamp(out.r - error*P, -MAX_OUT, MAX_OUT);
+	double error_d = (error - (total_angle_to_displacement(goal.angle()) - total_angle_to_displacement(status.prev_angle))) / status.dt;
+	double change = P*error + I*goal.angle_i() + D*error_d;
+	out.l = clamp(out.l + change, -MAX_OUT, MAX_OUT);
+	out.r = clamp(out.r - change, -MAX_OUT, MAX_OUT);
 
-	cout << status.now << " / " << status.distances.l << ":" << status.distances.r << " / " << out.l << ":" << out.r << " / " << status.angle << " / " << goal.angle() << "\n";
+	static const double K = .08;
+	if(fabs(out.l) < K) out.l = copysign(K, out.l);
+	if(fabs(out.r) < K) out.r = copysign(K, out.r);
+
+	cout << status.now << " / " << status.distances.l << ":" << status.distances.r << " / " << out.l << ":" << out.r << " / " << status.angle << " / " << goal.angle() << " / " << error_d << " / " << goal.angle_i() << " / " << goal.distances().l << "\n";
 
 	return out;
 }
