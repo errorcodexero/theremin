@@ -126,13 +126,13 @@ std::ostream& operator<<(std::ostream& o, Talon_srx_output a){
 	return o<<")";
 }
 
-IMPL_STRUCT(Navx_input::Navx_input,NAVX_ITEMS)
+IMPL_STRUCT(Navx_input::Navx_input,NAVX_INPUT_ITEMS)
 Navx_input::Navx_input():Navx_input(0.0,0.0,0.0,0.0,false,false,0.0,0.0,0,0.0,0.0,0.0,false,false,0.0,0.0,false,0.0,false,false,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,"",0,0,false){}
 
 std::ostream& operator<<(std::ostream& o,Navx_input a){
 	o<<"(";
 	#define X(t,NAME,...) o<<""#NAME<<":"<<(a.NAME)<<" ";
-	NAVX_ITEMS(X)
+	NAVX_INPUT_ITEMS(X)
 	#undef X
 	o<<")";
 	return o;
@@ -140,7 +140,7 @@ std::ostream& operator<<(std::ostream& o,Navx_input a){
 
 bool operator==(Navx_input a,Navx_input b){
 	#define X(t,NAME,...) if(a.NAME != b.NAME) return false;
-	NAVX_ITEMS(X)
+	NAVX_INPUT_ITEMS(X)
 	#undef X
 	return true;
 }
@@ -151,9 +151,40 @@ bool operator!=(Navx_input a,Navx_input b){
 
 bool operator<(Navx_input a,Navx_input b){
 	#define X(t,NAME,...) if(a.NAME<b.NAME) return 1; if(b.NAME<a.NAME) return 0;
-	NAVX_ITEMS(X)
+	NAVX_INPUT_ITEMS(X)
 	#undef X
-	return 1;
+	return 0;
+}
+
+IMPL_STRUCT(Navx_output::Navx_output,NAVX_OUTPUT_ITEMS)
+Navx_output::Navx_output():Navx_output(0,0){}
+
+ostream& operator<<(ostream& o,Navx_output a){
+	o<<"(";
+	#define X(t,NAME,...) o<<""#NAME<<":"<<(a.NAME)<<" ";
+	NAVX_OUTPUT_ITEMS(X)
+	#undef X
+	o<<")";
+	return o;
+}
+
+bool operator==(Navx_output a,Navx_output b){
+	#define X(t,NAME,...) if(a.NAME != b.NAME) return false;
+	NAVX_OUTPUT_ITEMS(X)
+	#undef X
+	return true;
+}
+
+bool operator!=(Navx_output a,Navx_output b){
+	return !(a==b);
+}
+
+bool operator<(Navx_output a,Navx_output b){
+	#define X(t,NAME,...) if(a.NAME<b.NAME) return true; \
+		if(b.NAME<a.NAME) return false;
+	NAVX_OUTPUT_ITEMS(X)
+	#undef X
+	return false;
 }
 
 void terse(ostream& o, Digital_out d){
@@ -316,7 +347,7 @@ bool operator==(Robot_outputs a,Robot_outputs b){
 			return 0;
 		}
 	}
-	return a.driver_station==b.driver_station && a.pump_auto==b.pump_auto;
+	return a.navx==b.navx && a.driver_station==b.driver_station && a.pump_auto==b.pump_auto;
 }
 
 bool operator!=(Robot_outputs a,Robot_outputs b){
@@ -351,6 +382,9 @@ bool operator<(Robot_outputs a,Robot_outputs b){
 		if(b.talon_srx[i]<a.talon_srx[i])return 0;
 	}
 	
+	if(a.navx < b.navx) return 1;
+	if(b.navx < a.navx) return 0;
+
 	return a.pump_auto<b.pump_auto;
 }
 
@@ -378,6 +412,7 @@ ostream& operator<<(ostream& o,Robot_outputs a){
 	for(unsigned i=0;i<a.Robot_outputs::TALON_SRX_OUTPUTS;i++){
 		o<<a.talon_srx[i];
 	}
+	o<<" navx:"<<a.navx;
 	o<<" driver_station_output:"<<a.driver_station;
 	o<<" pump_auto:"<<a.pump_auto;
 	return o<<")";
