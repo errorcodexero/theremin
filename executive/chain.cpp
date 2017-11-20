@@ -11,22 +11,17 @@ Chain::Chain(Step s, Executive n):Chain(vector<Step>{s},n){}
 }*/
 
 Toplevel::Goal Chain::run(Run_info info){
+	if(current_step>=steps.size()) return Toplevel::Goal();
 	return steps[current_step].run(info);
 }
 
 Executive Chain::next_mode(Next_mode_info a){
 	if(!a.autonomous) return Executive{Teleop()};
+	if(current_step>=steps.size()) return next;
 	switch(steps[current_step].done(a)){
 		case Step::Status::FINISHED_SUCCESS:
-			/*if(next) return next->clone();
-			return unique_ptr<Mode>();*/
-			//current_step++;
+			current_step++;
 			if(current_step==steps.size()) return next;
-			{
-				Chain new_this = Chain{*this};
-				new_this.current_step++;
-				return Executive{new_this};
-			}
 		case Step::Status::UNFINISHED:
 			return Executive{*this};
 		case Step::Status::FINISHED_FAILURE:
@@ -43,7 +38,11 @@ void Chain::display(ostream& o)const{
 }
 
 bool Chain::operator==(Chain const& b)const{
-	return 1;//current_step == b.current_step && steps == b.steps && next == b.next;
+	return current_step == b.current_step && steps == b.steps && next == b.next;
+}
+
+bool Chain::operator<(Chain const& b)const{
+	return current_step < b.current_step;
 }
 
 unique_ptr<Executive_interface> Chain::clone()const{

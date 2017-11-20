@@ -104,7 +104,7 @@ Toplevel::Goal Autonomous::run(Run_info){
 	return {};//nothing, just waits
 }
 
-bool Autonomous::operator<(Autonomous const& a)const{ return 0; }
+bool Autonomous::operator<(Autonomous const&)const{ return 0; }
 
 bool Autonomous::operator==(Autonomous const&)const{ return 1; }
 
