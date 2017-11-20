@@ -51,8 +51,13 @@ Executive get_auto_mode(Next_mode_info info){
 		Step{Navx_drive_straight{360.0}},
 		Executive{Teleop()}
 	}};
-		
-	return drive_straight_test;
+	
+	Executive rotate_test{Chain{
+		Step{Navx_rotate{90.0}},
+		Executive{Teleop()}
+	}};
+
+	return rotate_test;
 
 	/*
 	

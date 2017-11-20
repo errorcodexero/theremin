@@ -594,7 +594,13 @@ Drivebase::Output rotation_control(Drivebase::Status status, Drivebase::Goal goa
 	double error = goal_angle_displacement - status_angle_displacement;
 	double power = target_to_out_power(clamp(error*P,-MAX_OUT,MAX_OUT));
 	out = Drivebase::Output(power,-power);
+
+	static const double FLOOR = .08;
+	if(fabs(out.l) < FLOOR) out.l = copysign(K, out.l);
+	if(fabs(out.r) < FLOOR) out.r = copysign(K, out.r);
+
 	//cout<<"\n\ngoal:"<<goal.angle()<<","<<goal_angle_displacement<<" status:"<<status.angle<<","<<status_angle_displacement<<" out:"<<out<<"\n\n";
+
 	return out;
 }
 
@@ -609,9 +615,9 @@ Drivebase::Output drive_straight(Drivebase::Status status, Drivebase::Goal goal)
 	out.l = clamp(out.l + change, -MAX_OUT, MAX_OUT);
 	out.r = clamp(out.r - change, -MAX_OUT, MAX_OUT);
 
-	static const double K = .08;
-	if(fabs(out.l) < K) out.l = copysign(K, out.l);
-	if(fabs(out.r) < K) out.r = copysign(K, out.r);
+	static const double FLOOR = .08;
+	if(fabs(out.l) < FLOOR) out.l = copysign(K, out.l);
+	if(fabs(out.r) < FLOOR) out.r = copysign(K, out.r);
 
 	cout << status.now << " / " << status.distances.l << ":" << status.distances.r << " / " << out.l << ":" << out.r << " / " << status.angle << " / " << goal.angle() << " / " << error_d << " / " << goal.angle_i() << " / " << goal.distances().l << "\n";
 
