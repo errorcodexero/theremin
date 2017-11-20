@@ -104,7 +104,14 @@ Toplevel::Goal Autonomous::run(Run_info){
 	return {};//nothing, just waits
 }
 
+bool Autonomous::operator<(Autonomous const&)const{ return 0; }
+
 bool Autonomous::operator==(Autonomous const&)const{ return 1; }
+
+void Autonomous::display(ostream& o)const{
+	o<<"Autonomous()";
+}
+
 
 #ifdef AUTONOMOUS_TEST
 #include "test.h"
