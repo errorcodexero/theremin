@@ -84,30 +84,21 @@ bool Rotate::operator==(Rotate const& b)const{
 }
 ////
 
-Navx_rotate::Navx_rotate(double a):target_angle(a),initial_angle(0),init(false){}
+Navx_rotate::Navx_rotate(double a):target_angle(a){}
 
 Toplevel::Goal Navx_rotate::run(Run_info info){
 	return run(info,{});
 }
 
 Toplevel::Goal Navx_rotate::run(Run_info info,Toplevel::Goal goals){
-	if(!init){
-		initial_angle = info.status.drive.angle;//TODO
-		init = true;
-	}
-	
-	goals.drive = Drivebase::Goal::rotate(target_angle);
+	drive_goal = Drivebase::Goal::rotate(info.status.drive.angle + target_angle);
+	goals.drive = *drive_goal;
 	return goals;
 }
 
 Step::Status Navx_rotate::done(Next_mode_info info){
-	if(ready(info.status.drive,Drivebase::Goal::rotate(target_angle))){
-		 in_range.update(info.in.now,info.in.robot_mode.enabled);
-	} else {
-		static const Time FINISH_TIME = .50;//seconds
-		in_range.set(FINISH_TIME);
-	}
-	return in_range.done() ? Step::Status::FINISHED_SUCCESS : Step::Status::UNFINISHED;
+	drive_goal = Drivebase::Goal::rotate(info.status.drive.angle + target_angle);
+	return ready(info.status.drive, *drive_goal) ? Step::Status::FINISHED_SUCCESS : Step::Status::UNFINISHED;	
 }
 
 std::unique_ptr<Step_impl> Navx_rotate::clone()const{
@@ -115,7 +106,7 @@ std::unique_ptr<Step_impl> Navx_rotate::clone()const{
 }
 
 bool Navx_rotate::operator==(Navx_rotate const& b)const{
-	return target_angle == b.target_angle && initial_angle == b.initial_angle && in_range == b.in_range;
+	return target_angle == b.target_angle;
 }
 
 //Step::Step(Step_impl const& a):impl(a.clone().get()){}
