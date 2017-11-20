@@ -543,8 +543,10 @@ Drivebase::Output trapezoidal_speed_control(Drivebase::Status status, Drivebase:
 		const double MILLISECONDS_PER_SECOND = 1000 / 1;
 		
 		double step = clamp(status.dt * MILLISECONDS_PER_SECOND * SLOPE,-MAX_STEP,MAX_STEP);// in "volts" 
+		//double l_step = copysign(step,goal.distances().l);
+		//double r_step = copysign(step,goal.distances().r);
 		
-		//cout<<"\ndt:"<<status.dt * MILLISECONDS_PER_SECONDS<<" ms step:"<<step<<" "<<status<<"\n";
+		//cout<<"\ndt:"<<status.dt * MILLISECONDS_PER_SECOND<<" ms step:"<<step<<" "<<status<<"\n";
 		
 		double avg_out = clamp(avg_last + step, -MAX_OUT, MAX_OUT);
 		out = {avg_out, avg_out};
