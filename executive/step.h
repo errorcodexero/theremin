@@ -198,10 +198,8 @@ struct Rotate: Step_impl_inner<Rotate>{//orients the robot to a certain angle re
 };
 
 struct Navx_rotate: Step_impl_inner<Navx_rotate>{//orients the robot to a certain angle relative to its starting orientation //TODO
-	double target_angle;//degrees,clockwise=positive
-	double initial_angle;
-	bool init;
-	Countdown_timer in_range;
+	double target_angle;
+	Settable_constant<Drivebase::Goal> drive_goal;
 
 	explicit Navx_rotate(double);
 	

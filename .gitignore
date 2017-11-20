@@ -3,4 +3,5 @@ bazel-*
 t.mk
 FRCUserProgram
 *.swp
-backups
+backups/
+log/
