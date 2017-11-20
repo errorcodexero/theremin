@@ -242,7 +242,6 @@ if __name__=='__main__':
 
 	def build(printouts):
 		define_printouts = "-DPRINT_OUTS" if printouts else ""
-		print define_printouts
 		cross_makefile(open('t.mk','w'),define_printouts)
 		r=os.system('make -j4 -f t.mk')
 		assert r&0xff==0
