@@ -3,6 +3,7 @@
 
 struct Robot_constants{
 	static constexpr double ROBOT_WIDTH = 10;//TODO
+	static constexpr double DRIVE_WHEEL_DIAMETER = 6;
 };
 
 #endif

@@ -4,6 +4,7 @@
 #include "executive.h"
 #include "../util/motion_profile.h"
 #include "../util/settable_constant.h"
+#include "../util/robot_constants.h"
 
 struct Step_impl;
 
@@ -68,6 +69,19 @@ struct Step_impl_inner:Step_impl{
 
 using Inch=double;
 
+class Drive:public Step_impl_inner<Drive>{//Drives straight a certain distance
+	Countdown_timer timer;
+	
+	public:
+	explicit Drive(double);
+
+	Toplevel::Goal run(Run_info,Toplevel::Goal);
+	Toplevel::Goal run(Run_info);
+	Step::Status done(Next_mode_info);
+	std::unique_ptr<Step_impl> clone()const;
+	bool operator==(Drive const&)const;
+};
+
 class Drive_straight:public Step_impl_inner<Drive_straight>{//Drives straight a certain distance
 	Inch target_dist;
 	Drivebase::Distances initial_distances;
@@ -101,6 +115,21 @@ class MP_drive:public Step_impl_inner<MP_drive>{
 	Step::Status done(Next_mode_info);
 	std::unique_ptr<Step_impl> clone()const;
 	bool operator==(MP_drive const&)const;
+};
+
+class Navx_drive_straight:public Step_impl_inner<Navx_drive_straight>{
+	Inch target_distance;
+	double angle_i;
+	Settable_constant<Drivebase::Goal> drive_goal;
+
+	public:
+	explicit Navx_drive_straight(Inch);
+
+	Toplevel::Goal run(Run_info,Toplevel::Goal);
+	Toplevel::Goal run(Run_info);
+	Step::Status done(Next_mode_info);
+	std::unique_ptr<Step_impl> clone()const;
+	bool operator==(Navx_drive_straight const&)const;
 };
 
 class Ram:public Step_impl_inner<Ram>{//Drives straight a certain distance
@@ -161,9 +190,7 @@ class Combo: public Step_impl_inner<Combo>{//Runs two steps at the same time
 	bool operator==(Combo const&)const;
 };
 
-static const Inch ROBOT_WIDTH = 28; //inches, ignores bumpers //TODO: finds some way of dealing with constants like this and wheel diameter
-
-struct Turn: Step_impl_inner<Turn>{//orients the robot to a certain angle relative to its starting orientation
+struct Rotate: Step_impl_inner<Rotate>{//orients the robot to a certain angle relative to its starting orientation
 	Rad target_angle;//radians,clockwise=positive
 	Drivebase::Distances initial_distances;
 	bool init;
@@ -174,13 +201,26 @@ struct Turn: Step_impl_inner<Turn>{//orients the robot to a certain angle relati
 	Drivebase::Distances angle_to_distances(Rad);
 	Drivebase::Distances get_distance_travelled(Drivebase::Distances);
 
-	explicit Turn(Rad);
-	explicit Turn(Rad,double,double);
+	explicit Rotate(Rad);
+	explicit Rotate(Rad,double,double);
 	Toplevel::Goal run(Run_info,Toplevel::Goal);
 	Toplevel::Goal run(Run_info);
 	Step::Status done(Next_mode_info);
 	std::unique_ptr<Step_impl> clone()const;
-	bool operator==(Turn const&)const;
+	bool operator==(Rotate const&)const;
+};
+
+struct Navx_rotate: Step_impl_inner<Navx_rotate>{//orients the robot to a certain angle relative to its starting orientation //TODO
+	double target_angle;
+	Settable_constant<Drivebase::Goal> drive_goal;
+
+	explicit Navx_rotate(double);
+	
+	Toplevel::Goal run(Run_info,Toplevel::Goal);
+	Toplevel::Goal run(Run_info);
+	Step::Status done(Next_mode_info);
+	std::unique_ptr<Step_impl> clone()const;
+	bool operator==(Navx_rotate const&)const;
 };
 
 #endif

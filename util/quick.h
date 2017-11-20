@@ -7,9 +7,9 @@
 
 #define PRINT1(A,B) o<<a.B<<" ";
 
-#define DECL1(A,B) A B;
+#define DECL1(A,B,...) A B;
 
-#define TYPES(A,B) A,
+#define TYPES(A,B,...) A,
 
 #define STRUCT_MEMBERS(LIST)\
 	LIST(DECL1)\
@@ -21,8 +21,8 @@
 		NAME( LIST(TYPES) bool=0);\
 	};
 
-#define ARGS(A,B) A B##1,
-#define FDECL(A,B) B(B##1),
+#define ARGS(A,B,...) A B##1,
+#define FDECL(A,B,...) B(B##1),
 
 #define IMPL_STRUCT(NAME,LIST)\
 	NAME( LIST(ARGS) bool):LIST(FDECL) dummy{}{\

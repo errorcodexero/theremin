@@ -7,6 +7,7 @@
 #include "maybe_inline.h"
 #include "checked_array.h"
 #include "../input/pixycam/PixyUART.h"
+#include "quick.h"
 
 typedef double Time;//Seconds
 typedef bool Solenoid_output;
@@ -82,6 +83,84 @@ bool operator==(Talon_srx_input,Talon_srx_input);
 bool operator!=(Talon_srx_input,Talon_srx_input);
 bool operator<(Talon_srx_input,Talon_srx_input);
 
+#define NAVX_INPUT_ITEMS(X) \
+		X(double,pitch,GetPitch) \
+		X(double,roll,GetRoll) \
+		X(double,yaw,GetYaw) \
+		X(double,compass_heading,GetCompassHeading) \
+		X(bool,calibrating,IsCalibrating) \
+		X(bool,connected,IsConnected) \
+		X(double,byte_count,GetByteCount) \
+		X(double,update_count,GetUpdateCount) \
+		X(long,last_sensor_timestamp,GetLastSensorTimestamp) \
+		X(double,world_linear_accel_x,GetWorldLinearAccelX) \
+		X(double,world_linear_accel_y,GetWorldLinearAccelY) \
+		X(double,world_linear_accel_z,GetWorldLinearAccelZ) \
+		X(bool,moving,IsMoving) \
+		X(bool,rotating,IsRotating) \
+		X(double,barometric_pressure,GetBarometricPressure) \
+		X(double,altitude,GetAltitude) \
+		X(bool,valid_altitude,IsAltitudeValid) \
+		X(double,fused_heading,GetFusedHeading) \
+		X(bool,magnetic_disturbance,IsMagneticDisturbance) \
+		X(bool,magnetometer_calibrated,IsMagnetometerCalibrated) \
+		X(double,quaternion_w,GetQuaternionW) \
+		X(double,quaternion_x,GetQuaternionX) \
+		X(double,quaternion_y,GetQuaternionY) \
+		X(double,quaternion_z,GetQuaternionZ) \
+		X(double,velocity_x,GetVelocityX) \
+		X(double,velocity_y,GetVelocityY) \
+		X(double,velocity_z,GetVelocityZ) \
+		X(double,displacement_x,GetDisplacementX) \
+		X(double,displacement_y,GetDisplacementY) \
+		X(double,displacement_z,GetDisplacementY) \
+		X(double,angle,GetAngle) \
+		X(double,rate,GetRate) \
+		X(double,angle_adjustment,GetAngleAdjustment) \
+		X(double,raw_gyro_x,GetRawGyroX) \
+		X(double,raw_gyro_y,GetRawGyroY) \
+		X(double,raw_gyro_z,GetRawGyroZ) \
+		X(double,raw_accel_x,GetRawAccelX) \
+		X(double,raw_accel_y,GetRawAccelY) \
+		X(double,raw_accel_z,GetRawAccelZ) \
+		X(double,raw_mag_x,GetRawMagX) \
+		X(double,raw_mag_y,GetRawMagY) \
+		X(double,raw_mag_z,GetRawMagZ) \
+		X(double,pressure,GetPressure) \
+		X(double,temperature,GetTempC) \
+		X(std::string,firmware_version,GetFirmwareVersion) \
+		X(int,actual_update_rate,GetActualUpdateRate) \
+		X(int,requested_update_rate,GetRequestedUpdateRate)
+		//X(AHRS::BoardYawAxis,board_yaw_axis)//FIXME
+
+struct Navx_input{
+	//angle is cumulative and clockwise from top is positive
+	STRUCT_MEMBERS(NAVX_INPUT_ITEMS)
+	
+	Navx_input();
+	IMPL_STRUCT_DECLARE(Navx_input,NAVX_INPUT_ITEMS)
+};
+
+std::ostream& operator<<(std::ostream&,Navx_input);
+bool operator==(Navx_input,Navx_input);
+bool operator!=(Navx_input,Navx_input);
+bool operator<(Navx_input,Navx_input);
+
+#define NAVX_OUTPUT_ITEMS(X) \
+	X(bool,zero_yaw,ZeroYaw) 
+
+struct Navx_output{
+	STRUCT_MEMBERS(NAVX_OUTPUT_ITEMS)
+
+	Navx_output();
+	IMPL_STRUCT_DECLARE(Navx_output,NAVX_OUTPUT_ITEMS);
+};
+
+std::ostream& operator<<(std::ostream&,Navx_output);
+bool operator==(Navx_output,Navx_output);
+bool operator!=(Navx_output,Navx_output);
+bool operator<(Navx_output,Navx_output);
+
 std::ostream& operator<<(std::ostream&,Digital_out);
 bool operator<(Digital_out,Digital_out);
 bool operator==(Digital_out,Digital_out);
@@ -104,6 +183,8 @@ struct Robot_outputs{
 	
 	static const unsigned TALON_SRX_OUTPUTS=TALON_SRXS;//FIXME: talon initializaitons
 	Checked_array<Talon_srx_output, TALON_SRX_OUTPUTS> talon_srx;
+
+	Navx_output navx;
 	
 	//could add in some setup for the analog inputs
 	
@@ -214,6 +295,8 @@ struct Robot_inputs{
 
 	static const unsigned TALON_SRX_INPUTS=TALON_SRXS;
 	Checked_array<Talon_srx_input, TALON_SRX_INPUTS> talon_srx;
+
+	Navx_input navx;
 	
 	Driver_station_input driver_station;
 	Rad orientation;

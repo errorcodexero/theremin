@@ -8,7 +8,7 @@ cc_library(
 cc_test(
 	name="point_test",
 	srcs=["util/point.cpp","util/point.h","util/interface.h","util/maybe.h","util/driver_station_interface.h","util/maybe_inline.h","util/checked_array.h","util/util.h","util/util.cpp"],
-	deps=[":pixy_uart"],
+	deps=[":pixy_uart",":interface"],
 	copts=["-DPOINT_TEST"],
 	timeout="short"
 )
@@ -23,7 +23,7 @@ cc_test(
 cc_library(
 	name="point",
 	srcs=["util/point.cpp"],
-	hdrs=["util/point.h","util/interface.h","util/maybe.h","util/driver_station_interface.h","util/maybe_inline.h","util/checked_array.h","util/util.h"],
+	hdrs=["util/point.h","util/quick.h","util/interface.h","util/maybe.h","util/driver_station_interface.h","util/maybe_inline.h","util/checked_array.h","util/util.h"],
 	deps=[":pixy_uart"]
 )
 
@@ -32,7 +32,7 @@ cc_test(
 	#srcs=["util/util.cpp","util/interface.h","util/maybe.h","util/driver_station_interface.h","util/maybe_inline.h","util/checked_array.h","util/util.h"],
 	srcs=["util/util.cpp"],
 	copts=["-DUTIL_TEST"],
-	deps=[":point"],
+	deps=[":point",":interface"],
 	timeout="short"
 
 )
@@ -63,7 +63,7 @@ cc_test(
 	name="driver_station_interface_test",
 	srcs=["util/driver_station_interface.cpp"],
 	copts=["-DDRIVER_STATION_INTERFACE_TEST"],
-	deps=[":util"],
+	deps=[":util",":interface"],
 	timeout="short"
 
 )
@@ -71,12 +71,13 @@ cc_test(
 cc_library(
 	name="driver_station_interface",
 	srcs=["util/driver_station_interface.cpp"],
+	hdrs=["util/quick.h"],
 	deps=[":util"]
 )
 
 cc_test(
 	name="interface_test",
-	srcs=["util/interface.cpp"],
+	srcs=["util/interface.cpp","util/interface.h","util/quick.h"],
 	copts=["-DINTERFACE_TEST"],
 	deps=[":driver_station_interface",":pixy_uart"],
 	timeout="short"
@@ -203,7 +204,7 @@ cc_test(
 cc_library(
 	name="interface",
 	srcs=["util/interface.cpp"],
-	hdrs=["util/interface.h"],
+	hdrs=["util/interface.h","util/quick.h"],
 	deps=[":driver_station_interface",":pixy_uart"]
 )
 
@@ -247,7 +248,7 @@ cc_test(
 	name="persistent_tracker_test",
 	srcs=["util/persistent_tracker.cpp","util/persistent_tracker.h","util/maybe.h"],
 	copts=["-DPERSISTENT_TRACKER_TEST"],
-	deps=[":util"],
+	deps=[":util",":interface"],
 	timeout="short"
 )
 
@@ -464,15 +465,15 @@ cc_test(
 cc_library(
 	name="drivebase",
 	srcs=["control/drivebase.cpp"],
-	hdrs=["control/drivebase.h","util/quick.h"],
-	deps=[":interface",":motor_check",":countdown_timer",":stall_monitor"]
+	hdrs=["control/drivebase.h","util/quick.h","util/robot_constants.h"],
+	deps=[":interface",":motor_check",":motion_profile",":countdown_timer",":stall_monitor"]
 )
 
 cc_test(
 	name="drivebase_test",
-	srcs=["control/drivebase.cpp","control/drivebase.h","util/quick.h","control/formal.h"],
+	srcs=["control/drivebase.cpp","control/drivebase.h","util/quick.h","util/robot_constants.h","control/formal.h"],
 	copts=["-DDRIVEBASE_TEST"],
-	deps=[":interface",":motor_check",":countdown_timer",":stall_monitor"],
+	deps=[":interface",":motion_profile",":motor_check",":countdown_timer",":stall_monitor"],
 	timeout="short"
 )
 
@@ -655,21 +656,6 @@ cc_library(
 )
 
 cc_library(
-	name="robot_constants",
-	srcs=["util/robot_constants.cpp"],
-	hdrs=["util/robot_constants.h"],
-	deps=[]
-)
-
-cc_test(
-	name="robot_constants_test",
-	srcs=["util/robot_constants.cpp","util/robot_constants.h"],
-	copts=["-DROBOT_CONSTANTS_TEST"],
-	deps=[],
-	timeout="short"
-)
-
-cc_library(
 	name="teleop",
 	srcs=["executive/teleop.cpp"],
 	hdrs=["executive/teleop.h"],
@@ -719,7 +705,7 @@ cc_library(
 cc_library(
 	name="step",
 	srcs=["executive/step.cpp"],
-	hdrs=["executive/step.h"],
+	hdrs=["executive/step.h","util/robot_constants.h"],
 	deps=[":executive",":motion_profile",":settable_constant"]
 )
 
@@ -754,7 +740,7 @@ cc_test(
 
 cc_test(
 	name="step_test",
-	srcs=["executive/step.cpp","executive/step.h"],
+	srcs=["executive/step.cpp","executive/step.h","util/robot_constants.h"],
 	copts=["-DSTEP_TEST"],
 	deps=[":executive_impl",":motion_profile",":settable_constant"],
 	timeout="short"

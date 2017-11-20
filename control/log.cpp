@@ -213,7 +213,6 @@ void visit(Func f,Drivebase::Output const& a){
 	f.terminal(a);
 }
 
-
 template<typename Func>
 void visit(Func f,Drivebase::Status const& r){
 	DRIVEBASE_STATUS(VISIT_2ND)
@@ -223,7 +222,6 @@ template<typename Func>
 void visit(Func f,Dozer::Status_detail const& a){
 	f.terminal(a);
 }
-
 
 template<typename Func>
 void visit(Func f,Pump::Status const& a){

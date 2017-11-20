@@ -39,7 +39,8 @@ struct Drivebase{
 		X(SINGLE_ARG(std::array<double,MOTORS>),current) \
 		X(Encoder_info,left) \
 		X(Encoder_info,right) \
-		X(Distances,distances)
+		X(Distances,distances) \
+		X(double,angle)
 	DECLARE_STRUCT(Input,DRIVEBASE_INPUT)
 
 	struct Input_reader{
@@ -65,7 +66,9 @@ struct Drivebase{
 		X(Distances,distances) \
 		X(Output,last_output) \
 		X(Time,dt) \
-		X(Time,now)
+		X(Time,now) \
+		X(double,angle) \
+		X(double,prev_angle)
 	DECLARE_STRUCT(Status,DRIVEBASE_STATUS) //time is all in seconds
 
 	typedef Status Status_detail;
@@ -91,7 +94,9 @@ struct Drivebase{
 	struct Goal{
 		#define DRIVEBASE_GOAL_MODES \
 			X(ABSOLUTE) \
-			X(DISTANCE)
+			X(DISTANCES) \
+			X(DRIVE_STRAIGHT) \
+			X(ROTATE)
 		#define X(name) name,
 		enum class Mode{DRIVEBASE_GOAL_MODES};
 		#undef X 
@@ -99,7 +104,9 @@ struct Drivebase{
 		private:
 		Mode mode_;
 
-		Distances distances_;//used for both sides of the robot
+		Distances distances_;//used for controlling all drive motors on the robot 
+		double angle_;//degrees
+		double angle_i_;//integral of angle error
 		double left_,right_;
 
 		public:
@@ -108,12 +115,17 @@ struct Drivebase{
 		Mode mode()const;
 		
 		Distances distances()const;
-		
+
+		Rad angle()const;
+		double angle_i()const;
+	
 		double right()const;
 		double left()const;
 		
 		static Goal distances(Distances);
-		static Goal absolute(double,double);		
+		static Goal absolute(double,double);
+		static Goal drive_straight(Distances,double,double);
+		static Goal rotate(Rad);
 	};
 };
 bool operator==(Drivebase::Encoder_ticks const&,Drivebase::Encoder_ticks const&);
@@ -141,6 +153,8 @@ Drivebase::Encoder_ticks inches_to_ticks(const Drivebase::Distances);
 
 int encoderconv(Maybe_inline<Encoder_output>);
 
+double total_angle_to_displacement(double);
+
 CMP1(Drivebase::Encoder_ticks)
 CMP1(Drivebase::Speeds)
 
@@ -162,6 +176,7 @@ std::set<Drivebase::Status> examples(Drivebase::Status*);
 std::ostream& operator<<(std::ostream&,Drivebase::Goal const&);
 std::set<Drivebase::Goal> examples(Drivebase::Goal*);
 bool operator<(Drivebase::Goal const&,Drivebase::Goal const&);
+bool operator==(Drivebase::Goal const&,Drivebase::Goal const&);
 
 Drivebase::Status status(Drivebase::Status_detail);
 Drivebase::Output control(Drivebase::Status_detail,Drivebase::Goal);

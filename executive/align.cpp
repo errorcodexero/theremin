@@ -18,11 +18,11 @@ ostream& operator<<(ostream& o,Align::Mode a){
 
 static const Time INITIAL_SEARCH = 0.1;
 
-Align::Align(Rad a, bool d):mode(Align::Mode::VISION),demo(d),blocks({}),current(0),estimated_angle(a),nonvision_align(Step{Turn(a)}){
+Align::Align(Rad a, bool d):mode(Align::Mode::VISION),demo(d),blocks({}),current(0),estimated_angle(a),nonvision_align(Step{Rotate(a)}){
 	initial_search.set(INITIAL_SEARCH);
 }
 
-Align::Align(Rad a):mode(Align::Mode::VISION),demo(0),blocks({}),current(0),estimated_angle(a),nonvision_align(Step{Turn(a)}){
+Align::Align(Rad a):mode(Align::Mode::VISION),demo(0),blocks({}),current(0),estimated_angle(a),nonvision_align(Step{Rotate(a)}){
 	initial_search.set(INITIAL_SEARCH);
 }
 Align::Align():Align(0){}

@@ -29,25 +29,25 @@ Toplevel::Goal Step::run(Run_info info){
 
 const double RIGHT_SPEED_CORRECTION = /*-0.045; */ 0.0;// 0 is for comp bot. //left and right sides of the practice robot drive at different speeds given the same power, adjust this to make the robot drive straight
 
-Drivebase::Distances Turn::angle_to_distances(Rad target_angle){
-	Inch side_goal = target_angle * 0.5 * ROBOT_WIDTH;
+Drivebase::Distances Rotate::angle_to_distances(Rad target_angle){
+	Inch side_goal = target_angle * 0.5 * Robot_constants::ROBOT_WIDTH;
 	return Drivebase::Distances{side_goal,-side_goal};
 }
 
-Drivebase::Distances Turn::get_distance_travelled(Drivebase::Distances current){
+Drivebase::Distances Rotate::get_distance_travelled(Drivebase::Distances current){
 	return current - initial_distances;
 }
 
-Turn::Turn(Rad a):Turn(a,0.02,0.5){}//from testing
-Turn::Turn(Rad a,double vel_modifier,double max):target_angle(a),initial_distances({0,0}),init(false),side_goals(angle_to_distances(a)){
+Rotate::Rotate(Rad a):Rotate(a,0.02,0.5){}//from testing
+Rotate::Rotate(Rad a,double vel_modifier,double max):target_angle(a),initial_distances({0,0}),init(false),side_goals(angle_to_distances(a)){
 	motion_profile = {side_goals.l,vel_modifier,max};//from testing
 }
 
-Toplevel::Goal Turn::run(Run_info info){
+Toplevel::Goal Rotate::run(Run_info info){
 	return run(info,{});
 }
 
-Toplevel::Goal Turn::run(Run_info info,Toplevel::Goal goals){
+Toplevel::Goal Rotate::run(Run_info info,Toplevel::Goal goals){
 	if(!init){
 		initial_distances = info.status.drive.distances;
 		init = true;
@@ -56,13 +56,13 @@ Toplevel::Goal Turn::run(Run_info info,Toplevel::Goal goals){
 	
 	//ignoring right encoder because it's proven hard to get meaningful data from it
 	double power = motion_profile.target_speed(distance_travelled.l); 
-	double left = clip(target_to_out_power(power));//TODO: move .2 to the constructor of Turn and set an instance variable
+	double left = clip(target_to_out_power(power));//TODO: move .2 to the constructor of Rotate and set an instance variable
 	double right = -clip(target_to_out_power(power - RIGHT_SPEED_CORRECTION * power));
 	goals.drive = Drivebase::Goal::absolute(left,right);
 	return goals;
 }
 
-Step::Status Turn::done(Next_mode_info info){
+Step::Status Rotate::done(Next_mode_info info){
 	static const Inch TOLERANCE = 1.0;//inches
 	Drivebase::Distances distance_travelled = get_distance_travelled(info.status.drive.distances);
 	Drivebase::Distances distance_left = side_goals - distance_travelled;
@@ -75,12 +75,38 @@ Step::Status Turn::done(Next_mode_info info){
 	return in_range.done() ? Step::Status::FINISHED_SUCCESS : Step::Status::UNFINISHED;
 }
 
-std::unique_ptr<Step_impl> Turn::clone()const{
-	return unique_ptr<Step_impl>(new Turn(*this));
+std::unique_ptr<Step_impl> Rotate::clone()const{
+	return unique_ptr<Step_impl>(new Rotate(*this));
 }
 
-bool Turn::operator==(Turn const& b)const{
+bool Rotate::operator==(Rotate const& b)const{
 	return target_angle == b.target_angle && initial_distances == b.initial_distances && side_goals == b.side_goals && motion_profile == b.motion_profile && in_range == b.in_range;
+}
+////
+
+Navx_rotate::Navx_rotate(double a):target_angle(a){}
+
+Toplevel::Goal Navx_rotate::run(Run_info info){
+	return run(info,{});
+}
+
+Toplevel::Goal Navx_rotate::run(Run_info info,Toplevel::Goal goals){
+	drive_goal = Drivebase::Goal::rotate(info.status.drive.angle + target_angle);
+	goals.drive = *drive_goal;
+	return goals;
+}
+
+Step::Status Navx_rotate::done(Next_mode_info info){
+	drive_goal = Drivebase::Goal::rotate(info.status.drive.angle + target_angle);
+	return ready(info.status.drive, *drive_goal) ? Step::Status::FINISHED_SUCCESS : Step::Status::UNFINISHED;	
+}
+
+std::unique_ptr<Step_impl> Navx_rotate::clone()const{
+	return unique_ptr<Step_impl>(new Navx_rotate(*this));
+}
+
+bool Navx_rotate::operator==(Navx_rotate const& b)const{
+	return target_angle == b.target_angle;
 }
 
 //Step::Step(Step_impl const& a):impl(a.clone().get()){}
@@ -118,6 +144,33 @@ Step_impl::~Step_impl(){}
 	T const& b=dynamic_cast<T const&>(a.get());
 	return this->operator==(b);
 }*/
+
+Drive::Drive(double t){
+	timer.set(t);
+}
+
+Step::Status Drive::done(Next_mode_info /*info*/){
+	return timer.done() ? Step::Status::FINISHED_SUCCESS : Step::Status::UNFINISHED;
+}
+
+Toplevel::Goal Drive::run(Run_info info){
+	return run(info,{});
+}
+
+Toplevel::Goal Drive::run(Run_info info,Toplevel::Goal goals){
+	timer.update(info.in.now, info.in.robot_mode.enabled);
+	const double POWER = 0.4;
+	goals.drive = Drivebase::Goal::absolute(POWER,POWER);
+	return goals;
+}
+
+unique_ptr<Step_impl> Drive::clone()const{
+	return unique_ptr<Step_impl>(new Drive(*this));
+}
+
+bool Drive::operator==(Drive const& b)const{
+	return timer == b.timer;
+}
 
 Drive_straight::Drive_straight(Inch goal):Drive_straight(goal,0.02,0.5){}
 Drive_straight::Drive_straight(Inch goal,double vel_modifier,double max):target_dist(goal),initial_distances(Drivebase::Distances{0,0}),init(false),motion_profile(goal,vel_modifier,max){}//Motion profiling values from testing
@@ -202,6 +255,32 @@ unique_ptr<Step_impl> MP_drive::clone()const{
 }
 
 bool MP_drive::operator==(MP_drive const& a)const{
+	return target_distance==a.target_distance && drive_goal==a.drive_goal;
+}
+
+Navx_drive_straight::Navx_drive_straight(Inch target):target_distance(target),angle_i(0){}
+
+Step::Status Navx_drive_straight::done(Next_mode_info info){
+	drive_goal = Drivebase::Goal::drive_straight(Drivebase::Distances(target_distance) + info.status.drive.distances, info.status.drive.angle, angle_i);
+	return ready(info.status.drive, *drive_goal) ? Step::Status::FINISHED_SUCCESS : Step::Status::UNFINISHED;
+}
+
+Toplevel::Goal Navx_drive_straight::run(Run_info info){
+	return run(info, {});
+}
+
+Toplevel::Goal Navx_drive_straight::run(Run_info info, Toplevel::Goal goals){
+	drive_goal = Drivebase::Goal::drive_straight(Drivebase::Distances(target_distance) + info.status.drive.distances, info.status.drive.angle, angle_i);
+	angle_i += (total_angle_to_displacement((*drive_goal).angle()) - total_angle_to_displacement(info.status.drive.angle)) * info.status.drive.dt;
+	goals.drive = Drivebase::Goal::drive_straight((*drive_goal).distances(), (*drive_goal).angle(), angle_i);
+	return goals;
+}
+
+unique_ptr<Step_impl> Navx_drive_straight::clone()const{
+	return unique_ptr<Step_impl>(new Navx_drive_straight(*this));
+}
+
+bool Navx_drive_straight::operator==(Navx_drive_straight const& a)const{
 	return target_distance==a.target_distance && drive_goal==a.drive_goal;
 }
 

@@ -37,6 +37,26 @@ Executive get_auto_mode(Next_mode_info info){
 	//Auto mode which does nothing
 	const Executive auto_null{Teleop{}};
 
+	Executive motion_profile_test{Chain{
+		Step{MP_drive{100.0}}, //drive 100 inches
+		Executive{Teleop{}}	
+	}};
+
+	Executive drive_test{Chain{
+		Step{Drive(1)},
+		Executive{Teleop()}
+	}};
+
+	Executive drive_straight_test{Chain{
+		Step{Navx_drive_straight{360.0}},
+		Executive{Teleop()}
+	}};
+	
+	Executive rotate_test{Chain{
+		Step{Navx_rotate{90.0}},
+		Executive{Teleop()}
+	}};
+
 	return auto_null;
 
 	/*

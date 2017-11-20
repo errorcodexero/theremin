@@ -1,5 +1,7 @@
-*.swp
 *.o
 bazel-*
 t.mk
 FRCUserProgram
+*.swp
+backups/
+log/
