@@ -21,7 +21,15 @@ string get_logfilename(){
 	return name();
 }
 
-#define ROBOT_OUTPUTS(X) X(pwm) X(solenoid) X(relay) X(digital_io) X(talon_srx) X(driver_station)
+#define ROBOT_OUTPUTS(X) \
+	X(pwm) \
+	X(solenoid) \
+	X(relay) \
+	X(digital_io) \
+	X(talon_srx) \
+	X(navx) \
+	X(driver_station) \
+	X(pump)
 
 #define LOG_INNER(NAME) log(o,header,prefix+"_"#NAME,a.NAME);
 
@@ -29,26 +37,22 @@ string get_logfilename(){
 
 #define JOYSTICK_DATA(X) X(axis) X(button) X(pov)
 
-#define TALON_SRX_INPUT(X) \
-	X(encoder_position) \
-	X(fwd_limit_switch)\
-	X(rev_limit_switch)\
-	X(a)\
-	X(b)\
-	X(velocity)\
-	X(current)
-
 #define ROBOT_MODE(X) X(autonomous) X(enabled)
 
 #define ROBOT_INPUTS(X) \
 	X(robot_mode) \
 	X(now) \
+	X(ds_info) \
 	X(joystick) \
 	X(digital_io) \
 	X(analog) \
 	X(talon_srx) \
+	X(navx) \
+	X(driver_station) \
+	X(orientation) \
 	X(current) \
-	X(pump)
+	X(pump) \
+	X(camera)
 
 template<typename Func>
 void visit(Func f,double d){
@@ -82,9 +86,61 @@ void visit(Func f,Joystick_data const& a){
 }
 
 template<typename Func>
+void visit(Func f,Alliance const& a){
+	f.terminal(a);
+}
+
+template<typename Func>
+void visit(Func f,DS_info const& a){
+	#define X(TYPE,NAME) f(""#NAME,a.NAME);
+	DS_INFO_ITEMS(X)
+	#undef X
+}
+
+template<typename Func>
+void visit(Func f,Navx_input const& a){
+	#define X(TYPE,NAME,...) f(""#NAME,a.NAME);
+	NAVX_INPUT_ITEMS(X)
+	#undef X
+}
+
+template<typename Func>
+void visit(Func f,Navx_output const& a){
+	#define X(TYPE,NAME,...) f(""#NAME,a.NAME);
+	NAVX_OUTPUT_ITEMS(X)
+	#undef X
+}
+
+template<typename Func>
 void visit(Func f,Talon_srx_input const& a){
-	#define X(NAME) f(""#NAME,a.NAME);
-	TALON_SRX_INPUT(X)
+	#define X(TYPE,NAME) f(""#NAME,a.NAME);
+	TALON_SRX_INPUT_ITEMS(X)
+	#undef X
+}
+
+template<typename Func>
+void visit(Func f,Talon_srx_output::Mode const& a){
+	f.terminal(a);
+}
+
+template<typename Func>
+void visit(Func f,Talon_srx_output const& a){
+	#define X(TYPE,NAME) f(""#NAME,a.NAME);
+	TALON_SRX_OUTPUT_ITEMS(X)
+	#undef X
+}
+
+template<typename Func>
+void visit(Func f,Pump_input const& a){
+	#define X(TYPE,NAME) f(""#NAME,a.NAME);
+	PUMP_INPUT_ITEMS(X)
+	#undef X
+}
+
+template<typename Func>
+void visit(Func f,Pump_output const& a){
+	#define X(TYPE,NAME) f(""#NAME,a.NAME);
+	PUMP_OUTPUT_ITEMS(X)
 	#undef X
 }
 
@@ -126,14 +182,26 @@ void visit(Func f,Digital_out const& a){
 }
 
 template<typename Func>
-void visit(Func f,Talon_srx_output const& r){
-	#define TALON_SRX_OUTPUTS(X) X(power_level)
-	TALON_SRX_OUTPUTS(VISIT)
+void visit(Func f,Camera const& r){
+	#define CAMERA_ITEMS(X) X(FOV) X(enabled) X(blocks)
+	CAMERA_ITEMS(VISIT)
+}
+
+template<typename Func>
+void visit(Func f,PID_values const& r){
+	#define PID_VALUE_ITEMS(X) X(p) X(i) X(d) X(f)
+	PID_VALUE_ITEMS(VISIT)
 }
 
 template<typename Func>
 void visit(Func f,Driver_station_output const& r){
 	#define DRIVER_STATION_OUTPUT(X) X(digital)
+	DRIVER_STATION_OUTPUT(VISIT)
+}
+
+template<typename Func>
+void visit(Func f,Driver_station_input const& r){
+	#define DRIVER_STATION_INPUT(X) X(analog) X(digital)
 	DRIVER_STATION_OUTPUT(VISIT)
 }
 
@@ -164,6 +232,21 @@ void visit(Func f,Motor_check::Status a){
 template<typename Func>
 void visit(Func f,float a){
 	f.terminal(a);
+}
+
+template<typename Func, typename T>
+void visit(Func f,vector<T> v){
+	f.terminal(v);
+}
+
+template<typename Func>
+void visit(Func f,string s){
+	f.terminal(s);
+}
+
+template<typename Func>
+void visit(Func f,long int i){
+	f.terminal(i);
 }
 
 template<typename Func>

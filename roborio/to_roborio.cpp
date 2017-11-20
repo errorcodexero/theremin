@@ -3,6 +3,7 @@
 #include "../control/main.h"
 #include "dio_control.h"
 #include "talon_srx_control.h"
+#include "pump_control.h"
 #include "navx_control.h"
 #include <netinet/in.h>
 #include <arpa/inet.h>
@@ -180,7 +181,8 @@ class To_roborio
 	//NetworkTable *table;
 	//Gyro *gyro;
 	frc::PowerDistributionPanel *power;
-	frc::Compressor *compressor;
+	Pump_control pump_control;
+	//frc::Compressor *compressor;
 	frc::DriverStation& driver_station;
 	Pixy::PixyUART uart;
 	Pixy::PixyCam camera;
@@ -232,6 +234,7 @@ public:
 			//TODO: Note this somehow.
 		}*/
 
+		/*
 		compressor=new frc::Compressor();
 		if(compressor){
 			//for now I'm assuming that this means that it will run automatically.  I haven't seen any documentation that says what this does though.
@@ -239,6 +242,7 @@ public:
 		}else{
 			error_code|=512;
 		}
+		*/
 		
 		//Slave
 		
@@ -371,6 +375,7 @@ public:
 			}
 			talon_srx_controls.set(out.talon_srx,enable_all); 
 		}
+		pump_control.set(out.pump);
 		return error_code;
 	}
 	
@@ -405,6 +410,7 @@ public:
 		error_code|=in1.second;
 		in.digital_io=digital_io.get();
 		in.talon_srx=talon_srx_controls.get();
+		in.pump=pump_control.get();
 		/*if(gyro){
 			in.orientation=gyro->GetAngle();
 		}*/

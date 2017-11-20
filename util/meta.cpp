@@ -12,14 +12,14 @@ using namespace std;
 	X(DIGITAL_IO,Digital_io_id,digital_io)\
 	X(TALON_SRX,Talon_srx_id,talon_srx)\
 	X(DRIVER_STATION,Driver_station,driver_station)\
-	X(PUMP_AUTO,Pump_auto,pump_auto)
+	X(PUMP,Pump,pump)
 
 #define X(A,B,C) \
 	struct B{}; \
 	std::ostream& operator<<(ostream& o,B){ return o<<""#A; } \
 	bool operator<(B,B){ return 0; }
 X(DRIVER_STATION,Driver_station,driver_station)
-X(PUMP_AUTO,Pump_auto,pump_auto)
+X(PUMP,Pump,pump)
 	X(ROBOT_MODE,Robot_mode_in,robot_mode)\
 	X(NOW,Now,now)\
 	X(JOYSTICK,Joystick,joystick)\
@@ -134,7 +134,7 @@ set<Robot_output> differences(Robot_outputs const& a,Robot_outputs const& b){
 
 	#define X(A,B,C) if(a.C!=b.C) r|=Robot_output{B{}};
 	X(DRIVER_STATION,Driver_station,driver_station)\
-	X(PUMP_AUTO,Pump_auto,pump_auto)
+	X(PUMP,Pump,pump)
 	#undef X
 	return r;
 }

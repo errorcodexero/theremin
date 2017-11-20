@@ -617,7 +617,7 @@ Drivebase::Output drive_straight(Drivebase::Status status, Drivebase::Goal goal)
 	if(fabs(out.l) > .0001 && fabs(out.l) < FLOOR) out.l = copysign(FLOOR, out.l);
 	if(fabs(out.r) > .0001 && fabs(out.r) < FLOOR) out.r = copysign(FLOOR, out.r);
 
-	cout << status.now << " / " << status.distances.l << ":" << status.distances.r << " / " << out.l << ":" << out.r << " / " << status.angle << " / " << goal.angle() << " / " << error_d << " / " << goal.angle_i() << " / " << goal.distances().l << "\n";
+	//cout << status.now << " / " << status.distances.l << ":" << status.distances.r << " / " << out.l << ":" << out.r << " / " << status.angle << " / " << goal.angle() << " / " << error_d << " / " << goal.angle_i() << " / " << goal.distances().l << "\n";
 
 	return out;
 }
