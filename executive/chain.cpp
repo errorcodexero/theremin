@@ -20,6 +20,7 @@ Executive Chain::next_mode(Next_mode_info a){
 	if(current_step>=steps.size()) return next;
 	switch(steps[current_step].done(a)){
 		case Step::Status::FINISHED_SUCCESS:
+			cout<<"chain: "<<a.status.drive<<"\n";
 			current_step++;
 			if(current_step==steps.size()) return next;
 		case Step::Status::UNFINISHED:

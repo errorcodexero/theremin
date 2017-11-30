@@ -40,7 +40,7 @@ struct Drivebase{
 		X(Encoder_info,left) \
 		X(Encoder_info,right) \
 		X(Distances,distances) \
-		X(double,angle)
+		X(double,angle) 
 	DECLARE_STRUCT(Input,DRIVEBASE_INPUT)
 
 	struct Input_reader{
