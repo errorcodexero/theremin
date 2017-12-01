@@ -48,10 +48,16 @@ struct Drivebase{
 	};
 	Input_reader input_reader;
 
-	#define DRIVEBASE_OUTPUT(X)\
-		X(double,l)\
-		X(double,r)
-	DECLARE_STRUCT(Output,DRIVEBASE_OUTPUT)
+	#define DRIVEBASE_OUTPUT_ITEMS(X) \
+		X(double,l) \
+		X(double,r) \
+		X(Talon_srx_output::Speed_mode,talon_speed_mode)
+	struct Output{
+		STRUCT_MEMBERS(DRIVEBASE_OUTPUT_ITEMS)
+		
+		Output();
+		Output(DRIVEBASE_OUTPUT_ITEMS(TYPES) bool=0);
+	};
 
 	#define SPEEDS_ITEMS(X) \
 		X(double,l) \
@@ -98,14 +104,18 @@ struct Drivebase{
 
 		private:
 		Mode mode_;
-
+	
 		Distances distances_;//used for both sides of the robot
 		double left_,right_;
 
+		Talon_srx_output::Speed_mode talon_speed_mode_;
+		
 		public:
 		Goal();	
 
 		Mode mode()const;
+
+		Talon_srx_output::Speed_mode talon_speed_mode()const;
 		
 		Distances distances()const;
 		
@@ -113,7 +123,9 @@ struct Drivebase{
 		double left()const;
 		
 		static Goal distances(Distances);
-		static Goal absolute(double,double);		
+		static Goal distances(Distances,Talon_srx_output::Speed_mode);
+		static Goal absolute(double,double);
+		static Goal absolute(double,double,Talon_srx_output::Speed_mode);
 	};
 };
 bool operator==(Drivebase::Encoder_ticks const&,Drivebase::Encoder_ticks const&);
