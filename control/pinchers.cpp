@@ -4,7 +4,7 @@ using namespace std;
 
 #define PISTON_LOC 3
 #define BUCKET_SENSOR 4
-#define BUCKET_LIGHT 0
+#define BUCKET_LIGHT 2
 
 Pinchers::Input::Input():enabled(false),bucket_sensor(false){}
 Pinchers::Input::Input(bool a,bool b):enabled(a),bucket_sensor(b){}
@@ -152,12 +152,12 @@ bool operator==(Pinchers,Pinchers){ return 1; }
 bool operator!=(Pinchers a, Pinchers b){ return !(a==b); }
 
 Pinchers::Input Pinchers::Input_reader::operator()(Robot_inputs const& r) const{
-	return {r.robot_mode.enabled,r.digital_io.in[BUCKET_SENSOR]==Digital_in::_1};
+	return {r.robot_mode.enabled,r.digital_io.in[BUCKET_SENSOR]==Digital_in::_0};
 }
 
 Robot_inputs Pinchers::Input_reader::operator()(Robot_inputs r, Pinchers::Input in) const{
 	r.robot_mode.enabled = in.enabled;
-	r.digital_io.in[BUCKET_SENSOR] = in.bucket_sensor ? Digital_in::_1 : Digital_in::_0;
+	r.digital_io.in[BUCKET_SENSOR] = in.bucket_sensor ? Digital_in::_0 : Digital_in::_1;
 	return r;
 }
 

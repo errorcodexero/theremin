@@ -8,7 +8,7 @@ using namespace std;
 Grabber_arm::Input::Input():enabled(false),limit_switch(false){}
 Grabber_arm::Input::Input(bool a,bool b):enabled(a),limit_switch(b){}
 
-Grabber_arm::Estimator::Estimator():last(Status_detail::DOWN){
+Grabber_arm::Estimator::Estimator():last(Status_detail::UP){
 }
 
 std::set<Grabber_arm::Output> examples(Grabber_arm::Output*){
