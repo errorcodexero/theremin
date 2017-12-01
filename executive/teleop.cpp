@@ -106,7 +106,8 @@ Toplevel::Goal Teleop::run(Run_info info) {
 
 	#ifdef PRINT_OUTS
 	if(info.in.ds_info.connected && (print_number%10)==0){
-		cout<<"\nencoders:"<<info.status.drive<<"\n";
+		cout<<"\npanel:"<<info.panel<<"\n";
+		cout<<"encoder:"<<info.status.drive<<"\n";
 		if(info.in.camera.enabled){
 			cout<<"size: "<<info.in.camera.blocks.size()<<" blocks: "<<info.in.camera.blocks<<"\n";
 			/*for (vector<Pixy::Block>::const_iterator it=info.in.camera.blocks.begin();it!=info.in.camera.blocks.end();it++){

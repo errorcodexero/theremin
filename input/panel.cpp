@@ -108,18 +108,18 @@ Panel interpret_oi(Joystick_data d){
 
 		float grabber = d.axis[GRABBER_AXIS];
 		p.grabber = [&]{
-			static const float AUTO=-1,UP=0,DOWN=1;
-			if(set_button(grabber,AUTO,UP,DOWN)) return Panel::Grabber::UP;
-			if(set_button(grabber,UP,DOWN,ARTIFICIAL_MAX)) return Panel::Grabber::DOWN;
-			return Panel::Grabber::AUTO;
+			static const float UP=-1,DOWN=0,AUTO=1;
+			if(set_button(grabber,UP,DOWN,AUTO)) return Panel::Grabber::DOWN;
+			if(set_button(grabber,DOWN,AUTO,ARTIFICIAL_MAX)) return Panel::Grabber::AUTO;
+			return Panel::Grabber::UP;
 		}();
 
 		float pinchers = d.axis[PINCHERS_AXIS];
 		p.pinchers = [&]{
-			static const float AUTO=-1,OPEN=0,CLOSE=1;
-			if(set_button(pinchers,AUTO,OPEN,CLOSE)) return Panel::Pinchers::OPEN;
-			if(set_button(pinchers,OPEN,CLOSE,ARTIFICIAL_MAX)) return Panel::Pinchers::CLOSE;
-			return Panel::Pinchers::AUTO;
+			static const float OPEN=-1,CLOSE=0,AUTO=1;
+			if(set_button(pinchers,OPEN,CLOSE,AUTO)) return Panel::Pinchers::CLOSE;
+			if(set_button(pinchers,CLOSE,AUTO,ARTIFICIAL_MAX)) return Panel::Pinchers::AUTO;
+			return Panel::Pinchers::OPEN;
 		}();
 
 	}	
