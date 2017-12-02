@@ -92,9 +92,8 @@ Toplevel::Goal Teleop::run(Run_info info) {
 	grabber_toggle.update(info.panel.grabber_toggle);
 	if(grabber_toggle.get()){
 		goals.pinchers=Pinchers::Goal::CLOSE;
-		if(ready(info.status.pinchers,goals.pinchers)){
-			goals.grabber_arm=Grabber_arm::Goal::UP;
-		}
+		if(ready(info.status.pinchers,goals.pinchers)) goals.grabber_arm=Grabber_arm::Goal::UP;
+		else goals.grabber_arm=Grabber_arm::Goal::DOWN;
 	}else{
 		goals.grabber_arm=Grabber_arm::Goal::DOWN;
 		goals.pinchers=Pinchers::Goal::OPEN;
