@@ -177,7 +177,7 @@ void Pinchers::Estimator::update(Time time,Pinchers::Input input,Pinchers::Outpu
 			if(last.state == Status::State::CLOSING){
 				state_timer.update(time,input.enabled);
 			} else if(last.state != Status::State::CLOSED){ 
-				const Time CLOSE_TIME = 1.0;//seconds. assumed
+				const Time CLOSE_TIME = 0.5;//seconds. tested
 				last.state = Status::State::CLOSING;
 				state_timer.set(CLOSE_TIME);
 			}
