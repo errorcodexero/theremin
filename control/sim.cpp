@@ -43,6 +43,7 @@ using Pump_sim=Nop_sim<Pump::Input>;
 using Grabber_arm_sim=Nop_sim<Grabber_arm::Input>;
 using Pinchers_sim=Nop_sim<Pinchers::Input>;
 using Dozer_sim=Nop_sim<Dozer::Input>;
+using Lights_sim=Nop_sim<Lights::Input>;
 
 struct Drivebase_sim{
 	using Input=Drivebase::Input;
