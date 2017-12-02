@@ -81,6 +81,7 @@ Drivebase::Input Drivebase::Input_reader::operator()(Robot_inputs const& in)cons
 	auto encoder_info=[&](unsigned a, unsigned b){
 		return make_pair(in.digital_io.in[a],in.digital_io.in[b]);
 	};
+	//cout<<in.navx.angle<<" "<<total_angle_to_displacement(in.navx.angle)<<" "<<in.navx.yaw<<"\n";
 	return Drivebase::Input{
 		[&](){
 			array<double,Drivebase::MOTORS> r;
@@ -555,7 +556,7 @@ Drivebase::Output trapezoidal_speed_control(Drivebase::Status status, Drivebase:
 	{//for ramping down (based on distance)
 		//Drivebase::Distances error = goal.distances() - status.distances;
 		double error = avg_goal - avg_dist;
-		const double SLOW_WITHIN_DISTANCE = 120; //inches
+		const double SLOW_WITHIN_DISTANCE = 60; //inches
 		const double SLOPE = MAX_OUT / SLOW_WITHIN_DISTANCE; //"volts"/inches //TODO: currently arbitrary value
 		
 		if(error < SLOW_WITHIN_DISTANCE) {
@@ -594,14 +595,14 @@ Drivebase::Output rotation_control(Drivebase::Status status, Drivebase::Goal goa
 	double goal_angle_displacement = total_angle_to_displacement(goal.angle());
 	
 	double error = goal_angle_displacement - status_angle_displacement;
-	double power = target_to_out_power(clamp(error*P,-MAX_OUT,MAX_OUT));
+	double power = clamp(error*P,-MAX_OUT,MAX_OUT);
 	out = Drivebase::Output(power,-power);
 
-	static const double FLOOR = .08;
+	static const double FLOOR = .15;
 	if(fabs(out.l) > .0001 && fabs(out.l) < FLOOR) out.l = copysign(FLOOR, out.l);
 	if(fabs(out.r) > .0001 && fabs(out.r) < FLOOR) out.r = copysign(FLOOR, out.r);
 
-	//cout<<"\n\ngoal:"<<goal.angle()<<","<<goal_angle_displacement<<" status:"<<status.angle<<","<<status_angle_displacement<<" out:"<<out<<"\n\n";
+	cout<<"goal:"<<goal.angle()<<","<<goal_angle_displacement<<" status:"<<status.angle<<","<<status_angle_displacement<<" out:"<<out<<"\n";
 
 	return out;
 }
@@ -662,8 +663,9 @@ bool ready(Drivebase::Status status,Drivebase::Goal goal){
 			}
 		case Drivebase::Goal::Mode::ROTATE:
 			{
-				const double TOLERANCE = 1;//degrees
+				const double TOLERANCE = .2;//degrees
 				double error = total_angle_to_displacement(goal.angle()) - total_angle_to_displacement(status.angle);
+				cout<<"error: "<<fabs(error)<<"   "<<(fabs(error) < TOLERANCE)<<"\n";
 				return fabs(error) < TOLERANCE;
 			}
 		default:
