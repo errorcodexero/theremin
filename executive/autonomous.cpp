@@ -57,9 +57,6 @@ Executive get_auto_mode(Next_mode_info info){
 		Executive{Teleop()}
 	}};
 
-	return auto_null;
-
-	/*
 	
 	if(!info.panel.in_use){
 		return auto_null;//Do nothing during autonomous mode if no panel exists
@@ -90,7 +87,6 @@ Executive get_auto_mode(Next_mode_info info){
 		default:
 			return auto_null;
 	}
-	*/
 }
 
 Executive Autonomous::next_mode(Next_mode_info info){
