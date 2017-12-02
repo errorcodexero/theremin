@@ -82,8 +82,9 @@ Toplevel::Goal Teleop::run(Run_info info) {
 			if(spin) power-=set_drive_speed(info.driver_joystick.axis[Gamepad_axis::RIGHTX],boost,slow);
 			return power;
 		}());
-
-		goals.drive = Drivebase::Goal::absolute(left,right);
+		const Talon_srx_output::Speed_mode DRIVE_SPEED_MODE = Talon_srx_output::Speed_mode::BRAKE;
+		
+		goals.drive = Drivebase::Goal::absolute(left,right,DRIVE_SPEED_MODE);
 	}
 
 	goals.dozer=Dozer::Goal::IN;

@@ -19,7 +19,6 @@ struct Teleop : Executive_impl<Teleop> {
 		X(SINGLE_ARG(std::array<Nudge,NUDGES>),nudges) \
 		X(Posedge_toggle,grabber_toggle) \
 		X(int,print_number)
-				
 
 	STRUCT_MEMBERS(TELEOP_ITEMS)
 

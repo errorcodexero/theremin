@@ -90,6 +90,7 @@ Executive get_auto_mode(Next_mode_info info){
 		default:
 			return auto_null;
 	}
+
 	*/
 }
 
