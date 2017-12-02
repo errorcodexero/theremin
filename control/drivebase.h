@@ -49,10 +49,16 @@ struct Drivebase{
 	};
 	Input_reader input_reader;
 
-	#define DRIVEBASE_OUTPUT(X)\
-		X(double,l)\
-		X(double,r)
-	DECLARE_STRUCT(Output,DRIVEBASE_OUTPUT)
+	#define DRIVEBASE_OUTPUT_ITEMS(X) \
+		X(double,l) \
+		X(double,r) \
+		X(Talon_srx_output::Speed_mode,talon_speed_mode)
+	struct Output{
+		STRUCT_MEMBERS(DRIVEBASE_OUTPUT_ITEMS)
+		
+		Output();
+		Output(DRIVEBASE_OUTPUT_ITEMS(TYPES) bool=0);
+	};
 
 	#define SPEEDS_ITEMS(X) \
 		X(double,l) \
@@ -107,12 +113,17 @@ struct Drivebase{
 		Distances distances_;//used for controlling all drive motors on the robot 
 		double angle_;//degrees
 		double angle_i_;//integral of angle error
+	
 		double left_,right_;
 
+		Talon_srx_output::Speed_mode talon_speed_mode_;
+		
 		public:
 		Goal();	
 
 		Mode mode()const;
+
+		Talon_srx_output::Speed_mode talon_speed_mode()const;
 		
 		Distances distances()const;
 
@@ -122,10 +133,17 @@ struct Drivebase{
 		double right()const;
 		double left()const;
 		
-		static Goal distances(Distances);
-		static Goal absolute(double,double);
 		static Goal drive_straight(Distances,double,double);
-		static Goal rotate(Rad);
+		static Goal drive_straight(Distances,double,double,Talon_srx_output::Speed_mode);
+	
+		static Goal rotate(double);
+		static Goal rotate(double,Talon_srx_output::Speed_mode);
+	
+		static Goal distances(Distances);
+		static Goal distances(Distances,Talon_srx_output::Speed_mode);
+	
+		static Goal absolute(double,double);
+		static Goal absolute(double,double,Talon_srx_output::Speed_mode);
 	};
 };
 bool operator==(Drivebase::Encoder_ticks const&,Drivebase::Encoder_ticks const&);

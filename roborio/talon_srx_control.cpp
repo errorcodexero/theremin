@@ -1,5 +1,6 @@
 #include "talon_srx_control.h"
 #include "CANTalon.h"
+#include "CANSpeedController.h"
 #include "../util/util.h"
 #include <cmath>
 #include <cassert>
@@ -59,8 +60,8 @@ void Talon_srx_control::set(Talon_srx_output a, bool enable) {
 		}
 		return;
 	}
-	switch(a.mode){
-		case Talon_srx_output::Mode::PERCENT:
+	switch(a.control_mode){
+		case Talon_srx_output::Control_mode::PERCENT:
 			/* TODO:  was causing problems so it has been removed -- should we fix it and use it?
 			if(!approx_equal(a.power_level,clip(a.power_level))){//make sure we're not setting the power to over 100% or under -100%
 				cout<<endl<<"Power level set too high: "<<a.power_level<<endl;
@@ -80,7 +81,7 @@ void Talon_srx_control::set(Talon_srx_output a, bool enable) {
 				out.power_level=a.power_level;
 			}
 			break;
-		case Talon_srx_output::Mode::SPEED:
+		case Talon_srx_output::Control_mode::SPEED:
 			if(mode!=Talon_srx_control::Mode::SPEED || !pid_approx(out.pid,a.pid)){
 				talon->SetControlMode(frc::CANSpeedController::kSpeed);
 				talon->SetPID(a.pid.p,a.pid.i,a.pid.d,a.pid.f);	
@@ -96,6 +97,19 @@ void Talon_srx_control::set(Talon_srx_output a, bool enable) {
 				talon->Set(a.speed);
 				out.speed=a.speed;
 			}
+			break;
+		default:
+			nyi
+	}
+	switch(a.speed_mode){
+		case Talon_srx_output::Speed_mode::BRAKE:
+			talon->ConfigNeutralMode(frc::CANSpeedController::NeutralMode::kNeutralMode_Brake);
+			break;
+		case Talon_srx_output::Speed_mode::COAST:
+			talon->ConfigNeutralMode(frc::CANSpeedController::NeutralMode::kNeutralMode_Coast);
+			break;
+		case Talon_srx_output::Speed_mode::NO_OVERRIDE:
+			talon->ConfigNeutralMode(frc::CANSpeedController::NeutralMode::kNeutralMode_Jumper);
 			break;
 		default:
 			nyi
