@@ -551,7 +551,7 @@ Drivebase::Output trapezoidal_speed_control(Drivebase::Status status, Drivebase:
 	{//for ramping down (based on distance)
 		//Drivebase::Distances error = goal.distances() - status.distances;
 		double error = avg_goal - avg_dist;
-		const double SLOW_WITHIN_DISTANCE = 120; //inches
+		const double SLOW_WITHIN_DISTANCE = 40; //inches
 		const double SLOPE = MAX_OUT / SLOW_WITHIN_DISTANCE; //"volts"/inches //TODO: currently arbitrary value
 		
 		if(error < SLOW_WITHIN_DISTANCE) {
@@ -597,7 +597,7 @@ Drivebase::Output rotation_control(Drivebase::Status status, Drivebase::Goal goa
 	if(fabs(out.l) > .0001 && fabs(out.l) < FLOOR) out.l = copysign(FLOOR, out.l);
 	if(fabs(out.r) > .0001 && fabs(out.r) < FLOOR) out.r = copysign(FLOOR, out.r);
 
-	//cout<<"\n\ngoal:"<<goal.angle()<<","<<goal_angle_displacement<<" status:"<<status.angle<<","<<status_angle_displacement<<" out:"<<out<<"\n\n";
+	cout<<"\n\ngoal:"<<goal.angle()<<","<<goal_angle_displacement<<" status:"<<status.angle<<","<<status_angle_displacement<<" out:"<<out<<"\n\n";
 
 	return out;
 }
@@ -617,7 +617,7 @@ Drivebase::Output drive_straight(Drivebase::Status status, Drivebase::Goal goal)
 	if(fabs(out.l) > .0001 && fabs(out.l) < FLOOR) out.l = copysign(FLOOR, out.l);
 	if(fabs(out.r) > .0001 && fabs(out.r) < FLOOR) out.r = copysign(FLOOR, out.r);
 
-	//cout << status.now << " / " << status.distances.l << ":" << status.distances.r << " / " << out.l << ":" << out.r << " / " << status.angle << " / " << goal.angle() << " / " << error_d << " / " << goal.angle_i() << " / " << goal.distances().l << "\n";
+	cout << status.now << " / " << status.distances.l << ":" << status.distances.r << " / " << out.l << ":" << out.r << " / " << status.angle << " / " << goal.angle() << " / " << error_d << " / " << goal.angle_i() << " / " << goal.distances().l << "\n";
 
 	return out;
 }
