@@ -391,6 +391,8 @@ struct Robot_inputs{
 
 	Camera camera;
 
+	Maybe_inline<int> vision_error;
+
 	Robot_inputs();
 };
 bool operator<(Robot_inputs,Robot_inputs);

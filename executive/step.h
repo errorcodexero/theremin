@@ -223,4 +223,25 @@ struct Navx_rotate: Step_impl_inner<Navx_rotate>{//orients the robot to a certai
 	bool operator==(Navx_rotate const&)const;
 };
 
+struct Vision_rotate: Step_impl_inner<Vision_rotate>{
+	explicit Vision_rotate();
+	
+	Toplevel::Goal run(Run_info,Toplevel::Goal);
+	Toplevel::Goal run(Run_info);
+	Step::Status done(Next_mode_info);
+	std::unique_ptr<Step_impl> clone()const;
+	bool operator==(Vision_rotate const&)const;
+};
+
+struct Vision_drive: Step_impl_inner<Vision_drive>{
+	public:
+	explicit Vision_drive();
+	
+	Toplevel::Goal run(Run_info,Toplevel::Goal);
+	Toplevel::Goal run(Run_info);
+	Step::Status done(Next_mode_info);
+	std::unique_ptr<Step_impl> clone()const;
+	bool operator==(Vision_drive const&)const;
+};
+
 #endif

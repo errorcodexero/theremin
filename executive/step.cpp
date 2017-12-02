@@ -82,7 +82,6 @@ std::unique_ptr<Step_impl> Rotate::clone()const{
 bool Rotate::operator==(Rotate const& b)const{
 	return target_angle == b.target_angle && initial_distances == b.initial_distances && side_goals == b.side_goals && motion_profile == b.motion_profile && in_range == b.in_range;
 }
-////
 
 Navx_rotate::Navx_rotate(double a):target_angle(a){}
 
@@ -108,6 +107,89 @@ std::unique_ptr<Step_impl> Navx_rotate::clone()const{
 bool Navx_rotate::operator==(Navx_rotate const& b)const{
 	return target_angle == b.target_angle;
 }
+
+Vision_rotate::Vision_rotate(){}
+
+Toplevel::Goal Vision_rotate::run(Run_info info){
+	return run(info,{});
+}
+
+Toplevel::Goal Vision_rotate::run(Run_info info,Toplevel::Goal goals){
+	Drivebase::Output out = {0,0, goals.drive.talon_speed_mode()};
+	static const double MAX_OUT = 0.5;
+	static const double P = 0.0025;//TODO: currently arbitrary value
+
+	double power = [&]{
+		if(info.in.vision_error){
+			return target_to_out_power(clamp(*info.in.vision_error*P,-MAX_OUT,MAX_OUT));
+		}
+		const double SEARCH_POWER = 0.3;
+		return SEARCH_POWER;
+	}();
+	
+	out = Drivebase::Output(power,-power,goals.drive.talon_speed_mode());
+
+	static const double FLOOR = .08;
+	if(fabs(out.l) > .0001 && fabs(out.l) < FLOOR) out.l = copysign(FLOOR, out.l);
+	if(fabs(out.r) > .0001 && fabs(out.r) < FLOOR) out.r = copysign(FLOOR, out.r);
+
+	goals.drive = Drivebase::Goal::absolute(out.l, out.r);
+	return goals;
+}
+
+Step::Status Vision_rotate::done(Next_mode_info info){
+	const int TOLERANCE = 2;
+	if(!info.in.vision_error) return Step::Status::UNFINISHED;
+	return (abs(*info.in.vision_error) < TOLERANCE) ? Step::Status::FINISHED_SUCCESS : Step::Status::UNFINISHED;	
+}
+
+std::unique_ptr<Step_impl> Vision_rotate::clone()const{
+	return unique_ptr<Step_impl>(new Vision_rotate(*this));
+}
+
+bool Vision_rotate::operator==(Vision_rotate const&)const{
+	return true;
+}
+
+Vision_drive::Vision_drive(){}
+
+Toplevel::Goal Vision_drive::run(Run_info info){
+	return run(info,{});
+}
+
+Toplevel::Goal Vision_drive::run(Run_info info,Toplevel::Goal goals){
+	static const double MAX_OUT = 0.5;
+	static const double P = 0.0025;//TODO: currently arbitrary value
+
+	Drivebase::Output out = {MAX_OUT,MAX_OUT, goals.drive.talon_speed_mode()};
+
+	double adjustment_power = [&]{
+		if(info.in.vision_error){
+			return *info.in.vision_error * P;
+		}
+		return 0.0;
+	}();	
+	
+	out.l += adjustment_power;
+	out.r -= adjustment_power;
+
+	goals.drive = Drivebase::Goal::absolute(out.l, out.r);
+		
+	return goals;
+}
+
+Step::Status Vision_drive::done(Next_mode_info info){
+	return info.status.pinchers.has_bucket ? Step::Status::FINISHED_SUCCESS : Step::Status::UNFINISHED;	
+}
+
+std::unique_ptr<Step_impl> Vision_drive::clone()const{
+	return unique_ptr<Step_impl>(new Vision_drive(*this));
+}
+
+bool Vision_drive::operator==(Vision_drive const&)const{
+	return true;
+}
+
 
 //Step::Step(Step_impl const& a):impl(a.clone().get()){}
 Step::Step(Step_impl const& a){
