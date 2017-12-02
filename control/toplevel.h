@@ -8,13 +8,15 @@
 #include "pinchers.h"
 #include "dozer.h"
 #include "nop.h"
+#include "lights.h"
 
 #define TOPLEVEL_ITEMS \
 	X(Pump,pump,Pump::Goal::AUTO)\
 	X(Drivebase,drive,)\
 	X(Grabber_arm,grabber_arm,Grabber_arm::Goal::UP)\
 	X(Pinchers,pinchers,Pinchers::Goal::OPEN)\
-	X(Dozer,dozer,Dozer::Goal::STOP) 
+	X(Dozer,dozer,Dozer::Goal::STOP) \
+	X(Lights,lights,)
 	
 class Toplevel{
 	public:
