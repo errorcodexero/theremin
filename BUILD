@@ -478,6 +478,21 @@ cc_test(
 )
 
 cc_library(
+	name="lights",
+	srcs=["control/lights.cpp"],
+	hdrs=["control/lights.h"],
+	deps=[":interface",":nop"]
+)
+
+cc_test(
+	name="lights_test",
+	srcs=["control/lights.cpp","control/lights.h","control/formal.h"],
+	copts=["-DLIGHTS_TEST"],
+	deps=[":lights"],
+	timeout="short"
+)
+
+cc_library(
 	name="force",
 	srcs=["control/force.cpp"],
 	hdrs=["control/force.h"],
@@ -504,14 +519,14 @@ cc_library(
 	name="toplevel",
 	srcs=["control/toplevel.cpp"],
 	hdrs=["control/toplevel.h"],
-	deps=[":nop",":pump",":drivebase",":input"]
+	deps=[":nop",":pump",":drivebase",":lights",":input"]
 )
 
 cc_test(
 	name="toplevel_test",
 	srcs=["control/toplevel.cpp","control/toplevel.h","control/formal.h"],
 	copts=["-DTOPLEVEL_TEST"],
-	deps=[":nop",":pump",":drivebase",":input",":output"],
+	deps=[":nop",":pump",":drivebase",":lights",":input",":output"],
 	timeout="short"
 )
 
