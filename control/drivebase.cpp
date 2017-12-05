@@ -589,7 +589,7 @@ double total_angle_to_displacement(const double ANGLE){//converts total angle to
 Drivebase::Output rotation_control(Drivebase::Status status, Drivebase::Goal goal){
 	Drivebase::Output out = {0,0};
 	static const double MAX_OUT = 0.5;
-	static const double P = 0.0025;//TODO: currently arbitrary value
+	static const double P = 0.005;//TODO: currently arbitrary value
 	
 	double status_angle_displacement = total_angle_to_displacement(status.angle);
 	double goal_angle_displacement = total_angle_to_displacement(goal.angle());
@@ -602,7 +602,7 @@ Drivebase::Output rotation_control(Drivebase::Status status, Drivebase::Goal goa
 	if(fabs(out.l) > .0001 && fabs(out.l) < FLOOR) out.l = copysign(FLOOR, out.l);
 	if(fabs(out.r) > .0001 && fabs(out.r) < FLOOR) out.r = copysign(FLOOR, out.r);
 
-	cout<<"goal:"<<goal.angle()<<","<<goal_angle_displacement<<" status:"<<status.angle<<","<<status_angle_displacement<<" out:"<<out<<"\n";
+	cout<<status.now<<" / "<<goal.angle()<<" / "<<goal_angle_displacement<<" / "<<status.angle<<" / "<<status_angle_displacement<<" / "<<out.l<<":"<<out.r<<"\n";
 
 	return out;
 }
@@ -665,7 +665,7 @@ bool ready(Drivebase::Status status,Drivebase::Goal goal){
 			{
 				const double TOLERANCE = .2;//degrees
 				double error = total_angle_to_displacement(goal.angle()) - total_angle_to_displacement(status.angle);
-				cout<<"error: "<<fabs(error)<<"   "<<(fabs(error) < TOLERANCE)<<"\n";
+				//cout<<"error: "<<fabs(error)<<"   "<<(fabs(error) < TOLERANCE)<<"\n";
 				return fabs(error) < TOLERANCE;
 			}
 		default:
