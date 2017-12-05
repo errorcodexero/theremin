@@ -15,7 +15,7 @@ struct Pump{
 
 	enum class Status{FULL,NOT_FULL};
 	typedef Status Status_detail;
-	typedef Status Input;
+	typedef Status Input;//TODO: add examples for Input
 
 	struct Input_reader{
 		Robot_inputs operator()(Robot_inputs,Input)const;
