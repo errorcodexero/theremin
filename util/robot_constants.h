@@ -2,8 +2,8 @@
 #define ROBOT_CONSTANTS_H
 
 struct Robot_constants{
-	static constexpr double ROBOT_WIDTH = 19.5; //inches, between center of wheels
-	static constexpr double DRIVE_WHEEL_DIAMETER = 6.0; //inches
+	static constexpr double ROBOT_WIDTH = 33;
+	static constexpr double DRIVE_WHEEL_DIAMETER = 4.2;
 };
 
 #endif

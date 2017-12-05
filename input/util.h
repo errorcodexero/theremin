@@ -28,6 +28,6 @@ namespace Gamepad_axis{
 	static const unsigned LEFTX=0,LEFTY=1,LTRIGGER=2,RTRIGGER=3,RIGHTX=4,RIGHTY=5;
 }
 
-unsigned interpret_20_turn_pot(Volt);
+unsigned interpret_10_turn_pot(Volt);
 
 #endif

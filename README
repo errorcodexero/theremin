@@ -1,6 +1,6 @@
 This repository is for the code that interfaces to the robot through data structures that list the possible inputs and outputs rather than through the normal WPIlib methods. It also code for a robot which is written to that interface.
 
-This is for our software development robot.
+This is for the 2017 Bunnybots robot.
 
 Getting started:
 

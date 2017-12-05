@@ -150,7 +150,6 @@ class Ram:public Step_impl_inner<Ram>{//Drives straight a certain distance
 	bool operator==(Ram const&)const;
 };
 
-
 class Wait: public Step_impl_inner<Wait>{//Either stops all operation for a given period of time or continues to run the same goals for that time
 	Countdown_timer wait_timer;//seconds
 	public:
