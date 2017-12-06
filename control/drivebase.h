@@ -104,7 +104,7 @@ struct Drivebase{
 		private:
 		Mode mode_;
 
-		Distances distances_;//used for controlling all drive motors on the robot 
+		Distances distance_changes_, distances_;//used for controlling all drive motors on the robot 
 		double angle_;//degrees
 		double angle_i_;//integral of angle error
 		double left_,right_;
@@ -114,6 +114,7 @@ struct Drivebase{
 
 		Mode mode()const;
 		
+		Distances distance_changes()const;
 		Distances distances()const;
 
 		Rad angle()const;
@@ -124,7 +125,7 @@ struct Drivebase{
 		
 		static Goal distances(Distances);
 		static Goal absolute(double,double);
-		static Goal drive_straight(Distances,double,double);
+		static Goal drive_straight(Distances,Distances,double,double);
 		static Goal rotate(Rad);
 	};
 };

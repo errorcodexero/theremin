@@ -243,7 +243,7 @@ set<Drivebase::Status> examples(Drivebase::Status*){
 set<Drivebase::Goal> examples(Drivebase::Goal*){
 	return {
 		Drivebase::Goal::rotate(0),
-		Drivebase::Goal::drive_straight(0,0,0),
+		Drivebase::Goal::drive_straight(0,0,0,0),
 		Drivebase::Goal::distances({0,0}),
 		Drivebase::Goal::absolute(0,0),
 		Drivebase::Goal::absolute(1,1)
@@ -261,6 +261,11 @@ Drivebase::Goal::Goal():mode_(Drivebase::Goal::Mode::ABSOLUTE),distances_({0,0})
 
 Drivebase::Goal::Mode Drivebase::Goal::mode()const{
 	return mode_;
+}
+
+Drivebase::Distances Drivebase::Goal::distance_changes()const{
+	assert(mode_ == Drivebase::Goal::Mode::DISTANCES || mode_ == Drivebase::Goal::Mode::DRIVE_STRAIGHT);
+	return distance_changes_;
 }
 
 Drivebase::Distances Drivebase::Goal::distances()const{
@@ -303,10 +308,11 @@ Drivebase::Goal Drivebase::Goal::absolute(double left,double right){
 	return a;
 }
 
-Drivebase::Goal Drivebase::Goal::drive_straight(Drivebase::Distances target, double initial_angle, double initial_angle_i){
+Drivebase::Goal Drivebase::Goal::drive_straight(Drivebase::Distances start_distances, Drivebase::Distances distance_changes, double initial_angle, double initial_angle_i){
 	Drivebase::Goal a;
 	a.mode_ = Drivebase::Goal::Mode::DRIVE_STRAIGHT;
-	a.distances_ = target;
+	a.distance_changes_ = distance_changes;
+	a.distances_ = start_distances + distance_changes;
 	a.angle_ = initial_angle;
 	a.angle_i_ = initial_angle_i;
 	return a;
@@ -556,8 +562,10 @@ Drivebase::Output trapezoidal_speed_control(Drivebase::Status status, Drivebase:
 	{//for ramping down (based on distance)
 		//Drivebase::Distances error = goal.distances() - status.distances;
 		double error = avg_goal - avg_dist;
-		const double SLOW_WITHIN_DISTANCE = 60; //inches
+		const double SLOW_WITHIN_DISTANCE = .3333 * .5 * (goal.distance_changes().l + goal.distance_changes().r); //inches
 		const double SLOPE = MAX_OUT / SLOW_WITHIN_DISTANCE; //"volts"/inches //TODO: currently arbitrary value
+
+		cout<<SLOW_WITHIN_DISTANCE<<"     "<<goal.distance_changes()<<"\n";
 		
 		if(error < SLOW_WITHIN_DISTANCE) {
 			double slow_out = clamp(error * SLOPE, -avg_last, avg_last);
@@ -622,7 +630,7 @@ Drivebase::Output drive_straight(Drivebase::Status status, Drivebase::Goal goal)
 	if(fabs(out.l) > .0001 && fabs(out.l) < FLOOR) out.l = copysign(FLOOR, out.l);
 	if(fabs(out.r) > .0001 && fabs(out.r) < FLOOR) out.r = copysign(FLOOR, out.r);
 
-	//cout << status.now << " / " << status.distances.l << ":" << status.distances.r << " / " << out.l << ":" << out.r << " / " << status.angle << " / " << goal.angle() << " / " << error_d << " / " << goal.angle_i() << " / " << goal.distances().l << "\n";
+	cout << status.now << " / " << status.distances.l << ":" << status.distances.r << " / " << out.l << ":" << out.r << " / " << status.angle << " / " << goal.angle() << " / " << error_d << " / " << goal.angle_i() << " / " << goal.distances().l << "\n";
 
 	return out;
 }

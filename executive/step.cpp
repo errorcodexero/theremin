@@ -261,7 +261,7 @@ bool MP_drive::operator==(MP_drive const& a)const{
 Navx_drive_straight::Navx_drive_straight(Inch target):target_distance(target),angle_i(0){}
 
 Step::Status Navx_drive_straight::done(Next_mode_info info){
-	drive_goal = Drivebase::Goal::drive_straight(Drivebase::Distances(target_distance) + info.status.drive.distances, info.status.drive.angle, angle_i);
+	drive_goal = Drivebase::Goal::drive_straight(info.status.drive.distances, Drivebase::Distances(target_distance), info.status.drive.angle, angle_i);
 	return ready(info.status.drive, *drive_goal) ? Step::Status::FINISHED_SUCCESS : Step::Status::UNFINISHED;
 }
 
@@ -270,9 +270,9 @@ Toplevel::Goal Navx_drive_straight::run(Run_info info){
 }
 
 Toplevel::Goal Navx_drive_straight::run(Run_info info, Toplevel::Goal goals){
-	drive_goal = Drivebase::Goal::drive_straight(Drivebase::Distances(target_distance) + info.status.drive.distances, info.status.drive.angle, angle_i);
+	drive_goal = Drivebase::Goal::drive_straight(info.status.drive.distances, Drivebase::Distances(target_distance), info.status.drive.angle, angle_i);
 	angle_i += (total_angle_to_displacement((*drive_goal).angle()) - total_angle_to_displacement(info.status.drive.angle)) * info.status.drive.dt;
-	goals.drive = Drivebase::Goal::drive_straight((*drive_goal).distances(), (*drive_goal).angle(), angle_i);
+	goals.drive = Drivebase::Goal::drive_straight((*drive_goal).distances(), (*drive_goal).distance_changes(), (*drive_goal).angle(), angle_i);
 	return goals;
 }
 
