@@ -103,6 +103,8 @@ Toplevel::Goal Teleop::run(Run_info info) {
 	if(info.panel.pinchers==Panel::Pinchers::CLOSE) goals.pinchers=Pinchers::Goal::CLOSE;
 	if(info.panel.grabber==Panel::Grabber::UP) goals.grabber_arm=Grabber_arm::Goal::UP;
 	if(info.panel.grabber==Panel::Grabber::DOWN) goals.grabber_arm=Grabber_arm::Goal::DOWN;
+	if(info.driver_joystick.button[Gamepad_button::B]) goals.lights.camera_light = Lights::Camera_light::ON;
+	else goals.lights.camera_light = Lights::Camera_light::OFF;
 
 	#ifdef PRINT_OUTS
 	if(info.in.ds_info.connected && (print_number%10)==0){

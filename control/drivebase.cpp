@@ -81,6 +81,7 @@ Drivebase::Input Drivebase::Input_reader::operator()(Robot_inputs const& in)cons
 	auto encoder_info=[&](unsigned a, unsigned b){
 		return make_pair(in.digital_io.in[a],in.digital_io.in[b]);
 	};
+	//cout<<in.navx.angle<<" "<<total_angle_to_displacement(in.navx.angle)<<" "<<in.navx.yaw<<"\n";
 	return Drivebase::Input{
 		[&](){
 			array<double,Drivebase::MOTORS> r;
@@ -617,20 +618,20 @@ double total_angle_to_displacement(const double ANGLE){//converts total angle to
 Drivebase::Output rotation_control(Drivebase::Status status, Drivebase::Goal goal){
 	Drivebase::Output out = {0,0, goal.talon_speed_mode()};
 	static const double MAX_OUT = 0.5;
-	static const double P = 0.0025;//TODO: currently arbitrary value
+	static const double P = 0.005;//TODO: currently arbitrary value
 	
 	double status_angle_displacement = total_angle_to_displacement(status.angle);
 	double goal_angle_displacement = total_angle_to_displacement(goal.angle());
 	
 	double error = goal_angle_displacement - status_angle_displacement;
-	double power = target_to_out_power(clamp(error*P,-MAX_OUT,MAX_OUT));
+	double power = clamp(error*P,-MAX_OUT,MAX_OUT);
 	out = Drivebase::Output(power,-power,goal.talon_speed_mode());
 
-	static const double FLOOR = .08;
+	static const double FLOOR = .15;
 	if(fabs(out.l) > .0001 && fabs(out.l) < FLOOR) out.l = copysign(FLOOR, out.l);
 	if(fabs(out.r) > .0001 && fabs(out.r) < FLOOR) out.r = copysign(FLOOR, out.r);
 
-	cout<<"\n\ngoal:"<<goal.angle()<<","<<goal_angle_displacement<<" status:"<<status.angle<<","<<status_angle_displacement<<" out:"<<out<<"\n\n";
+	cout<<status.now<<" / "<<goal.angle()<<" / "<<goal_angle_displacement<<" / "<<status.angle<<" / "<<status_angle_displacement<<" / "<<out.l<<":"<<out.r<<"\n";
 
 	return out;
 }
@@ -698,8 +699,9 @@ bool ready(Drivebase::Status status,Drivebase::Goal goal){
 			}
 		case Drivebase::Goal::Mode::ROTATE:
 			{
-				const double TOLERANCE = 1;//degrees
+				const double TOLERANCE = .2;//degrees
 				double error = total_angle_to_displacement(goal.angle()) - total_angle_to_displacement(status.angle);
+				//cout<<"error: "<<fabs(error)<<"   "<<(fabs(error) < TOLERANCE)<<"\n";
 				return fabs(error) < TOLERANCE;
 			}
 		default:
