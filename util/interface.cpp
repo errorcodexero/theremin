@@ -808,7 +808,8 @@ bool operator==(Robot_inputs a,Robot_inputs b){
 	}
 	if(a.driver_station!=b.driver_station) return 0;
 	if(a.camera!=b.camera) return 0;
-	return a.orientation==b.orientation;
+	if(a.orientation!=b.orientation) return 0;
+	return a.vision_number==b.vision_number;
 }
 
 bool operator!=(Robot_inputs a,Robot_inputs b){
@@ -831,6 +832,7 @@ bool operator<(Robot_inputs a,Robot_inputs b){
 	X(current)
 	X(pump)
 	X(camera)
+	//X(vision_number)
 	#undef X
 	return 0;
 }
@@ -862,6 +864,7 @@ ostream& operator<<(ostream& o,Robot_inputs a){
 	o<<" driver_station_inputs:"<<a.driver_station;
 	o<<" camera:"<<a.camera;
 	o<<" orientation:"<<a.orientation;
+	o<<" vision_number:"<<a.vision_number;
 	return o<<")";
 }
 

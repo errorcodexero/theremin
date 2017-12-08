@@ -89,6 +89,8 @@ Toplevel::Goal Teleop::run(Run_info info) {
 	if(info.driver_joystick.button[Gamepad_button::B]) goals.lights.camera_light = Lights::Camera_light::ON;
 	else goals.lights.camera_light = Lights::Camera_light::OFF;
 
+	cout<<"VISION NUMBER: "<<info.in.vision_number<<"\n";
+
 	#ifdef PRINT_OUTS
 	if(info.in.ds_info.connected && (print_number%10)==0){
 		cout<<"\nencoders:"<<info.status.drive<<"\n";

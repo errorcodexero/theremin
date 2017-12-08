@@ -5,6 +5,7 @@
 #include "talon_srx_control.h"
 #include "pump_control.h"
 #include "navx_control.h"
+#include "udp_receiver.h"
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <unistd.h>
@@ -187,9 +188,11 @@ class To_roborio
 	Pixy::PixyUART uart;
 	Pixy::PixyCam camera;
 	bool cam_data_recieved;
+	boost::asio::io_service io_service;
+	UDP_receiver udp_receiver;
 	std::ofstream null_stream;
 public:
-	To_roborio():error_code(0),navx_control(frc::SerialPort::Port::kUSB),driver_station(frc::DriverStation::GetInstance()),uart("/dev/ttyS1"),camera(uart),cam_data_recieved(false),null_stream("/dev/null")//,gyro(NULL)
+	To_roborio():error_code(0),navx_control(frc::SerialPort::Port::kUSB),driver_station(frc::DriverStation::GetInstance()),uart("/dev/ttyS1"),camera(uart),cam_data_recieved(false),udp_receiver(io_service,1425,256),null_stream("/dev/null")//,gyro(NULL)
 	{
 		power = new frc::PowerDistributionPanel();
 		// Wake the NUC by sending a Wake-on-LAN magic UDP packet:
@@ -215,6 +218,8 @@ public:
 			analog_in[i]=new frc::AnalogInput(i);
 			if(!analog_in[i]) error_code|=8;
 		}
+
+		io_service.run();
 
 		/*
 		for(unsigned i=0;i<Robot_outputs::DIGITAL_IOS;i++){
@@ -304,6 +309,8 @@ public:
 		r.current=read_currents();
 		r.camera=read_camera(r);
 		r.navx=read_navx();
+		//cout<<"Print test\n";
+		//r.vision_number=udp_receiver.recievie();
 		return make_pair(r,error_code);
 	}
 	array<double,Robot_inputs::CURRENT> read_currents(){

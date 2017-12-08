@@ -379,6 +379,8 @@ struct Robot_inputs{
 
 	Camera camera;
 
+	std::string vision_number;
+
 	Robot_inputs();
 };
 bool operator<(Robot_inputs,Robot_inputs);
