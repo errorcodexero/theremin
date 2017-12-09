@@ -327,6 +327,36 @@ bool Ram::operator==(Ram const& b)const{
 	return target_dist == b.target_dist && initial_distances == b.initial_distances && init == b.init /*&& stall_timer == b.stall_timer*/;
 }
 
+Drive_to_bucket::Drive_to_bucket(){
+	static const Time TIMEOUT = 2;
+	timeout_timer.set(TIMEOUT);
+}
+
+Step::Status Drive_to_bucket::done(Next_mode_info info){
+	return (info.status.pinchers.has_bucket || timeout_timer.done()) ? Step::Status::FINISHED_SUCCESS : Step::Status::UNFINISHED;
+}
+
+Toplevel::Goal Drive_to_bucket::run(Run_info info){
+	return run(info,{});
+}
+
+Toplevel::Goal Drive_to_bucket::run(Run_info info,Toplevel::Goal goals){
+	timeout_timer.update(info.in.now,info.in.robot_mode.enabled);
+	static const double POWER = .6;
+	goals.drive = Drivebase::Goal::absolute(POWER, POWER);
+	goals.grabber_arm = Grabber_arm::Goal::DOWN;
+	goals.pinchers = Pinchers::Goal::OPEN;
+	return goals;
+}
+
+unique_ptr<Step_impl> Drive_to_bucket::clone()const{
+	return unique_ptr<Step_impl>(new Drive_to_bucket(*this));
+}
+
+bool Drive_to_bucket::operator==(Drive_to_bucket const& b)const{
+	return timeout_timer == b.timeout_timer;
+}
+
 Wait::Wait(Time wait_time){
 	wait_timer.set(wait_time);
 }
@@ -364,8 +394,9 @@ Toplevel::Goal Grab_bucket::run(Run_info info){
 
 Toplevel::Goal Grab_bucket::run(Run_info info,Toplevel::Goal goals){
 	(void)info;
-	goals.grabber_arm = grabber_arm_goal;
 	goals.pinchers = pinchers_goal;
+	if(ready(info.status.pinchers, pinchers_goal)) goals.grabber_arm = grabber_arm_goal;
+	else goals.grabber_arm = Grabber_arm::Goal::DOWN;
 	return goals;
 }
 
