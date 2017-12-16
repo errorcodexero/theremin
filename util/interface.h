@@ -67,21 +67,33 @@ struct Talon_srx_input{
 };
 
 struct Talon_srx_output{
-	#define TALON_SRX_OUTPUT_MODES \
+	#define TALON_SRX_OUTPUT_CONTROL_MODES \
 		X(PERCENT) \
 		X(SPEED)
 	
-	enum class Mode{
+	enum class Control_mode{
 		#define X(NAME) NAME,
-		TALON_SRX_OUTPUT_MODES
+		TALON_SRX_OUTPUT_CONTROL_MODES
 		#undef X
 	};//percent means percent voltage on the in terminals on the talon
 
+	#define TALON_SRX_OUTPUT_SPEED_MODES \
+		X(BRAKE) \
+		X(COAST) \
+		X(NO_OVERRIDE) \
+	
+	enum class Speed_mode{
+		#define X(NAME) NAME,
+		TALON_SRX_OUTPUT_SPEED_MODES
+		#undef X
+	};
+	
 	#define TALON_SRX_OUTPUT_ITEMS(X) \
 		X(PID_values,pid) \
 		X(double,power_level) \
 		X(double,speed) \
-		X(Mode,mode) 
+		X(Control_mode,control_mode) \
+		X(Speed_mode,speed_mode)
 
 	STRUCT_MEMBERS(TALON_SRX_OUTPUT_ITEMS)
 	
@@ -93,17 +105,17 @@ struct Talon_srx_output{
 	static Talon_srx_output closed_loop(double);
 };
 
-std::ostream& operator<<(std::ostream&,Talon_srx_output::Mode);
+std::ostream& operator<<(std::ostream&,Talon_srx_output::Control_mode);
+std::ostream& operator<<(std::ostream&,Talon_srx_output::Speed_mode);
 std::ostream& operator<<(std::ostream&,Talon_srx_output);
 bool operator==(Talon_srx_output,Talon_srx_output);
 bool operator!=(Talon_srx_output,Talon_srx_output);
 bool operator<(Talon_srx_output,Talon_srx_output);
 
 std::ostream& operator<<(std::ostream&,Talon_srx_input);
-
-bool operator<(Talon_srx_input,Talon_srx_input);
 bool operator==(Talon_srx_input,Talon_srx_input);
 bool operator!=(Talon_srx_input,Talon_srx_input);
+bool operator<(Talon_srx_input,Talon_srx_input);
 
 #define NAVX_INPUT_ITEMS(X) \
 		X(double,pitch,GetPitch) \
@@ -379,7 +391,7 @@ struct Robot_inputs{
 
 	Camera camera;
 
-	int vision_number;
+	Maybe_inline<int> vision_error;
 
 	Robot_inputs();
 };

@@ -7,7 +7,7 @@ using namespace std;
 
 double set_drive_speed(double axis,double boost,bool slow){
 	static const float MAX_SPEED=1;//Change this value to change the max power the robot will achieve with full boost (cannot be larger than 1.0)
-	static const float DEFAULT_SPEED=.4;//Change this value to change the default power
+	static const float DEFAULT_SPEED=.3;//Change this value to change the default power
 	static const float SLOW_BY=.5;//Change this value to change the percentage of the default power the slow button slows
 	return (pow(axis,3)*((DEFAULT_SPEED+(MAX_SPEED-DEFAULT_SPEED)*boost)-((DEFAULT_SPEED*SLOW_BY)*slow)));
 }
@@ -64,36 +64,40 @@ Toplevel::Goal Teleop::run(Run_info info) {
 			nudges[i].timer.update(info.in.now,enabled);
 		}
 		const double NUDGE_POWER=.2,ROTATE_NUDGE_POWER=.2;
-		double left=([&]{
+		double left=clip([&]{
 			if(!nudges[Nudges::FORWARD].timer.done()) return NUDGE_POWER;
 			if(!nudges[Nudges::BACKWARD].timer.done()) return -NUDGE_POWER;
 			if(!nudges[Nudges::CLOCKWISE].timer.done()) return ROTATE_NUDGE_POWER;
 			if(!nudges[Nudges::COUNTERCLOCKWISE].timer.done()) return -ROTATE_NUDGE_POWER;
-			double power=set_drive_speed(info.driver_joystick.axis[Gamepad_axis::LEFTY],boost,slow);
-			if(spin) power+=set_drive_speed(-info.driver_joystick.axis[Gamepad_axis::RIGHTX],boost,slow);
-			return -power; //inverted so drivebase values can be positive
-		}());
-		double right=-clip([&]{ //right side is reversed
-			if(!nudges[Nudges::FORWARD].timer.done()) return -NUDGE_POWER;
-			if(!nudges[Nudges::BACKWARD].timer.done()) return NUDGE_POWER;
-			if(!nudges[Nudges::CLOCKWISE].timer.done()) return ROTATE_NUDGE_POWER;	
-			if(!nudges[Nudges::COUNTERCLOCKWISE].timer.done()) return -ROTATE_NUDGE_POWER;
-			double power=set_drive_speed(info.driver_joystick.axis[Gamepad_axis::LEFTY],boost,slow);
-			if(spin) power-=set_drive_speed(-info.driver_joystick.axis[Gamepad_axis::RIGHTX],boost,slow);
+			double power=set_drive_speed(-info.driver_joystick.axis[Gamepad_axis::LEFTY],boost,slow);
+			if(spin) power+=set_drive_speed(info.driver_joystick.axis[Gamepad_axis::RIGHTX],boost,slow);
 			return power;
 		}());
-
-		goals.drive = Drivebase::Goal::absolute(left,right);
+		double right=clip([&]{
+			if(!nudges[Nudges::FORWARD].timer.done()) return NUDGE_POWER;
+			if(!nudges[Nudges::BACKWARD].timer.done()) return -NUDGE_POWER;
+			if(!nudges[Nudges::CLOCKWISE].timer.done()) return -ROTATE_NUDGE_POWER;	
+			if(!nudges[Nudges::COUNTERCLOCKWISE].timer.done()) return ROTATE_NUDGE_POWER;
+			double power=set_drive_speed(-info.driver_joystick.axis[Gamepad_axis::LEFTY],boost,slow);
+			if(spin) power-=set_drive_speed(info.driver_joystick.axis[Gamepad_axis::RIGHTX],boost,slow);
+			return power;
+		}());
+		const Talon_srx_output::Speed_mode DRIVE_SPEED_MODE = Talon_srx_output::Speed_mode::BRAKE;
+		
+		goals.drive = Drivebase::Goal::absolute(left,right,DRIVE_SPEED_MODE);
 	}
 
 	if(info.driver_joystick.button[Gamepad_button::B]) goals.lights.camera_light = Lights::Camera_light::ON;
 	else goals.lights.camera_light = Lights::Camera_light::OFF;
 
-	cout<<"VISION NUMBER: "<<info.in.vision_number<<"\n";
+	if(info.in.vision_error) cout<<"VISION ERROR: "<<*info.in.vision_error<<"\n";
 
 	#ifdef PRINT_OUTS
 	if(info.in.ds_info.connected && (print_number%10)==0){
-		cout<<"\nencoders:"<<info.status.drive<<"\n";
+		cout<<"\npanel:"<<info.panel<<"\n";
+		cout<<"t1: "<<goals.grabber_arm<<"          "<<ready(info.status.grabber_arm, goals.grabber_arm)<<"\n";
+		cout<<"t2: "<<goals.pinchers<<"\n";
+		cout<<"encoder:"<<info.status.drive<<"\n";
 		if(info.in.camera.enabled){
 			cout<<"size: "<<info.in.camera.blocks.size()<<" blocks: "<<info.in.camera.blocks<<"\n";
 			/*for (vector<Pixy::Block>::const_iterator it=info.in.camera.blocks.begin();it!=info.in.camera.blocks.end();it++){

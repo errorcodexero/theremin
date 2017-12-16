@@ -150,7 +150,6 @@ class Ram:public Step_impl_inner<Ram>{//Drives straight a certain distance
 	bool operator==(Ram const&)const;
 };
 
-
 class Wait: public Step_impl_inner<Wait>{//Either stops all operation for a given period of time or continues to run the same goals for that time
 	Countdown_timer wait_timer;//seconds
 	public:
@@ -208,6 +207,28 @@ struct Navx_rotate: Step_impl_inner<Navx_rotate>{//orients the robot to a certai
 	Step::Status done(Next_mode_info);
 	std::unique_ptr<Step_impl> clone()const;
 	bool operator==(Navx_rotate const&)const;
+};
+
+struct Vision_rotate: Step_impl_inner<Vision_rotate>{
+	explicit Vision_rotate();
+	
+	Toplevel::Goal run(Run_info,Toplevel::Goal);
+	Toplevel::Goal run(Run_info);
+	Step::Status done(Next_mode_info);
+	std::unique_ptr<Step_impl> clone()const;
+	bool operator==(Vision_rotate const&)const;
+};
+
+struct Vision_drive: Step_impl_inner<Vision_drive>{
+	Countdown_timer timeout_timer;
+
+	explicit Vision_drive();
+	
+	Toplevel::Goal run(Run_info,Toplevel::Goal);
+	Toplevel::Goal run(Run_info);
+	Step::Status done(Next_mode_info);
+	std::unique_ptr<Step_impl> clone()const;
+	bool operator==(Vision_drive const&)const;
 };
 
 #endif

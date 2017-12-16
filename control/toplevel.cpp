@@ -98,7 +98,7 @@ ostream& operator<<(ostream& o,Toplevel::Output_applicator const&){
 
 Toplevel::Output::Output():
 	pump(Pump::Output::AUTO),
-	drive(0.0,0.0),
+	drive(),
 	lights()
 {}
 
@@ -341,7 +341,7 @@ set<Toplevel::Input> examples(Toplevel::Input*){
 	Toplevel::Input a{
 		Pump::Input{},
 		*examples((Drivebase::Input*)0).begin(),
-		*examples((Lights::Input*)0).begin(),
+		*examples((Lights::Input*)0).begin()
 	};
 	return {a};
 }

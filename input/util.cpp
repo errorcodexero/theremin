@@ -60,37 +60,23 @@ POV_section pov_section(int x){
 	}
 }
 
-unsigned interpret_20_turn_pot(Volt v){
-	array<Volt,20> limits={
+unsigned interpret_10_turn_pot(Volt v){
+	array<Volt,10> limits={
 		-1.00,
-		-0.90,
-		-0.80,
-		-0.69,
-		-0.58,
-		-0.48,
-		-0.37,
-		-0.27,
-		-0.16,
-		-0.05,
-		0.04,
-		0.15,
-		0.25,
-		0.36,
-		0.47,
-		0.57,
-		0.69,
+		-0.75,
+		-0.50,
+		-0.25,
+		0.00,
+		0.20,
+		0.40,
+		0.60,
 		0.80,
-		0.90,
 		1.00
 	};
-	for(unsigned i=0;i<20;i++){
-		if(v<(limits[i] + 0.05)){
-			if(i==9) return 0;
-			if(i==19) return 10;
-			return i + 1;
-		}
+	for(unsigned i=0;i<10;i++){
+		if(v<(limits[i] + 0.05)) return 9 - i;
 	}
-	return 19;
+	return 9;
 }
 
 #ifdef INPUT_UTIL_TEST

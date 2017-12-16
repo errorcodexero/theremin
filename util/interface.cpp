@@ -105,34 +105,42 @@ std::ostream& operator<<(std::ostream& o, Talon_srx_input in){
 }
 
 IMPL_STRUCT(Talon_srx_output::Talon_srx_output,TALON_SRX_OUTPUT_ITEMS)
-Talon_srx_output::Talon_srx_output():Talon_srx_output(PID_values(),0,0,Talon_srx_output::Mode::PERCENT,false){}
+Talon_srx_output::Talon_srx_output():Talon_srx_output(PID_values(),0,0,Talon_srx_output::Control_mode::PERCENT,Talon_srx_output::Speed_mode::NO_OVERRIDE,false){}
 
 Talon_srx_output Talon_srx_output::percent(double a){
 	Talon_srx_output r;
-	r.mode=Mode::PERCENT;
+	r.control_mode=Control_mode::PERCENT;
 	r.power_level=a;
 	return r;
 }
 
 Talon_srx_output Talon_srx_output::closed_loop(double a){
 	Talon_srx_output r;
-	r.mode=Mode::SPEED;
+	r.control_mode=Control_mode::SPEED;
 	r.speed=a;
 	return r;
 }
 
-std::ostream& operator<<(std::ostream& o, Talon_srx_output::Mode a){
-	#define X(NAME) if(a == Talon_srx_output::Mode::NAME) return o<<""#NAME;
-	TALON_SRX_OUTPUT_MODES
+std::ostream& operator<<(std::ostream& o, Talon_srx_output::Control_mode a){
+	#define X(NAME) if(a == Talon_srx_output::Control_mode::NAME) return o<<""#NAME;
+	TALON_SRX_OUTPUT_CONTROL_MODES
 	#undef X
 	nyi
 }
 
+std::ostream& operator<<(std::ostream& o, Talon_srx_output::Speed_mode a){
+	#define X(NAME) if(a == Talon_srx_output::Speed_mode::NAME) return o<<""#NAME;
+	TALON_SRX_OUTPUT_SPEED_MODES
+	#undef X
+	nyi	
+}
+
 std::ostream& operator<<(std::ostream& o, Talon_srx_output a){
-	o<<"(mode: "<<a.mode;
+	o<<"(control_mode: "<<a.control_mode;
+	o<<" speed_mode: "<<a.speed_mode;
 	o<<" pid:"<<a.pid;
-	if(a.mode==Talon_srx_output::Mode::PERCENT) o<<" power_level:"<<a.power_level;
-	else if(a.mode==Talon_srx_output::Mode::SPEED) o<<" speed:"<<a.speed;
+	if(a.control_mode==Talon_srx_output::Control_mode::PERCENT) o<<" power_level:"<<a.power_level;
+	else if(a.control_mode==Talon_srx_output::Control_mode::SPEED) o<<" speed:"<<a.speed;
 	return o<<")";
 }
 
@@ -760,7 +768,7 @@ bool operator==(Camera const& a,Camera const& b){
 bool operator!=(Camera const& a,Camera const& b){ return !(a==b); }
 
 Robot_inputs::Robot_inputs():
-	now(0),orientation(0),pump(),vision_number(0)
+	now(0),orientation(0),pump(),vision_error()
 {
 	for(unsigned i=0;i<ANALOG_INPUTS;i++){
 		//could make this be NAN instead
@@ -808,8 +816,8 @@ bool operator==(Robot_inputs a,Robot_inputs b){
 	}
 	if(a.driver_station!=b.driver_station) return 0;
 	if(a.camera!=b.camera) return 0;
-	if(a.orientation!=b.orientation) return 0;
-	return a.vision_number==b.vision_number;
+	if(a.vision_error!=b.vision_error) return 0;
+	return a.orientation==b.orientation;
 }
 
 bool operator!=(Robot_inputs a,Robot_inputs b){
@@ -832,7 +840,7 @@ bool operator<(Robot_inputs a,Robot_inputs b){
 	X(current)
 	X(pump)
 	X(camera)
-	//X(vision_number)
+	X(vision_error)
 	#undef X
 	return 0;
 }
@@ -863,8 +871,8 @@ ostream& operator<<(ostream& o,Robot_inputs a){
 	o<<" currents:"<<a.current;	
 	o<<" driver_station_inputs:"<<a.driver_station;
 	o<<" camera:"<<a.camera;
+	o<<" vision_error:"<<a.vision_error;
 	o<<" orientation:"<<a.orientation;
-	o<<" vision_number:"<<a.vision_number;
 	return o<<")";
 }
 
