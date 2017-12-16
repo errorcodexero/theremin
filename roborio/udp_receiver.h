@@ -4,6 +4,7 @@
 #include <string>
 #include <cstdint>
 #include <vector>
+#include "../util/maybe_inline.h"
 #include "boost/asio.hpp"
 
 class UDP_receiver {
@@ -19,7 +20,7 @@ class UDP_receiver {
 
 	public:
 	void receive();
-	int get();
+	void get(Maybe_inline<int>&);
 
 	UDP_receiver(boost::asio::io_service&,int,size_t);	
 };

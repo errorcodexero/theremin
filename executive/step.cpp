@@ -117,28 +117,38 @@ Toplevel::Goal Vision_rotate::run(Run_info info){
 Toplevel::Goal Vision_rotate::run(Run_info info,Toplevel::Goal goals){
 	Drivebase::Output out = {0,0, goals.drive.talon_speed_mode()};
 	static const double MAX_OUT = 0.5;
-	static const double P = 0.0025;//TODO: currently arbitrary value
+	static const double P = 0.002, I = 0.0001;
+
+	if(info.in.vision_error) error_integral += info.in.vision_error * (info.in.now - last_time);
+	last_time = info.in.now;
+
+	if(info.in.vision_error) cout<<"error: "<<info.in.vision_error<<"        i: "<<error_integral<<"\n";
 
 	double power = [&]{
 		if(info.in.vision_error){
-			return target_to_out_power(clamp(*info.in.vision_error*P,-MAX_OUT,MAX_OUT));
+			return clamp(*info.in.vision_error * P + error_integral * I,-MAX_OUT,MAX_OUT);
 		}
-		const double SEARCH_POWER = 0.3;
+		const double SEARCH_POWER = 0.2;
 		return SEARCH_POWER;
 	}();
 	
 	out = Drivebase::Output(power,-power,goals.drive.talon_speed_mode());
 
-	static const double FLOOR = .08;
+	cout<<"out1: "<<out<<"      ";
+
+	static const double FLOOR = .1;
 	if(fabs(out.l) > .0001 && fabs(out.l) < FLOOR) out.l = copysign(FLOOR, out.l);
 	if(fabs(out.r) > .0001 && fabs(out.r) < FLOOR) out.r = copysign(FLOOR, out.r);
 
+	cout<<"out2: "<<out<<"\n";
+
 	goals.drive = Drivebase::Goal::absolute(out.l, out.r);
+
 	return goals;
 }
 
 Step::Status Vision_rotate::done(Next_mode_info info){
-	const int TOLERANCE = 2;
+	const int TOLERANCE = 5;
 	if(!info.in.vision_error) return Step::Status::UNFINISHED;
 	return (abs(*info.in.vision_error) < TOLERANCE) ? Step::Status::FINISHED_SUCCESS : Step::Status::UNFINISHED;	
 }
@@ -152,7 +162,7 @@ bool Vision_rotate::operator==(Vision_rotate const&)const{
 }
 
 Vision_drive::Vision_drive(){
-	const Time TIMEOUT_TIME = 2; //seconds
+	const Time TIMEOUT_TIME = 5; //seconds
 	timeout_timer.set(TIMEOUT_TIME);
 }
 
@@ -163,20 +173,30 @@ Toplevel::Goal Vision_drive::run(Run_info info){
 Toplevel::Goal Vision_drive::run(Run_info info,Toplevel::Goal goals){
 	timeout_timer.update(info.in.now, info.in.robot_mode.enabled);
 
-	static const double MAX_OUT = 0.5;
-	static const double P = 0.0025;//TODO: currently arbitrary value
+	static const double BASE_OUT = -.4;
+	Drivebase::Output out = Drivebase::Output(BASE_OUT,BASE_OUT, goals.drive.talon_speed_mode());
 
-	Drivebase::Output out = {MAX_OUT,MAX_OUT, goals.drive.talon_speed_mode()};
+	if(info.in.vision_error) {
+		static const double P = 0.001, I = 0.0002, D = 0;
+		error_integral += info.in.vision_error * (info.in.now - last_time);
+		double error_d = (info.in.vision_error - last_error) / (info.in.now - last_time);
+		double adjustment_power = *info.in.vision_error*P + error_integral*I + error_d*D;
+		out.l += adjustment_power;
+		out.r -= adjustment_power;
 
-	double adjustment_power = [&]{
-		if(info.in.vision_error){
-			return *info.in.vision_error * P;
-		}
-		return 0.0;
-	}();	
-	
-	out.l += adjustment_power;
-	out.r -= adjustment_power;
+		cout<<"e: "<<info.in.vision_error<<"      i: "<<error_integral<<"       d: "<<error_d<<"\n";
+
+		last_error = info.in.vision_error;
+	}
+	last_time = info.in.now;
+
+	cout<<"out: "<<out.l<<" "<<out.r<<"        ";
+
+	static const double FLOOR = .1;
+	if(fabs(out.l) > .0001 && fabs(out.l) < FLOOR) out.l = copysign(FLOOR, out.l);
+	if(fabs(out.r) > .0001 && fabs(out.r) < FLOOR) out.r = copysign(FLOOR, out.r);
+
+	cout<<out.l<<" "<<out.r<<"\n";
 
 	goals.drive = Drivebase::Goal::absolute(out.l, out.r);
 		

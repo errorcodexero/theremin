@@ -34,7 +34,9 @@ void UDP_receiver::receive() {
 	m_service.run();
 }
 
-int UDP_receiver::get() {
-	if(received.length() < 8) return 0;
-	return stoi(received.substr(7));
+void UDP_receiver::get(Maybe_inline<int> &value) {
+	if(received.length() < 8) return;
+	std::string target = received.substr(7);
+	if(target == "NONE") return;
+	value = stoi(target);
 }

@@ -90,7 +90,7 @@ Toplevel::Goal Teleop::run(Run_info info) {
 	if(info.driver_joystick.button[Gamepad_button::B]) goals.lights.camera_light = Lights::Camera_light::ON;
 	else goals.lights.camera_light = Lights::Camera_light::OFF;
 
-	if(info.in.vision_error) cout<<"VISION ERROR: "<<*info.in.vision_error<<"\n";
+	//if(info.in.vision_error && (print_number%5)==0) cout<<"VISION ERROR: "<<*info.in.vision_error<<"\n";
 
 	#ifdef PRINT_OUTS
 	if(info.in.ds_info.connected && (print_number%10)==0){

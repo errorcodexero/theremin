@@ -309,7 +309,7 @@ public:
 		r.current=read_currents();
 		r.camera=read_camera(r);
 		r.navx=read_navx();
-		r.vision_error=udp_receiver.get();
+		udp_receiver.get(r.vision_error);
 		return make_pair(r,error_code);
 	}
 	array<double,Robot_inputs::CURRENT> read_currents(){

@@ -57,7 +57,25 @@ Executive get_auto_mode(Next_mode_info info){
 		Executive{Teleop()}
 	}};
 
-	return auto_null;
+	Executive vision_rotate_test{Chain{
+		Step{Vision_rotate{}},
+		Executive{Teleop()}
+	}};
+
+	Executive vision_drive_test{Chain{
+		Step{Vision_drive{}},
+		Executive{Teleop()}
+	}};
+
+	Executive align_and_drive{Chain{
+		vector<Step>{
+			Step{Vision_rotate{}},
+			Step{Vision_drive{}}
+		},
+		Executive{Teleop()}
+	}};
+
+	return align_and_drive;
 
 	/*
 	if(!info.panel.in_use){

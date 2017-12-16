@@ -1,6 +1,8 @@
 #ifndef MAYBE_INLINE_H
 #define MAYBE_INLINE_H
 
+#include <cassert>
+
 template<typename T>
 class Maybe_inline{
 	T t;

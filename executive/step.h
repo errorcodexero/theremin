@@ -210,6 +210,9 @@ struct Navx_rotate: Step_impl_inner<Navx_rotate>{//orients the robot to a certai
 };
 
 struct Vision_rotate: Step_impl_inner<Vision_rotate>{
+	Time last_time;
+	double error_integral;
+
 	explicit Vision_rotate();
 	
 	Toplevel::Goal run(Run_info,Toplevel::Goal);
@@ -221,6 +224,8 @@ struct Vision_rotate: Step_impl_inner<Vision_rotate>{
 
 struct Vision_drive: Step_impl_inner<Vision_drive>{
 	Countdown_timer timeout_timer;
+	Time last_time;
+	double last_error, error_integral;
 
 	explicit Vision_drive();
 	
