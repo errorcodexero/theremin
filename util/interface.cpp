@@ -760,7 +760,7 @@ bool operator==(Camera const& a,Camera const& b){
 bool operator!=(Camera const& a,Camera const& b){ return !(a==b); }
 
 Robot_inputs::Robot_inputs():
-	now(0),orientation(0),pump()
+	now(0),orientation(0),pump(),vision_number(0)
 {
 	for(unsigned i=0;i<ANALOG_INPUTS;i++){
 		//could make this be NAN instead

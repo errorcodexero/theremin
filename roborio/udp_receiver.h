@@ -8,6 +8,7 @@
 
 class UDP_receiver {
 	private:
+	std::string received;
 	std::vector<uint8_t> m_buffer;
 	boost::asio::io_service &m_service;
 	boost::asio::ip::udp::endpoint m_endpoint;
@@ -18,6 +19,7 @@ class UDP_receiver {
 
 	public:
 	void receive();
+	int get();
 
 	UDP_receiver(boost::asio::io_service&,int,size_t);	
 };

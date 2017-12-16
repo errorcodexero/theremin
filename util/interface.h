@@ -379,7 +379,7 @@ struct Robot_inputs{
 
 	Camera camera;
 
-	std::string vision_number;
+	int vision_number;
 
 	Robot_inputs();
 };

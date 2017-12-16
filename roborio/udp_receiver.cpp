@@ -15,9 +15,10 @@ UDP_receiver::UDP_receiver(boost::asio::io_service &service, int port, size_t si
 }
 
 void UDP_receiver::handle_receive(const boost::system::error_code& error, std::size_t bytes_transferred) {
-	std::cout<<"recieved\n";
+	std::cout<<"recieved: ";
 	if(!error) {
-		std::cout<<std::string((const char *)&m_buffer[0], bytes_transferred)<<"\n";
+		received = std::string((const char *)&m_buffer[0], bytes_transferred);
+		std::cout<<received<<"\n";
 		start_receive();
 	} else {
 		std::cout<<"error\n";
@@ -31,11 +32,9 @@ void UDP_receiver::start_receive() {
 void UDP_receiver::receive() {
 	start_receive();
 	m_service.run();
-/*
-	size_t count = m_socket.receive_from(boost::asio::buffer(m_buffer), m_endpoint);
-	std::string msg = std::string((const char *)&m_buffer[0], count);
-	std::cout<<msg<<"\n";
-	return msg;
-	*/
-	//return std::stod(msg);
+}
+
+int UDP_receiver::get() {
+	if(received.length() < 8) return 0;
+	return stoi(received.substr(7));
 }
