@@ -3,7 +3,7 @@
 using namespace std;
 
 #define PISTON_LOC 3
-#define BUCKET_SENSOR 4
+#define BUCKET_SENSOR 6
 #define BUCKET_LIGHT 2
 
 Pinchers::Input::Input():enabled(false),bucket_sensor(false){}

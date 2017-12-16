@@ -84,6 +84,16 @@ Executive get_auto_mode(Next_mode_info info){
 		Executive{Teleop()}
 	}};
 
+	Executive cross_midline_r{Chain{
+		Step{Navx_drive_straight{-396.0}},
+		Executive{Teleop()}
+	}};
+
+	Executive cross_field_r{Chain{
+		Step{Navx_drive_straight{-540.0}},
+		Executive{Teleop()}
+	}};
+
 	if(!info.panel.in_use){
 		return auto_null;//Do nothing during autonomous mode if no panel exists
 	}
@@ -94,10 +104,13 @@ Executive get_auto_mode(Next_mode_info info){
 		case 1: 
 			return cross_midline;
 		case 2: 
-			return bucket;
+			return cross_field;
 		case 3:
-		case 4: 
+			return bucket;
+		case 4:
+			return cross_midline_r;
 		case 5: 
+			return cross_field_r;
 		case 6:
 		case 7: 
 		case 8:
