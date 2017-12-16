@@ -28,10 +28,14 @@ void UDP_receiver::start_receive() {
 	m_socket.async_receive_from(boost::asio::buffer(m_buffer), m_endpoint, boost::bind(&UDP_receiver::handle_receive, this, boost::asio::placeholders::error, boost::asio::placeholders::bytes_transferred));
 }
 
-std::string UDP_receiver::receive() {
+void UDP_receiver::receive() {
+	start_receive();
+	m_service.run();
+/*
 	size_t count = m_socket.receive_from(boost::asio::buffer(m_buffer), m_endpoint);
 	std::string msg = std::string((const char *)&m_buffer[0], count);
 	std::cout<<msg<<"\n";
 	return msg;
+	*/
 	//return std::stod(msg);
 }

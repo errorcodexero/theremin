@@ -10,6 +10,7 @@
 #include <arpa/inet.h>
 #include <unistd.h>
 #include <iostream>
+#include <thread>
 
 using namespace std;
 
@@ -190,9 +191,10 @@ class To_roborio
 	bool cam_data_recieved;
 	boost::asio::io_service io_service;
 	UDP_receiver udp_receiver;
+	std::thread receiver_thread;
 	std::ofstream null_stream;
 public:
-	To_roborio():error_code(0),navx_control(frc::SerialPort::Port::kUSB),driver_station(frc::DriverStation::GetInstance()),uart("/dev/ttyS1"),camera(uart),cam_data_recieved(false),udp_receiver(io_service,1425,256),null_stream("/dev/null")//,gyro(NULL)
+	To_roborio():error_code(0),navx_control(frc::SerialPort::Port::kUSB),driver_station(frc::DriverStation::GetInstance()),uart("/dev/ttyS1"),camera(uart),cam_data_recieved(false),udp_receiver(io_service,1425,256),receiver_thread([&] {udp_receiver.receive(); }),null_stream("/dev/null")//,gyro(NULL)
 	{
 		power = new frc::PowerDistributionPanel();
 		// Wake the NUC by sending a Wake-on-LAN magic UDP packet:
@@ -218,8 +220,6 @@ public:
 			analog_in[i]=new frc::AnalogInput(i);
 			if(!analog_in[i]) error_code|=8;
 		}
-
-		io_service.run();
 
 		/*
 		for(unsigned i=0;i<Robot_outputs::DIGITAL_IOS;i++){

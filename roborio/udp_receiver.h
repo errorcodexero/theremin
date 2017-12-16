@@ -17,7 +17,7 @@ class UDP_receiver {
 	void start_receive();
 
 	public:
-	std::string receive();
+	void receive();
 
 	UDP_receiver(boost::asio::io_service&,int,size_t);	
 };
