@@ -7,7 +7,7 @@ using namespace std;
 
 double set_drive_speed(double axis,double boost,bool slow){
 	static const float MAX_SPEED=1;//Change this value to change the max power the robot will achieve with full boost (cannot be larger than 1.0)
-	static const float DEFAULT_SPEED=.4;//Change this value to change the default power
+	static const float DEFAULT_SPEED=.3;//Change this value to change the default power
 	static const float SLOW_BY=.5;//Change this value to change the percentage of the default power the slow button slows
 	return (pow(axis,3)*((DEFAULT_SPEED+(MAX_SPEED-DEFAULT_SPEED)*boost)-((DEFAULT_SPEED*SLOW_BY)*slow)));
 }
@@ -92,9 +92,8 @@ Toplevel::Goal Teleop::run(Run_info info) {
 	grabber_toggle.update(info.panel.grabber_toggle);
 	if(grabber_toggle.get()){
 		goals.pinchers=Pinchers::Goal::CLOSE;
-		if(ready(info.status.pinchers,goals.pinchers)){
-			goals.grabber_arm=Grabber_arm::Goal::UP;
-		}
+		if(ready(info.status.pinchers,goals.pinchers)) goals.grabber_arm=Grabber_arm::Goal::UP;
+		else goals.grabber_arm=Grabber_arm::Goal::DOWN;
 	}else{
 		goals.grabber_arm=Grabber_arm::Goal::DOWN;
 		goals.pinchers=Pinchers::Goal::OPEN;
@@ -104,10 +103,18 @@ Toplevel::Goal Teleop::run(Run_info info) {
 	if(info.panel.pinchers==Panel::Pinchers::CLOSE) goals.pinchers=Pinchers::Goal::CLOSE;
 	if(info.panel.grabber==Panel::Grabber::UP) goals.grabber_arm=Grabber_arm::Goal::UP;
 	if(info.panel.grabber==Panel::Grabber::DOWN) goals.grabber_arm=Grabber_arm::Goal::DOWN;
+	if(info.driver_joystick.button[Gamepad_button::B]) goals.lights.camera_light = Lights::Camera_light::ON;
+	else goals.lights.camera_light = Lights::Camera_light::OFF;
+
+	if(goals.grabber_arm==Grabber_arm::Goal::DOWN && !ready(info.status.grabber_arm, goals.grabber_arm)) {
+		goals.pinchers=Pinchers::Goal::CLOSE;
+	}
 
 	#ifdef PRINT_OUTS
 	if(info.in.ds_info.connected && (print_number%10)==0){
 		cout<<"\npanel:"<<info.panel<<"\n";
+		cout<<"t1: "<<goals.grabber_arm<<"          "<<ready(info.status.grabber_arm, goals.grabber_arm)<<"\n";
+		cout<<"t2: "<<goals.pinchers<<"\n";
 		cout<<"encoder:"<<info.status.drive<<"\n";
 		if(info.in.camera.enabled){
 			cout<<"size: "<<info.in.camera.blocks.size()<<" blocks: "<<info.in.camera.blocks<<"\n";

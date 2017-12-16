@@ -97,12 +97,12 @@ bool operator==(Grabber_arm,Grabber_arm){ return 1; }
 bool operator!=(Grabber_arm a, Grabber_arm b){ return !(a==b); }
 
 Grabber_arm::Input Grabber_arm::Input_reader::operator()(Robot_inputs const& r) const{
-	return {r.robot_mode.enabled,r.digital_io.in[GRABBER_ARM_LIMIT]==Digital_in::_1};
+	return {r.robot_mode.enabled,r.digital_io.in[GRABBER_ARM_LIMIT]==Digital_in::_0};
 }
 
 Robot_inputs Grabber_arm::Input_reader::operator()(Robot_inputs r, Grabber_arm::Input in) const{
 	r.robot_mode.enabled = in.enabled;
-	r.digital_io.in[GRABBER_ARM_LIMIT] = in.limit_switch ? Digital_in::_1 : Digital_in::_0;
+	r.digital_io.in[GRABBER_ARM_LIMIT] = in.limit_switch ? Digital_in::_0 : Digital_in::_1;
 	return r;
 }
 

@@ -150,6 +150,19 @@ class Ram:public Step_impl_inner<Ram>{//Drives straight a certain distance
 	bool operator==(Ram const&)const;
 };
 
+class Drive_to_bucket:public Step_impl_inner<Drive_to_bucket>{//Drives until the bucket sensor sees a bucket
+	Countdown_timer timeout_timer;
+	
+	public:
+	explicit Drive_to_bucket();
+	
+	Toplevel::Goal run(Run_info,Toplevel::Goal);
+	Toplevel::Goal run(Run_info);
+	Step::Status done(Next_mode_info);
+	std::unique_ptr<Step_impl> clone()const;
+	bool operator==(Drive_to_bucket const&)const;
+};
+
 class Wait: public Step_impl_inner<Wait>{//Either stops all operation for a given period of time or continues to run the same goals for that time
 	Countdown_timer wait_timer;//seconds
 	public:
