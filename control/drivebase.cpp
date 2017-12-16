@@ -585,7 +585,7 @@ Drivebase::Output trapezoidal_speed_control(Drivebase::Status status, Drivebase:
 	{//for ramping down (based on distance)
 		//Drivebase::Distances error = goal.distances() - status.distances;
 		double error = avg_goal - avg_dist;
-		const double SLOW_WITHIN_DISTANCE = 40; //inches
+		const double SLOW_WITHIN_DISTANCE = 120; //inches
 		const double SLOPE = MAX_OUT / SLOW_WITHIN_DISTANCE; //"volts"/inches //TODO: currently arbitrary value
 		
 		if(error < SLOW_WITHIN_DISTANCE) {
@@ -645,10 +645,14 @@ Drivebase::Output drive_straight(Drivebase::Status status, Drivebase::Goal goal)
 	double error = total_angle_to_displacement(goal.angle()) - total_angle_to_displacement(status.angle);
 	double error_d = (error - (total_angle_to_displacement(goal.angle()) - total_angle_to_displacement(status.prev_angle))) / status.dt;
 	double change = P*error + I*goal.angle_i() + D*error_d;
-	out.l = clamp(out.l + change, -MAX_OUT, MAX_OUT);
-	out.r = clamp(out.r - change, -MAX_OUT, MAX_OUT);
+	double avg_goal = (goal.distances().l + goal.distances().r) / 2;
+	double avg_dist = (status.distances.l + status.distances.r) / 2;
+	if(fabs(avg_goal - avg_dist) > 50) {
+		out.l = clamp(out.l + change, -MAX_OUT, MAX_OUT);
+		out.r = clamp(out.r - change, -MAX_OUT, MAX_OUT);
+	}
 
-	static const double FLOOR = .08;
+	static const double FLOOR = .10;
 	if(fabs(out.l) > .0001 && fabs(out.l) < FLOOR) out.l = copysign(FLOOR, out.l);
 	if(fabs(out.r) > .0001 && fabs(out.r) < FLOOR) out.r = copysign(FLOOR, out.r);
 

@@ -768,7 +768,7 @@ bool operator==(Camera const& a,Camera const& b){
 bool operator!=(Camera const& a,Camera const& b){ return !(a==b); }
 
 Robot_inputs::Robot_inputs():
-	now(0),orientation(0),pump()
+	now(0),orientation(0),pump(),vision_error()
 {
 	for(unsigned i=0;i<ANALOG_INPUTS;i++){
 		//could make this be NAN instead
@@ -816,6 +816,7 @@ bool operator==(Robot_inputs a,Robot_inputs b){
 	}
 	if(a.driver_station!=b.driver_station) return 0;
 	if(a.camera!=b.camera) return 0;
+	if(a.vision_error!=b.vision_error) return 0;
 	return a.orientation==b.orientation;
 }
 
@@ -839,6 +840,7 @@ bool operator<(Robot_inputs a,Robot_inputs b){
 	X(current)
 	X(pump)
 	X(camera)
+	X(vision_error)
 	#undef X
 	return 0;
 }
@@ -869,6 +871,7 @@ ostream& operator<<(ostream& o,Robot_inputs a){
 	o<<" currents:"<<a.current;	
 	o<<" driver_station_inputs:"<<a.driver_station;
 	o<<" camera:"<<a.camera;
+	o<<" vision_error:"<<a.vision_error;
 	o<<" orientation:"<<a.orientation;
 	return o<<")";
 }

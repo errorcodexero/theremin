@@ -57,10 +57,43 @@ Executive get_auto_mode(Next_mode_info info){
 		Executive{Teleop()}
 	}};
 
-	return drive_straight_test;
+	Executive test_bucket_drive{Chain{
+		vector<Step>{
+			Step{Drive_to_bucket()},
+			Step{Grab_bucket()}
+		},
+		Executive{Teleop()}
+	}};
 
-	/*
-	
+	Executive cross_midline{Chain{
+		Step{Navx_drive_straight{396.0}},
+		Executive{Teleop()}
+	}};
+
+	Executive cross_field{Chain{
+		Step{Navx_drive_straight{540.0}},
+		Executive{Teleop()}
+	}};
+
+	Executive bucket{Chain{
+		vector<Step>{
+			Step{Navx_drive_straight{288.0}},
+			Step{Drive_to_bucket()},
+			Step{Grab_bucket()}
+		},
+		Executive{Teleop()}
+	}};
+
+	Executive cross_midline_r{Chain{
+		Step{Navx_drive_straight{-396.0}},
+		Executive{Teleop()}
+	}};
+
+	Executive cross_field_r{Chain{
+		Step{Navx_drive_straight{-540.0}},
+		Executive{Teleop()}
+	}};
+
 	if(!info.panel.in_use){
 		return auto_null;//Do nothing during autonomous mode if no panel exists
 	}
@@ -69,29 +102,24 @@ Executive get_auto_mode(Next_mode_info info){
 		case 0: 
 			return auto_null;
 		case 1: 
+			return cross_midline;
 		case 2: 
+			return cross_field;
 		case 3:
-		case 4: 
+			return bucket;
+		case 4:
+			return cross_midline_r;
 		case 5: 
+			return cross_field_r;
 		case 6:
 		case 7: 
-		case 8: 
+		case 8:
+			return auto_null; 
 		case 9: 
-		case 10:
-		case 11:
-		case 12:
-		case 13:
-		case 14:
-		case 15:
-		case 16:
-		case 17:
-		case 18:
-		case 19:
+			return test_bucket_drive;
 		default:
 			return auto_null;
 	}
-
-	*/
 }
 
 Executive Autonomous::next_mode(Next_mode_info info){

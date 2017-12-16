@@ -90,9 +90,15 @@ Toplevel::Goal Teleop::run(Run_info info) {
 	if(info.driver_joystick.button[Gamepad_button::B]) goals.lights.camera_light = Lights::Camera_light::ON;
 	else goals.lights.camera_light = Lights::Camera_light::OFF;
 
+	if(goals.grabber_arm==Grabber_arm::Goal::DOWN && !ready(info.status.grabber_arm, goals.grabber_arm)) {
+		goals.pinchers=Pinchers::Goal::CLOSE;
+	}
+
 	#ifdef PRINT_OUTS
 	if(info.in.ds_info.connected && (print_number%10)==0){
 		cout<<"\npanel:"<<info.panel<<"\n";
+		cout<<"t1: "<<goals.grabber_arm<<"          "<<ready(info.status.grabber_arm, goals.grabber_arm)<<"\n";
+		cout<<"t2: "<<goals.pinchers<<"\n";
 		cout<<"encoder:"<<info.status.drive<<"\n";
 		if(info.in.camera.enabled){
 			cout<<"size: "<<info.in.camera.blocks.size()<<" blocks: "<<info.in.camera.blocks<<"\n";
