@@ -1,13 +1,27 @@
-CXX = arm-frc-linux-gnueabi-g++
-CXXFLAGS = -std=c++14
+#
+# makefile for the control library
+#
 
+#
+# define our target library
+#
+TARGET=input.a
+
+#
+# define the source code files
+#
 SRC = \
 	joystick_linux.cpp\
 	panel.cpp\
-	range_finder.cpp\
-	util.cpp
+	util.cpp\
+	PixyBlock.cpp\
+	PixyImpl.cpp\
+	PixyTCP.cpp\
+	PixyUART.cpp
 
-OBJS = $(SRC:.cpp=.o)
 
-input.a: $(OBJS)
-	$(AR) r $@ $(OBJS)
+
+#
+# include a central make file that defines our compilation recipe
+#
+include ../../makefiles/compilelib.mk

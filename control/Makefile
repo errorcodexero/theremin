@@ -1,13 +1,20 @@
-CXX = arm-frc-linux-gnueabi-g++
-CXXFLAGS = -std=c++14
+#
+# makefile for the control library
+#
 
+#
+# define our target library
+#
+TARGET=control.a
+
+#
+# define the source code files
+#
 SRC = \
-	arm.cpp\
 	drivebase.cpp\
 	force.cpp\
 	force_interface.cpp\
-	grabber.cpp\
-	gun.cpp\
+	lights.cpp\
 	log.cpp\
 	main.cpp\
 	monitor.cpp\
@@ -15,11 +22,10 @@ SRC = \
 	nop.cpp\
 	pump.cpp\
 	sim.cpp\
-	toplevel.cpp\
-	tote_sensors.cpp\
-	winch.cpp
+	toplevel.cpp
 
-OBJS = $(SRC:.cpp=.o)
+#
+# include a central make file that defines our compilation recipe
+#
+include ../../makefiles/compilelib.mk
 
-control.a: $(OBJS)
-	$(AR) r $@ $(OBJS)
