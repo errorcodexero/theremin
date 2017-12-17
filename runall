@@ -174,7 +174,7 @@ def makefile(out):
 	print>>out, '\trm -f *_test'
 	print>>out, '\tfind -name \*.o | xargs rm -f'
 
-def cross_makefile(out,printouts):
+def cross_makefile(out,printouts,use_global_source):
 	import commands
 
 	objdir='tobj'
@@ -189,8 +189,9 @@ def cross_makefile(out,printouts):
 	print>>out,'OBJDIR=obj'
 	print>>out,"H_FILES=$(find -name \*.h)"
 	print>>out,"CXX=arm-frc-linux-gnueabi-g++"
-	print>>out,"CXXFLAGS=-pthread -Wall -Wextra -Werror -O2 -g -std=c++14 -DNAMESPACED_WPILIB -I"+os.environ['HOME']+"/wpilib/cpp/current/include -I"+os.environ['HOME']+"/CTRE_FRCLib/cpp/include -isystem "+os.environ['HOME']+"/navx-mxp-libs/roborio/cpp/include "+printouts+" -fmessage-length=0" #TODO: remove the definition for using the namespaced version of WPILib after FIRST makes the change in 2018 (probably)
-	print>>out,"LD_FLAGS="+os.environ['HOME']+"/CTRE_FRCLib/cpp/lib/libCTRLib.a "+os.environ['HOME']+"/navx-mxp-libs/roborio/cpp/lib/libnavx_frc_cpp.a -L"+os.environ['HOME']+"/wpilib/cpp/current/lib -Wl,-rpath,/opt/GenICam_v2_3/bin/Linux_armv7-a -lwpi"
+	source_dir=""+os.environ['HOME'] if use_global_source else "../external"
+	print>>out,"CXXFLAGS=-pthread -Wall -Wextra -Werror -O2 -g -std=c++14 -DNAMESPACED_WPILIB -I"+source_dir+"/wpilib/cpp/current/include -I"+source_dir+"/CTRE_FRCLib/cpp/include -isystem "+source_dir+"/navx-mxp-libs/roborio/cpp/include "+printouts+" -fmessage-length=0" #TODO: remove the definition for using the namespaced version of WPILib after FIRST makes the change in 2018 (probably)
+	print>>out,"LD_FLAGS="+source_dir+"/CTRE_FRCLib/cpp/lib/libCTRLib.a "+source_dir+"/navx-mxp-libs/roborio/cpp/lib/libnavx_frc_cpp.a -L"+source_dir+"/wpilib/cpp/current/lib -Wl,-rpath,/opt/GenICam_v2_3/bin/Linux_armv7-a -lwpi"
 	print>>out,".PHONY: clean\n"
 
 	print>>out,"all: FRCUserProgram"
@@ -226,6 +227,7 @@ if __name__=='__main__':
 	p.add_option('--printouts',action="store_true",help="Build the robot code defining PRINT_OUTS (does nothing by default)")
 	p.add_option('--test_makefile',action='store_true')
 	p.add_option('--build_makefile',action='store_true')
+	p.add_option('--use_global_source',action="store_true",help="Search for external libraries in home folder rather than locally (local by default)")
 	options,args=p.parse_args()
 	assert len(args)==0
 
@@ -240,9 +242,9 @@ if __name__=='__main__':
 		assert r&0xff==0
 		return r>>8
 
-	def build(printouts):
+	def build(printouts,use_global_source):
 		define_printouts = "-DPRINT_OUTS" if printouts else ""
-		cross_makefile(open('t.mk','w'),define_printouts)
+		cross_makefile(open('t.mk','w'),define_printouts,use_global_source)
 		r=os.system('make -j4 -f t.mk')
 		assert r&0xff==0
 		return r>>8
@@ -251,10 +253,10 @@ if __name__=='__main__':
 
 	if options.arguments: test(options.arguments,options.test_name)
 	if options.test: test(options.arguments,options.test_name)
-	if options.build: build(options.printouts)
+	if options.build: build(options.printouts,options.use_global_source)
 
 	if options.test_makefile:makefile(sys.stdout)
 	if options.build_makefile:cross_makefile(sys.stdout)
 
 	if not options.test and not options.build and not options.test_makefile and not options.build_makefile:
-		sys.exit(test(options.arguments,options.test_name) or build(options.printouts))
+		sys.exit(test(options.arguments,options.test_name) or build(options.printouts,options.use_global_source))
