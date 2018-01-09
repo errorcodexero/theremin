@@ -211,7 +211,8 @@ struct Navx_rotate: Step_impl_inner<Navx_rotate>{//orients the robot to a certai
 
 struct Vision_rotate: Step_impl_inner<Vision_rotate>{
 	Time last_time;
-	double error_integral;
+	double last_error, error_integral;
+	bool found_something;
 
 	explicit Vision_rotate();
 	

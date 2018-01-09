@@ -108,7 +108,7 @@ bool Navx_rotate::operator==(Navx_rotate const& b)const{
 	return target_angle == b.target_angle;
 }
 
-Vision_rotate::Vision_rotate(){}
+Vision_rotate::Vision_rotate():last_error(0),found_something(false){}
 
 Toplevel::Goal Vision_rotate::run(Run_info info){
 	return run(info,{});
@@ -117,26 +117,35 @@ Toplevel::Goal Vision_rotate::run(Run_info info){
 Toplevel::Goal Vision_rotate::run(Run_info info,Toplevel::Goal goals){
 	Drivebase::Output out = {0,0, goals.drive.talon_speed_mode()};
 	static const double MAX_OUT = 0.5;
-	static const double P = 0.002, I = 0.0001;
+	static const double P = 0.0012, I = 0.0001;
 
 	if(info.in.vision_error) error_integral += info.in.vision_error * (info.in.now - last_time);
 	last_time = info.in.now;
 
 	if(info.in.vision_error) cout<<"error: "<<info.in.vision_error<<"        i: "<<error_integral<<"\n";
+	cout<<"f: "<<found_something<<"\n";
+
+	if(info.in.vision_error) found_something = true;
 
 	double power = [&]{
-		if(info.in.vision_error){
-			return clamp(*info.in.vision_error * P + error_integral * I,-MAX_OUT,MAX_OUT);
+		if(found_something) {
+			if(info.in.vision_error){
+				last_error = info.in.vision_error;
+				return clamp(*info.in.vision_error * P + error_integral * I,-MAX_OUT,MAX_OUT);
+			}
+			const double SEARCH_POWER = .12;
+			return copysign(SEARCH_POWER, last_error);
+		} else {
+			const double SEARCH_POWER = 0.2;
+			return SEARCH_POWER;
 		}
-		const double SEARCH_POWER = 0.2;
-		return SEARCH_POWER;
 	}();
 	
 	out = Drivebase::Output(power,-power,goals.drive.talon_speed_mode());
 
 	cout<<"out1: "<<out<<"      ";
 
-	static const double FLOOR = .1;
+	static const double FLOOR = .14;
 	if(fabs(out.l) > .0001 && fabs(out.l) < FLOOR) out.l = copysign(FLOOR, out.l);
 	if(fabs(out.r) > .0001 && fabs(out.r) < FLOOR) out.r = copysign(FLOOR, out.r);
 
@@ -177,7 +186,7 @@ Toplevel::Goal Vision_drive::run(Run_info info,Toplevel::Goal goals){
 	Drivebase::Output out = Drivebase::Output(BASE_OUT,BASE_OUT, goals.drive.talon_speed_mode());
 
 	if(info.in.vision_error) {
-		static const double P = 0.001, I = 0.0002, D = 0;
+		static const double P = 0.004, I = 0.0002, D = 0;
 		error_integral += info.in.vision_error * (info.in.now - last_time);
 		double error_d = (info.in.vision_error - last_error) / (info.in.now - last_time);
 		double adjustment_power = *info.in.vision_error*P + error_integral*I + error_d*D;
@@ -192,7 +201,7 @@ Toplevel::Goal Vision_drive::run(Run_info info,Toplevel::Goal goals){
 
 	cout<<"out: "<<out.l<<" "<<out.r<<"        ";
 
-	static const double FLOOR = .1;
+	static const double FLOOR = .12;
 	if(fabs(out.l) > .0001 && fabs(out.l) < FLOOR) out.l = copysign(FLOOR, out.l);
 	if(fabs(out.r) > .0001 && fabs(out.r) < FLOOR) out.r = copysign(FLOOR, out.r);
 
