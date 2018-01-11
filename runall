@@ -190,8 +190,8 @@ def cross_makefile(out,printouts,use_global_source):
 	print>>out,"H_FILES=$(find -name \*.h)"
 	print>>out,"CXX=arm-frc-linux-gnueabi-g++"
 	source_dir=""+os.environ['HOME'] if use_global_source else "../external"
-	print>>out,"CXXFLAGS=-pthread -Wall -Wextra -Werror -O2 -g -std=c++14 -DNAMESPACED_WPILIB -I"+source_dir+"/wpilib/cpp/current/include -I"+source_dir+"/CTRE_FRCLib/cpp/include -isystem "+source_dir+"/navx-mxp-libs/roborio/cpp/include "+printouts+" -fmessage-length=0" #TODO: remove the definition for using the namespaced version of WPILib after FIRST makes the change in 2018 (probably)
-	print>>out,"LD_FLAGS="+source_dir+"/CTRE_FRCLib/cpp/lib/libCTRLib.a "+source_dir+"/navx-mxp-libs/roborio/cpp/lib/libnavx_frc_cpp.a -L"+source_dir+"/wpilib/cpp/current/lib -Wl,-rpath,/opt/GenICam_v2_3/bin/Linux_armv7-a -lwpi"
+	print>>out,"CXXFLAGS=-pthread -Wall -Wextra -Werror -O2 -g -std=c++14 -DNAMESPACED_WPILIB -I"+source_dir+"/wpilib/cpp/current/include -I"+source_dir+"/ctre/cpp/include -isystem "+source_dir+"/navx/include "+printouts+" -fmessage-length=0" #TODO: remove the definition for using the namespaced version of WPILib after FIRST makes the change in 2018 (probably)
+	print>>out,"LD_FLAGS=-L"+source_dir+"/ctre/cpp/lib/ -lCTRE_Phoenix -lCTRE_PhoenixCCI "+source_dir+"/navx/lib/libnavx_frc_cpp.a -L"+source_dir+"/wpilib/common/current/lib/linux/athena/shared -L"+source_dir+"/wpilib/cpp/current/reflib/linux/athena/shared -Wl,-rpath,/opt/GenICam_v2_3/bin/Linux_armv7-a -lwpi -lpthread"
 	print>>out,".PHONY: clean\n"
 
 	print>>out,"all: FRCUserProgram"
@@ -227,7 +227,7 @@ if __name__=='__main__':
 	p.add_option('--printouts',action="store_true",help="Build the robot code defining PRINT_OUTS (does nothing by default)")
 	p.add_option('--test_makefile',action='store_true')
 	p.add_option('--build_makefile',action='store_true')
-	p.add_option('--use_global_source',action="store_true",help="Search for external libraries in home folder rather than locally (local by default)")
+	p.add_option('--use_global_source','-g',action="store_true",help="Search for external libraries in home folder rather than locally (local by default)")
 	options,args=p.parse_args()
 	assert len(args)==0
 
