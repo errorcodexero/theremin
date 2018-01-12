@@ -231,6 +231,8 @@ if __name__=='__main__':
 	options,args=p.parse_args()
 	assert len(args)==0
 
+	use_global_source = options.use_global_source or not os.path.isdir("../external")
+
 	def test(arguments,test_name):
 		if bazel_available():
 			return os.system("bazel test --run_under='valgrind --error-exitcode=1' --cxxopt=-std=c++14 --cxxopt=-Wall --cxxopt=-Werror " + arguments + " :" + test_name)
@@ -253,10 +255,10 @@ if __name__=='__main__':
 
 	if options.arguments: test(options.arguments,options.test_name)
 	if options.test: test(options.arguments,options.test_name)
-	if options.build: build(options.printouts,options.use_global_source)
+	if options.build: build(options.printouts,use_global_source)
 
 	if options.test_makefile:makefile(sys.stdout)
 	if options.build_makefile:cross_makefile(sys.stdout)
 
 	if not options.test and not options.build and not options.test_makefile and not options.build_makefile:
-		sys.exit(test(options.arguments,options.test_name) or build(options.printouts,options.use_global_source))
+		sys.exit(test(options.arguments,options.test_name) or build(options.printouts,use_global_source))
