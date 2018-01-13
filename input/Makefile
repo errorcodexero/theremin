@@ -14,12 +14,12 @@ SRC = \
 	joystick_linux.cpp\
 	panel.cpp\
 	util.cpp\
-	PixyBlock.cpp\
-	PixyImpl.cpp\
-	PixyTCP.cpp\
-	PixyUART.cpp
+	pixycam/PixyBlock.cpp\
+	pixycam/PixyImpl.cpp\
+	pixycam/PixyTCP.cpp\
+	pixycam/PixyUART.cpp
 
-
+MKDIRS = pixycam
 
 #
 # include a central make file that defines our compilation recipe
