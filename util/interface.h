@@ -6,7 +6,7 @@
 #include "driver_station_interface.h"
 #include "maybe_inline.h"
 #include "checked_array.h"
-#include "../input/pixycam/PixyUART.h"
+#include "../input/PixyUART.h"
 #include "quick.h"
 
 typedef double Time;//Seconds

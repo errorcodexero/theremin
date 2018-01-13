@@ -1,7 +1,17 @@
-CXX = arm-frc-linux-gnueabi-g++
-CXXFLAGS = -std=c++14
+#
+# makefile for the misc library
+#
 
+#
+# define our target library
+#
+TARGET=util.a
+
+#
+# define the source code files
+#
 SRC = \
+	auto_distances.cpp\
 	bound_tracker.cpp\
 	countdown_timer.cpp\
 	countup_timer.cpp\
@@ -10,28 +20,30 @@ SRC = \
 	fixVictor.cpp\
 	input.cpp\
 	interface.cpp\
-	jag_interface.cpp\
 	meta.cpp\
 	motion_profile.cpp\
-	nav2.cpp\
-	nav.cpp\
 	negedge_trigger.cpp\
 	network.cpp\
 	output.cpp\
 	perf_tracker.cpp\
+	persistent_tracker.cpp\
 	point.cpp\
 	posedge_toggle.cpp\
 	posedge_trigger.cpp\
 	posedge_trigger_debounce.cpp\
-	pwm.cpp\
+	settable_constant.cpp\
 	settable_toggle.cpp\
+	speed_tracker.cpp\
+	stall_monitor.cpp\
 	string_utils.cpp\
-	tagger.cpp\
 	type.cpp\
 	util.cpp\
 	visitable.cpp
 
-OBJS = $(SRC:.cpp=.o)
+$(info $(SRC))
 
-util.a: $(OBJS)
-	$(AR) r $@ $(OBJS)
+
+#
+# include a central make file that defines our compilation recipe
+#
+include ../../makefiles/compilelib.mk
