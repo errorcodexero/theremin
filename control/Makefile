@@ -22,6 +22,7 @@ SRC = \
 	nop.cpp\
 	pump.cpp\
 	sim.cpp\
+	pidctrl.cpp\
 	toplevel.cpp
 
 #
